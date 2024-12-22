@@ -1,0 +1,158 @@
+h2 {
+    font-size: 40px;
+}
+
+body {
+    margin-top: 50px;
+    margin-bottom: 50px;
+    margin-left: 100PX;
+    margin-right: 100px;
+}
+
+.top {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 10px;
+    width: 100%;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+thead {
+    background-color: #f4f4f4;
+    height: 50px;
+}
+
+/* 清單第一欄位設4角圓角 */
+thead th:first-child {
+    background-color: #f4f4f4;
+    height: 50px;
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+}
+
+thead th:last-child {
+    background-color: #f4f4f4;
+    height: 50px;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+
+tbody {
+    text-align: center;
+}
+
+.title {
+    width: 200px;
+}
+
+td {
+    padding: 10px 10px;
+}
+
+td img {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    /* 裁剪圖片以填充容器，但保持比例 */
+    object-position: center;
+    /* 圖片位置居中 */
+    border-radius: 5px;
+}
+
+
+/* 預設設定(自訂義) */
+.default {
+    margin: 5px;
+    border: none;
+    cursor: pointer;
+    padding: 10px 20px;
+    border-radius: 10px;
+}
+
+.default:hover {
+    background-color: #ECF5FF;
+}
+
+/* 其他按鈕的個別設定 */
+/* 上面不是在表格中的按鈕*/
+/* 新增商品、搜尋 */
+.insertButton {
+    background-color: #ECF5FF;
+    color: #1162be;
+    padding: 15px 30px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 10px;
+    cursor: pointer;
+    border: none;
+}
+
+.insertButton:hover {
+    background-color: #357ac8;
+    color: #ffffff;
+}
+
+.selectText {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.selectText input {
+    flex: 1;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    font-size: 15px;
+}
+
+.selectButton {
+    flex: none !important;
+    width: 100px !important;
+    margin: 5px;
+    border: none !important;
+    cursor: pointer;
+    padding: 10px 20px;
+    border-radius: 10px;
+}
+
+.selectButton:hover {
+    background-color: #ECF5FF;
+}
+
+/* 清單表格中的按鈕 */
+/* 上架、編輯、刪除等 */
+.productLaunched {
+    background-color: #ECF5FF;
+    border: 1px solid #1162be;
+    color: #1162be;
+    margin: 5px;
+    cursor: pointer;
+    padding: 10px 20px;
+    border-radius: 10px;
+
+}
+
+.productLaunched:hover {
+    background-color: #d8eaff;
+}
+
+.delect {
+    margin: 5px;
+    border: none;
+    cursor: pointer;
+    padding: 10px 20px;
+    border-radius: 10px;
+}
+
+.delect:hover {
+    color: #ffffff;
+    background-color: #ae0000;
+}

@@ -1,0 +1,253 @@
+h2 {
+    font-size: 40px;
+}
+
+body {
+    margin-top: 50px;
+    margin-bottom: 50px;
+    margin-left: 100PX;
+    margin-right: 100px;
+}
+
+.top {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.table {
+    width: 100%;
+}
+
+.text {
+    padding-right: 20px;
+    padding-bottom: 20px;
+}
+
+.text input {
+    padding: 10px;
+    width: 100%;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+}
+
+.text textarea {
+    padding: 10px;
+    width: 100%;
+    height: 200px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    resize: none;
+}
+
+tr {
+    margin-bottom: 20px;
+}
+
+.formTitle {
+    text-align: left;
+}
+
+/* 預設設定(自訂義) */
+.default {
+    margin: 5px;
+    border: none;
+    cursor: pointer;
+    padding: 10px 20px;
+    border-radius: 10px;
+}
+
+.default:hover {
+    background-color: #ECF5FF;
+}
+
+/* .insertButton:hover {
+    background-color: #ECF5FF;
+} */
+
+/* 送出按鈕 */
+.insertButton:hover {
+    background-color: #357ac8;
+    color: #ffffff;
+}
+
+.insertButton {
+    background-color: #ECF5FF;
+    color: #1162be;
+    padding: 15px 30px;
+    font-size: 16px;
+    font-weight: bold;
+    margin: 5px;
+    border: none;
+    cursor: pointer;
+    border-radius: 10px;
+}
+
+/* 返回按鈕 */
+.breakButton {
+    background-color: #fff;
+    width: 124px;
+    padding: 15px 30px;
+    font-size: 16px;
+    font-weight: bold;
+    margin: 5px;
+    border: none;
+    cursor: pointer;
+    border: 2px solid #dfdfdf;
+    border-radius: 10px;
+}
+
+.breakButton:hover {
+    border: 2px solid #9fccff;
+    color: #1162be;
+}
+
+/* 必填 */
+.required {
+    /*background-color:black;*/
+    color: #7B7B7B;
+    padding: 8px;
+}
+
+/* 商品上傳按鈕 */
+.productImg label {
+    display: inline-block;
+    line-height: 150px;
+    text-align: center;
+    background-color: #f4f4f4;
+    width: 100%;
+    height: 150px;
+    border-radius: 10px;
+    font-size: 16px;
+    margin-bottom: 20px;
+    cursor: pointer;
+}
+
+.productImg label:hover {
+    background-color: #e9e9e9;
+}
+
+
+.fa-regular fa-image {
+    font-size: 500px;
+}
+
+/* 分類 */
+.classificationText {
+    padding-right: 20px;
+    padding-bottom: 20px;
+
+}
+
+.classificationText input {
+    padding: 10px;
+    width: 250px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+}
+
+.classificationText+Button {
+    display: flex;
+    align-items: center;
+}
+
+.classificationRemove {
+    color: white;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+
+.existClassification {
+    padding-top: 5px;
+    display: flex;
+    gap: 5px;
+}
+
+.classificationName {
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    width: fit-content;
+    border-radius: 10px;
+    background-color: #357ac8;
+}
+
+.classificationName div {
+    color: white;
+    font-size: 14px;
+    display: flex;
+    justify-content: center;
+    /* 水平居中文字和按鈕 */
+    gap: 5px;
+}
+
+/* 規格 庫存 貨運設定這次先不做 */
+/* 規格按鈕一進網頁的畫面 */
+/* .insertSpecification button {
+    background-color: #f4f4f4;
+    width: 200px;
+    height: 50px;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    margin-bottom: 20px;
+    cursor: pointer;
+}
+
+.insertSpecification button:hover {
+    background-color: #e9e9e9;
+} */
+
+
+/* 規格 點開時 新增畫面*/
+/* .sizeSettings {
+    display: flex;
+    width: 100%;
+    align-items: center;
+}
+
+.sizeSettings input {
+    font-size: 16px;
+}
+
+.specifications {
+    margin-right: -10px;
+    display: flex;
+    gap: 5px;
+} */
+
+/* 規格按鈕 */
+/* .sizeSettings Button {
+    background-color: #f4f4f4;
+    width: 100px;
+    height: 40px;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    margin-bottom: 20px;
+    cursor: pointer;
+}
+
+.sizeSettings Button:hover {
+    background-color: #e9e9e9;
+} */
+
+/* 貨運設定先暫時用Checkbox */
+/* .freightCheckbox {
+    padding-bottom: 20px;
+} */
+
+#preview-container {
+    margin-top: 10px;
+    text-align: center;
+}
+
+#preview {
+    border: 1px solid #ccc;
+    border-radius: 10px;
+}
