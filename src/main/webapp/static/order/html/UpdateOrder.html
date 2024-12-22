@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>修改訂單資料及訂單細項</title>
+    <link rel="stylesheet" href="/CloudSerenityHotel/static/order/css/xxx.css" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #fdf5e6;
+            text-align: center;
+        }
+
+        fieldset {
+            border: 1px solid #ccc;
+            padding: 20px;
+            margin: 20px auto;
+            width: 70%;
+            background-color: #fff;
+        }
+
+        legend {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #1162be;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .form-group {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            width: 80%;
+        }
+
+        .form-group label {
+            width: 30%;
+            text-align: left;
+            font-weight: bold;
+        }
+
+        .form-group input {
+            width: 65%;
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        input[type="submit"] {
+            background-color: #1162be;
+            color: white;
+            padding: 10px 20px;
+            font-weight: bold;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #357ac8;
+        }
+
+        .button {
+            background-color: #ECF5FF;
+            color: #1162be;
+            padding: 5px 10px;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            border: none;
+        }
+
+        .button:hover {
+            background-color: #357ac8;
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+	<!-- Select怎麼都靠右?? -->
+    <h1>修改訂單資料及訂單細項</h1>
+    <form action="/CloudSerenityHotel/Order/updateOrder" method="post">
+        <fieldset>
+            <legend>訂單資料</legend>
+            <div class="form-group">
+                <label for="orderId">訂單ID：</label>
+                <input type="text" name="orderId" required />
+            </div>
+            <div class="form-group">
+                <label for="userId">會員ID：</label>
+                <input type="text" name="userId" required />
+            </div>
+            <div class="form-group">
+                <label for="receiveName">收件人：</label>
+                <input type="text" name="receiveName" required />
+            </div>
+            <div class="form-group">
+                <label for="email">email：</label>
+                <input type="email" name="email" required />
+            </div>
+            <div class="form-group">
+                <label for="phoneNumber">電話號碼：</label>
+                <input type="text" name="phoneNumber" required />
+            </div>
+            <div class="form-group">
+                <label for="address">收貨地址：</label>
+                <input type="text" name="address" required />
+            </div>
+            <div class="form-group">
+                <label for="orderStatus">訂單狀態：</label>
+                <select name="orderStatus" multiple size="1" required>
+                    <option value="處理中">處理中</option>
+                    <option value="已出貨">已出貨</option>
+                    <option value="已到貨">已到貨</option>
+                    <option value="異常">異常</option>
+           		</select>
+            </div>
+            <div class="form-group">
+                <label for="paymentMethod">付款方式：</label>
+                <select name="paymentMethod" multiple size="1" required>
+                    <option value="信用卡">信用卡</option>
+                    <option value="Line_Pay">Line_Pay</option>
+                    <option value="悠遊付">悠遊付</option>
+                    <option value="貨到付款">貨到付款</option>
+            	</select>
+            </div>
+            <div class="form-group">
+                <label for="totalAmount">總金額：</label>
+                <input type="text" name="totalAmount" required />
+            </div>
+            <div class="form-group">
+                <label for="pointsDiscount">點數折抵：</label>
+                <input type="text" name="pointsDiscount" required />
+            </div>
+            <div class="form-group">
+                <label for="discountAmount">折扣金額：</label>
+                <input type="text" name="discountAmount" required />
+            </div>
+            <div class="form-group">
+                <label for="finalAmount">最終金額：</label>
+                <input type="text" name="finalAmount" required />
+            </div>
+        </fieldset>
+
+        <div>
+            <input type="submit" value="更新訂單" />
+        </div>
+    </form>
+
+</body>
+</html>

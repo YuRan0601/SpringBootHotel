@@ -1,0 +1,215 @@
+body,
+html {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    /* 使得 body 和 html 的佈局方向為縱向 */
+    height: 100vh;
+    /* 設定視口高度 */
+    width: 100vw;
+    /* 設定視口寬度 */
+    overflow: hidden;
+    /* 防止多餘的滾動條出現 */
+}
+
+/* 側邊欄樣式 */
+nav {
+    width: 50px;
+    height: 100vh;
+    background-color: #2c3e50;
+    transition: width 0.4s;
+    position: fixed;
+    overflow: hidden;
+}
+
+/* 側邊欄展開時 */
+nav:hover {
+    width: 180px;
+}
+
+/* 標誌區域 */
+nav .logo {
+    text-align: center;
+    padding: 20px;
+    color: white;
+    font-size: 24px;
+    font-weight: bold;
+    border-bottom: 1px solid #ffffff;
+}
+
+/* 圖片樣式 */
+.sidebar-img {
+    width: 110px;
+    height: 110px;
+    object-fit: contain;
+    position: absolute;
+    top: 23px;
+    right: 32px;
+    transform: translate(0, 0);
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+/* 當側邊欄展開時圖片放大 */
+nav:hover .sidebar-img {
+    transform: scale(1.8);
+    opacity: 1;
+}
+
+/* 當側邊欄收縮時圖片隱藏 */
+.sidebar-img {
+    opacity: 0;
+    transform: scale(0.4);
+}
+
+/* 滾動條樣式 */
+.scrollbar {
+    overflow-y: auto;
+    height: calc(100vh - 100px);
+    margin-top: 150px;
+}
+
+/* 項目列表樣式 */
+ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+li {
+    padding: 20px 15px;
+    display: flex;
+    align-items: center;
+    color: white;
+    border-bottom: 1px solid #aeb0b3;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    border-bottom: none;
+}
+
+li i {
+    margin-right: 10px;
+    color: #ecf0f1;
+
+}
+
+/* 項目文字隱藏，側邊欄展開時顯示 */
+li span {
+    visibility: hidden;
+    position: absolute;
+    left: 70px;
+    top: 50%;
+    transform: translateY(-50%);
+    transition: opacity 0.5s, visibility 0.5s;
+    opacity: 0;
+    color: #ecf0f1;
+}
+
+nav:hover li span {
+    visibility: visible;
+    opacity: 1;
+    transition: opacity 0.5s, visibility 0s;
+}
+
+/* 側邊欄展開時，圖標移動 */
+nav:hover li i {
+    margin-right: 15px;
+
+}
+
+li:hover {
+    background-color: #34495e;
+}
+
+/* 內容區域 */
+article {
+    display: flex;
+    /* 使用 Flexbox 排列項目 */
+    flex-wrap: wrap;
+    /* 允許內容換行 */
+    gap: 20px;
+    /* 項目之間的間距 */
+    height: calc(100vh - 50px);
+    /* 設置高度，減去固定側邊欄的高度 */
+    width: calc(100vw - 250px);
+    /* 設定寬度，減去側邊欄的寬度 */
+    padding: 20px;
+    background-color: #ffffff;
+    margin-top: 60px;
+    margin-left: 500px;
+    /* 讓內容區域避開側邊欄 */
+    overflow-y: auto;
+    /* 允許垂直滾動 */
+    box-sizing: border-box;
+    /* 包括 padding 和 border */
+    flex-direction: row;
+    /* 使內容區域內的項目水平方向排列 */
+    padding-bottom: 100px;
+    /* 增加底部間距，以確保滾動區域有一些空間 */
+}
+
+.form-container {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 80%;
+    max-width: 600px;
+    border-top: 5px solid #2c3e50;
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+input[type="text"],
+input[type="number"],
+select,
+textarea {
+    width: 100%;
+    padding: 12px 15px;
+    /* 設置上下和左右內邊距 */
+    border: 1px solid #ccc;
+    /* 邊框 */
+    border-radius: 5px;
+    /* 邊框圓角 */
+    font-size: 16px;
+    /* 字體大小 */
+    margin-bottom: 15px;
+    /* 每個表單元素底部的間距 */
+    box-sizing: border-box;
+    /* 使內邊距和邊框包含在寬度和高度內 */
+}
+
+textarea {
+    resize: vertical;
+}
+
+button {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    background-color: #2c3e50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #b1b3b1;
+}

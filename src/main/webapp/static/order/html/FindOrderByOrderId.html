@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>查詢訂單</title>
+</head>
+<body style="background-color: #fdf5e6">
+    <h1>查詢單筆訂單資料</h1>
+
+    <!-- 查詢訂單表單 -->
+    <form action="/CloudSerenityHotel/Order/findOrderById" method="get">
+        <label for="orderId">訂單編號：</label>
+        <input type="text" id="orderId" name="orderId" required>
+        <button type="submit">查詢</button>
+    </form>
+
+    <br/>
+    <a href="/static/order/jsp/OrderList.jsp">返回訂單列表</a>
+</body>
+</html>

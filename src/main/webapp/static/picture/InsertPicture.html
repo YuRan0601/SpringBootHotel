@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>新增圖片資料</title>
+    <style>
+      /* 核心樣式 */
+      .gtco-video .overlay {
+		  position: absolute;
+		  top: 0;
+		  left: 0;
+		  right: 0;
+		  bottom: 0;
+		  background: rgba(0, 0, 0, 0.5);
+		  -webkit-transition: 0.5s;
+		  -o-transition: 0.5s;
+		  transition: 0.5s;
+		}
+		.gtco-video:hover .overlay {
+		  background: rgba(0, 0, 0, 0.7);
+		}
+		.gtco-cover > .gtco-container {
+		  position: relative;
+		  z-index: 10;
+		  .fh5co-card-item figure .overlay {
+	  opacity: 0;
+	  visibility: hidden;
+	  z-index: 10;
+	  top: 0;
+	  left: 0;
+	  right: 0;
+	  bottom: 0;
+	  position: absolute;
+	  background: rgba(0, 0, 0, 0.4);
+	  -webkit-transition: 0.7s;
+	  -o-transition: 0.7s;
+	  transition: 0.7s;
+	}
+	.fh5co-card-item figure .overlay i {
+	  z-index: 12;
+	  color: #fff;
+	  font-size: 30px;
+	  position: absolute;
+	  margin-left: -15px;
+	  margin-top: -45px;
+	  top: 50%;
+	  left: 50%;
+	  -webkit-transition: 0.3s;
+	  -o-transition: 0.3s;
+	  transition: 0.3s;
+	}
+	.fh5co-card-item:hover figure .overlay, .fh5co-card-item:focus figure .overlay {
+	  opacity: 1;
+	  visibility: visible;
+	}
+	.fh5co-card-item:hover figure .overlay i, .fh5co-card-item:focus figure .overlay i {
+	  margin-top: -15px;
+	}
+		}
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        nav {
+            background: #333;
+            color: #fff;
+        }
+        .gtco-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+        }
+        .gtco-logo a {
+            text-decoration: none;
+            color: white;
+            font-size: 1.5em;
+        }
+        .menu-1 ul {
+            list-style: none;
+            display: flex;
+            margin: 0;
+            padding: 0;
+        }
+        .menu-1 ul li {
+            margin: 0 15px;
+            position: relative;
+        }
+        .menu-1 ul li a {
+            color: white;
+            text-decoration: none;
+        }
+        .has-dropdown:hover .dropdown {
+            display: block;
+        }
+        .dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: #fff;
+            color: #333;
+            list-style: none;
+            margin: 0;
+            padding: 10px 0;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .dropdown li {
+            padding: 5px 20px;
+        }
+        .dropdown li a {
+            color: #333;
+            text-decoration: none;
+        }
+        .dropdown li a:hover {
+            color: #9c70e8;
+        }
+        header {
+            background-size: cover;
+            height: 300px;
+            color: black;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        body {
+            font-family: "Arial", sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 80%;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            text-align: center;
+        }
+        h2 {
+            font-size: 2em;
+            color: #9c70e8; /* 淡紫色 */
+            margin-bottom: 20px;
+        }
+        form {
+            text-align: left;
+            margin-top: 20px;
+        }
+        label {
+            font-size: 1.1em;
+            color: #9c70e8; /* 淡紫色 */
+        }
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+        input[type="submit"] {
+            background-color: #9c70e8; /* 淡紫色 */
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1.1em;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #8a63d1; /* 更深的紫色 */
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="gtco-container">
+            <div class="gtco-logo"><a href="#">Hotel</a></div>
+            <div class="menu-1">
+                <ul>
+                    <li><a href="SelectPicture.jsp">返回首頁</a></li>
+                    <li><a href="InsertPicture.html">新增圖片資料</a></li>
+                    <li><a href="GetUpdateDataPicture.html">修改圖片資料</a></li>
+                    <li><a href="DeletePicture.html">刪除圖片資料</a></li>
+                    <li><a href="GetPicture.html">查詢單筆圖片資料</a></li>
+                    <li><a href="/CloudSerenityHotel/GetAllPictures">查詢所有圖片資料</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+	<header id="gtco-header" class="gtco-cover gtco-cover-sm" role="banner" style="background-image: url(../images/Background1.jpeg)">
+		<div class="overlay"></div>
+		<div class="gtco-container">
+			<div class="row">
+				<div class="col-md-12 col-md-offset-0 text-center">
+					<div class="row row-mt-15em">
+
+						<div class="col-md-12 mt-text animate-box" data-animate-effect="fadeInUp">
+							<h1>雲澄<br>CloudSerenity Hotel</h1>	
+						</div>
+						
+					</div>
+					
+				</div>
+			</div>
+		</div>
+	</header>
+
+    <div class="container">
+        <h2>新增圖片資料</h2>
+        <form method="post" action="/CloudSerenityHotel/InsertPicture">
+            <label for="referenceId">關聯ID :</label>
+            <input type="text" id="reference_Id" name="reference_Id" required /><p>
+
+            <label for="referenceType">關聯類型 :</label>
+            <input type="text" id="reference_Type" name="reference_Type" required /><p>
+
+            <label for="imageUrl">圖片連結 :</label>
+            <input type="text" id="image_Url" name="image_Url" required /><p>
+
+            <input type="submit" value="確定" />
+        </form>
+    </div>
+</body>
+</html>

@@ -1,0 +1,2 @@
+Select選單作為主選單
+放置在\JSP\src\main\webapp\CloudSerenityHotel

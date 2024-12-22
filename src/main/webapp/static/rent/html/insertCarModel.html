@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/css/all.min.css"
+	integrity="sha512-5Hs3dF2AEPkpNAR7UiOHba+lRSJNeM2ECkwxUIxC1Q/FLycGTbNapWXB4tP889k5T5Ju8fs4b1P5z/iB4nMfSQ=="
+	crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+<link rel="stylesheet" type="text/css"
+	href="/CloudSerenityHotel/static/rent/css/insertCarModel.css">
+<title>雲澄飯店租車系統</title>
+
+</head>
+
+<body>
+	<form action="/CloudSerenityHotel/rent/car-model/insert" method="post"
+		id="Update-form">
+		<nav id="sidebar">
+
+			 <img src="/CloudSerenityHotel/static/rent/cloud.png" alt="Logo" class="sidebar-img">
+
+			<div class="scrollbar">
+				<ul>
+					<li><a href="/CloudSerenityHotel/static/rent/html/home.html"><i class="fa-solid fa-house"></i><span>首頁</span></a></li>
+					<li><a href="/CloudSerenityHotel/rent/car-model/query-all"><i
+							class="fa-solid fa-car-side"></i><span>車型管理</span></a></li>
+					<li><i class="fa-solid fa-car"></i><span>車輛管理</span></li>
+					<li><i class="fa-solid fa-box-archive"></i><span>訂單紀錄</span></li>
+				</ul>
+			</div>
+		</nav>
+
+		<article>
+			<div class="form-container">
+				<h2>車型新增表單</h2>
+				<form id="vehicle-form">
+					<!-- 車型名稱 -->
+					<div class="form-group">
+						<label for="carModel">車型名稱:</label> <input type="text"
+							id="carModel" name="carModel" required>
+					</div>
+
+					<!-- 品牌 -->
+					<div class="form-group">
+						<label for="brand">品牌:</label> <input type="text" id="brand"
+							name="brand" required>
+					</div>
+
+					<!-- 油耗量 (數字輸入框) -->
+					<div class="form-group">
+						<label for="fuelEfficiency">油耗量 (單位：km/L):</label> <input
+							type="text" id="fuelEfficiency" name="fuelEfficiency" required>
+					</div>
+
+					<!-- 車輛類型 -->
+					<div class="form-group">
+						<label for="carType">車輛類型:</label> <select id="carType"
+							name="carType" required>
+							<option value="motorcycle">機車</option>
+							<option value="compact_car">小型車</option>
+							<option value="subcompact_car">緊湊型車</option>
+							<option value="mid_size_car">中型車</option>
+							<option value="full_size_car">全尺寸車</option>
+							<option value="luxury_car">豪華車</option>
+							<option value="sports_car">運動型車</option>
+							<option value="suv">SUV（運動型多功能車）</option>
+							<option value="van">廂型車</option>
+							<option value="pickup_truck">皮卡</option>
+							<option value="electric_car">電動車</option>
+						</select>
+					</div>
+
+					<!-- 車輛尺寸 -->
+					<div class="form-group">
+						<label for="carSize">車輛尺寸:</label> <select id="carSize"
+							name="carSize" required>
+							<option value="compact">小型</option>
+							<option value="mid_size">中型</option>
+							<option value="full_size">全尺寸</option>
+							<option value="large">大型</option>
+							<option value="extra_large">超大</option>
+						</select>
+					</div>
+
+					<!-- 乘車人數 -->
+					<div class="form-group">
+						<label for="seatingCapacity">乘車人數:</label> <input type="number"
+							id="seatingCapacity" name="seatingCapacity" required>
+					</div>
+
+					<!-- 車輛描述 -->
+					<div class="form-group">
+						<label for="description">車輛描述:</label>
+						<textarea id="description" name="description" rows="4" required></textarea>
+					</div>
+
+
+					<button type="submit">提交表單</button>
+				</form>
+			</div>
+
+		</article>
+	</form>
+</body>
+
+</html>

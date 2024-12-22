@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>新增設施資料</title>
+    
+    <style>
+        /* 核心樣式 */
+        .gtco-video .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            -webkit-transition: 0.5s;
+            -o-transition: 0.5s;
+            transition: 0.5s;
+        }
+        .gtco-video:hover .overlay {
+            background: rgba(0, 0, 0, 0.7);
+        }
+        .gtco-cover > .gtco-container {
+            position: relative;
+            z-index: 10;
+        }
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        nav {
+            background: #333;
+            color: #fff;
+        }
+        .gtco-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+        }
+        .gtco-logo a {
+            text-decoration: none;
+            color: white;
+            font-size: 1.5em;
+        }
+        .menu-1 ul {
+            list-style: none;
+            display: flex;
+            margin: 0;
+            padding: 0;
+        }
+        .menu-1 ul li {
+            margin: 0 15px;
+            position: relative;
+        }
+        .menu-1 ul li a {
+            color: white;
+            text-decoration: none;
+        }
+        header {
+            background-size: cover;
+            height: 300px;
+            color: black;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        body {
+            font-family: "Arial", sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 80%;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            text-align: center;
+        }
+        h2 {
+            font-size: 2em;
+            color: #9c70e8; /* 淡紫色 */
+            margin-bottom: 20px;
+        }
+        form {
+            text-align: left;
+            margin-top: 20px;
+        }
+        label {
+            font-size: 1.1em;
+            color: #9c70e8; /* 淡紫色 */
+        }
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+        input[type="submit"] {
+            background-color: #9c70e8; /* 淡紫色 */
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1.1em;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #8a63d1; /* 更深的紫色 */
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="gtco-container">
+            <div class="gtco-logo"><a href="#">Hotel</a></div>
+            <div class="menu-1">
+                <ul>
+                    <li><a href="SelectFacility.jsp">返回首頁</a></li>
+                    <li><a href="InsertFacility.html">新增資料</a></li>
+                    <li><a href="http://localhost:8080/CloudSerenityHotel/static/facility/GetUpdateDataFacility.html">修改資料</a></li>
+                    <li><a href="DeleteFacility.html">刪除資料</a></li>
+                    <li><a href="GetFacility.html">查詢單筆資料</a></li>
+                    <li><a href="/CloudSerenityHotel/Facility/GetAllFacilities">查詢所有資料</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <header id="gtco-header" class="gtco-cover gtco-cover-sm" role="banner" style="background-image: url(../images/Background1.jpeg)">
+        <div class="overlay"></div>
+        <div class="gtco-container">
+            <div class="row">
+                <div class="col-md-12 col-md-offset-0 text-center">
+                    <div class="row row-mt-15em">
+                        <div class="col-md-12 mt-text animate-box" data-animate-effect="fadeInUp">
+                            <h1>雲澄<br>CloudSerenity Hotel</h1>    
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <h2>新增設施資料</h2>
+        <form method="post" action="/CloudSerenityHotel/InsertFacility">
+            <label for="name">設施名稱 :</label>
+            <input type="text" id="name" name="name" required /><p>
+
+            <label for="description">設施簡介 :</label>
+            <textarea id="description" name="description" required></textarea><p>
+
+            <label for="location">位置 :</label>
+            <input type="text" id="location" name="location" required /><p>
+
+            <label for="availabilityhours">開放時間 :</label>
+            <input type="text" id="availabilityhours" name="availabilityhours" required /><p>
+
+
+
+            <input type="submit" value="確定" />
+        </form>
+    </div>
+</body>
+</html>
