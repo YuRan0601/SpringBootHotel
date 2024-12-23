@@ -29,11 +29,11 @@ public class RoomDaoImpl implements RoomDao {
 //	}
 	
 	@Override
-	public int insertRoom(Room room, Integer roomTypeId) {
+	public int insertRoom(Room room) {
 		Session session = factory.getCurrentSession();
 		
 		try {
-			RoomType roomType = session.find(RoomType.class, roomTypeId);
+			RoomType roomType = session.find(RoomType.class, room.getRoomType().getTypeId());
 			
 			room.setRoomType(roomType);
 			
@@ -78,10 +78,10 @@ public class RoomDaoImpl implements RoomDao {
 	}
 
 	@Override
-	public int updateRoom(Room room, int roomTypeId) {
+	public int updateRoom(Room room) {
 		Session session = factory.getCurrentSession();
 		
-		RoomType roomType = session.find(RoomType.class, roomTypeId);
+		RoomType roomType = session.find(RoomType.class, room.getRoomType().getTypeId());
 		
 		return session.createMutationQuery("""
 				UPDATE Room

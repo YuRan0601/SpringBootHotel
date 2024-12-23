@@ -7,7 +7,7 @@ import com.cloudSerenityHotel.booking.model.Room;
 
 public interface RoomDao {
 	
-	int insertRoom(Room room, Integer roomTypeId);
+	int insertRoom(Room room);
 
 	int deleteRoomById(int roomId);
 
@@ -15,6 +15,6 @@ public interface RoomDao {
 
 	Room selectRoomById(int roomId);
 
-	int updateRoom(Room room, int roomTypeId);			
+	int updateRoom(Room room);			
 
 }

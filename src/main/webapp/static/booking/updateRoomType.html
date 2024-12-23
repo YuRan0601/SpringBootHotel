@@ -199,6 +199,8 @@
   <div class="container">
     <form action="http://localhost:8080/CloudSerenityHotel/room/updateRoomType" method="post"
       enctype="multipart/form-data">
+      <input type="hidden" name="_method" value="PUT">
+
       <label for="typeId">房型ID：</label>
       <input type="text" name="typeId" id="typeId" readonly />
       <br />
@@ -305,9 +307,9 @@
             $("#prImgDiv").css("display", "none");
             $("#otherImgsDiv").css("display", "none");
 
-            if(resp.imgs != null && resp.imgs.length != 0) {
-              for(let i = 0; i < resp.imgs.length; i++) {
-                if(resp.imgs[i].isPrimary) {
+            if (resp.imgs != null && resp.imgs.length != 0) {
+              for (let i = 0; i < resp.imgs.length; i++) {
+                if (resp.imgs[i].isPrimary) {
                   $("#prImgDiv").css("display", "block");
                   $("#prImgDiv").append(`
                             <input type="checkbox" name="deletePrImgIdAndUrl" id="deletePrImg" value="${resp.imgs[i].imgId},${resp.imgs[i].imgUrl}"/>
@@ -319,22 +321,6 @@
                                   <input type="checkbox" name="deleteOtherImgsIdAndUrl" id="deleteOtherImgs${i}" value="${resp.imgs[i].imgId},${resp.imgs[i].imgUrl}"/>
                                   <label for="deleteOtherImgs${i}"><img src="${resp.imgs[i].imgUrl}" /></label>
                                   `);
-                }
-              }
-            }
-
-            if (resp.primaryImg.isPrimary) {
-              $("#prImgDiv").append(`
-                            <input type="checkbox" name="deletePrImgIdAndUrl" id="deletePrImg" value="${resp.primaryImg.imgId},${resp.primaryImg.imgUrl}"/>
-                            <label for="deletePrImg"><img src="${resp.imgs[i].imgUrl}" /></label>
-                            `);
-            } else {
-              if (resp.otherImgs != null && resp.otherImgs.length !== 0) {
-              for (let i = 0; i < resp.otherImgs.length; i++) {
-                $("#otherImgsDiv").append(`
-                                <input type="checkbox" name="deleteOtherImgsIdAndUrl" id="deleteOtherImgs${i}" value="${resp.imgs[i].imgId},${resp.imgs[i].imgUrl}"/>
-                                <label for="deleteOtherImgs${i}"><img src="${resp.imgs[i].imgUrl}" /></label>
-                                `);
                 }
               }
             }

@@ -379,7 +379,7 @@
 
         if (confirm) {
           $.ajax({
-            type: "Get",
+            type: "DELETE",
             url: `http://localhost:8080/CloudSerenityHotel/room/deleteRoom?roomId=${roomId}`,
             success: (resp) => {
               console.log(resp);

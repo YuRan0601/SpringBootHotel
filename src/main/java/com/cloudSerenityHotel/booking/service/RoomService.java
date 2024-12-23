@@ -22,15 +22,15 @@ public interface RoomService {
 
 	Map<String, Object> getRoomTypeAndImgById(int roomTypeId);
 
-	int deleteRoomTypeById(int typeId, String imgPath);
+	int deleteRoomTypeById(int typeId);
 
 	int updateRoomType(RoomType roomType);
 
-	int insertRoomTypeImg(Integer typeId, Collection<Part> parts, String imgPath);
+	int insertRoomTypeImg(Integer typeId, MultipartFile typePrimaryImg, MultipartFile[] typeImg);
 
-	int deleteImgById(String imgIdAndUrl, String imgPath);
+	int deleteImgById(String imgIdAndUrl);
 
-	int insertRoom(Room room, Integer roomTypeId);
+	int insertRoom(Room room);
 
 	List<Map<String, Object>> getAllRooms();
 
@@ -38,7 +38,7 @@ public interface RoomService {
 
 	Map<String, Object> getOneRoom(int roomId);
 
-	int updateRoom(Room room, int roomTypeId);
+	int updateRoom(Room room);
 
 	int insertRoomTypeAndImg(RoomType roomType, MultipartFile typePrimaryImg, MultipartFile[] typeImg);
 	

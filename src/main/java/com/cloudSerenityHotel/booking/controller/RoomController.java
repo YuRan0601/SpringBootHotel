@@ -10,9 +10,15 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -29,6 +35,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Part;
 
 @RestController
+@RequestMapping("/room")
 @MultipartConfig
 public class RoomController extends BaseController {
 	private static final long serialVersionUID = 1L;
@@ -36,21 +43,18 @@ public class RoomController extends BaseController {
 	@Autowired
 	private RoomService roomService;
 	
-	private static Gson gson = new Gson();
-	
-	
-	@GetMapping("/room/test")
+	@GetMapping("/test")
 	public String test(HttpServletRequest request) {
 		return "static/user/login.jsp";
 	}
 
-	@GetMapping("/room/getAllRoomType")
+	@GetMapping("/getAllRoomType")
 	public List<Map<String, Object>> getAllRoomType()
 			throws ServletException, IOException {
 		return roomService.getAllRoomTypes();
 	}
 
-	@PostMapping("/room/insertRoomType")
+	@PostMapping("/insertRoomType")
 	public void insertRoomType(@RequestParam String typeName, 
 			@RequestParam String maxCapacity, 
 			@RequestParam String typeDesc,
@@ -70,146 +74,126 @@ public class RoomController extends BaseController {
 		}
 	}
 
-	@GetMapping("/room/getOneRoomType")
+	@GetMapping("/getOneRoomType")
 	public Map<String, Object> getOneRoomType(@RequestParam String typeId) {
 		return roomService.getRoomTypeAndImgById(Integer.parseInt(typeId));
 	}
 
-
-	protected void deleteRoomType(HttpServletRequest request, HttpServletResponse response)
+	
+	@DeleteMapping("/deleteRoomType")
+	public Integer deleteRoomType(@RequestParam String typeId, HttpServletResponse resp)
 			throws ServletException, IOException {
-		String typeId = request.getParameter("typeId");
 		
-		String imgPath = getServletContext().getRealPath("/static/booking/upload/imgs/");
+		return roomService.deleteRoomTypeById(Integer.parseInt(typeId));
 		
-		int row = roomService.deleteRoomTypeById(Integer.parseInt(typeId), imgPath);
-		
-		response.setContentType("text/html;charset=UTF-8");
-		
-		response.getWriter().print(row);
 	}
 
-	protected void updateRoomType(HttpServletRequest request, HttpServletResponse response)
+	@PutMapping(path = "/updateRoomType")
+	public void updateRoomType(
+			@RequestParam String typeId,
+			@RequestParam String typeName,
+			@RequestParam String typeDesc,
+			@RequestParam String maxCapacity,
+			@RequestParam(required = false) MultipartFile typePrimaryImg,
+			@RequestParam(required = false) MultipartFile[] typeImg,
+			@RequestParam(required = false) String deletePrImgIdAndUrl,
+			@RequestParam(required = false) String[] deleteOtherImgsIdAndUrl)
 			throws ServletException, IOException {
-		int typeId = Integer.parseInt(request.getParameter("typeId"));
-		String typeName = request.getParameter("typeName");
-		String typeDesc = request.getParameter("typeDesc");
-		int maxCapacity = Integer.parseInt(request.getParameter("maxCapacity"));
-		Collection<Part> parts = request.getParts();
-		String deletePrImgIdAndUrl = request.getParameter("deletePrImgIdAndUrl");
-		String[] deleteOtherImgsIdAndUrl = request.getParameterValues("deleteOtherImgsIdAndUrl");
 		
-		RoomType roomType = new RoomType(typeId, 
+		RoomType roomType = new RoomType(Integer.parseInt(typeId), 
 				typeName, 
 				typeDesc, 
-				maxCapacity, 
+				Integer.parseInt(maxCapacity), 
 				null, 
 				new Timestamp(new Date().getTime()));
 		
-		String imgPath = getServletContext().getRealPath("/static/booking/upload/imgs/");
-		
 		if(deletePrImgIdAndUrl != null) {
-			roomService.deleteImgById(deletePrImgIdAndUrl, imgPath);
+			roomService.deleteImgById(deletePrImgIdAndUrl);
 		}
 		
 		if(deleteOtherImgsIdAndUrl != null) {
 			for(String imgIdAndUrl : deleteOtherImgsIdAndUrl) {
-				roomService.deleteImgById(imgIdAndUrl, imgPath);
+				roomService.deleteImgById(imgIdAndUrl);
 			}
 		}
 		
 		int row = roomService.updateRoomType(roomType);
 		
-		roomService.insertRoomTypeImg(typeId, parts, imgPath);
+		roomService.insertRoomTypeImg(Integer.parseInt(typeId), typePrimaryImg, typeImg);
 
+	}
+	
+	@PostMapping("/insertRoom")
+	public void insertRoom(
+			@RequestParam String roomTypeId,
+			@RequestParam String roomName,
+			@RequestParam String roomDescription,
+			@RequestParam String price,
+			@RequestParam String status,
+			HttpServletResponse resp) throws IOException
+	{
+
+		
+		Room room = new Room(null, 
+				new RoomType(), 
+				roomName, 
+				roomDescription, 
+				new BigDecimal(price), 
+				status, 
+				null, 
+				null);
+		
+		room.getRoomType().setTypeId(Integer.parseInt(roomTypeId));
+		
+		roomService.insertRoom(room);
+		
+		resp.sendRedirect("http://localhost:8080/CloudSerenityHotel/static/booking/room.html");
+		
+	}
+
+	@GetMapping("/getAllRooms")
+	public List<Map<String, Object>> getAllRooms(){
+		return roomService.getAllRooms();
+	}
+	
+	@DeleteMapping("/deleteRoom")
+	public Integer deleteRoom(@RequestParam String roomId) {
+		 return roomService.deleteRoom(Integer.parseInt(roomId));
+	}
+	
+	@GetMapping("/getOneRoom")
+	public Map<String, Object> getOneRoom(@RequestParam String roomId){
+		
+		return roomService.getOneRoom(Integer.parseInt(roomId));
+	}
+	
+	@PutMapping("/updateRoom")
+	public void updateRoom(
+			@RequestParam String roomId,
+			@RequestParam String roomTypeId,
+			@RequestParam String roomName,
+			@RequestParam String roomDescription,
+			@RequestParam String price,
+			@RequestParam String status,
+			HttpServletResponse resp
+			)
+			throws ServletException, IOException {
+		
+		Room room = new Room(Integer.parseInt(roomId) , 
+				new RoomType(), 
+				roomName, 
+				roomDescription, 
+				new BigDecimal(price), 
+				status, 
+				null, 
+				null);
+		
+		room.getRoomType().setTypeId(Integer.parseInt(roomTypeId));
+		
+		int row = roomService.updateRoom(room);
+		
 		if(row > 0) {
-			response.sendRedirect("http://localhost:8080/CloudSerenityHotel/static/booking/roomType.html");
+			resp.sendRedirect("http://localhost:8080/CloudSerenityHotel/static/booking/room.html");
 		}
 	}
-	
-
-	protected void insertRoom(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
-		Integer roomTypeId = Integer.parseInt(request.getParameter("roomTypeId"));
-		String roomName = request.getParameter("roomName");
-		String roomDescription = request.getParameter("roomDescription");
-		BigDecimal price = new BigDecimal(request.getParameter("price"));
-		String status = request.getParameter("status");
-		
-		Room room = new Room(null, null, roomName, roomDescription, price, status, null, null);
-		
-		int result = roomService.insertRoom(room, roomTypeId);
-		
-		if(result > 0) {
-			response.sendRedirect("http://localhost:8080/CloudSerenityHotel/static/booking/room.html");
-		}
-	}
-
-	protected void getAllRooms(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
-		List<Map<String, Object>> rooms = roomService.getAllRooms();
-		
-		String json = gson.toJson(rooms);
-		
-		response.setContentType("text/html;charset=UTF-8");
-		
-		response.getWriter().print(json);
-	}
-	
-	protected void deleteRoom(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
-		 int roomId = Integer.parseInt(request.getParameter("roomId"));
-		 
-		 int row = roomService.deleteRoom(roomId);
-		 
-		 response.getWriter().print(row);
-	}
-	
-	protected void getOneRoom(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
-		int roomId = Integer.parseInt(request.getParameter("roomId"));
-		
-		Map<String, Object> result = roomService.getOneRoom(roomId);
-		
-		String json = gson.toJson(result);
-		
-		response.setContentType("text/html;charset=UTF-8");
-	 	
-	 	response.getWriter().print(json);
-	}
-	
-	protected void updateRoom(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
-		int roomId = Integer.parseInt(request.getParameter("roomId"));
-		int roomTypeId = Integer.parseInt(request.getParameter("roomTypeId"));
-		String roomName = request.getParameter("roomName");
-		String roomDescription = request.getParameter("roomDescription");
-		BigDecimal price = new BigDecimal(request.getParameter("price"));
-		String status = request.getParameter("status");
-		
-		Room room = new Room(roomId, null, roomName, 
-				roomDescription, price, status, null, null);
-		
-		int row = roomService.updateRoom(room, roomTypeId);
-		
-		if(row > 0) {
-			response.sendRedirect("http://localhost:8080/CloudSerenityHotel/static/booking/room.html");
-		}
-	}
-	
-	
-	
-	protected void test(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
-		System.out.println(request.getContextPath());
-		System.out.println(getServletContext().getRealPath("/static/booking/upload/imgs/"));
-	}
-	
-//	@Override
-//	public void init() throws ServletException {
-//		ServletContext application = getServletContext();
-//		context = WebApplicationContextUtils.getWebApplicationContext(application);
-//		
-//		roomService = context.getBean(RoomService.class);
-//	}
 }

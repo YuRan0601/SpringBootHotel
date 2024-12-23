@@ -189,8 +189,8 @@ public class RoomServiceImpl implements RoomService {
 	}
 
 	@Override
-	public int insertRoomTypeImg(Integer typeId, Collection<Part> parts, String imgPath) {
-		List<RoomTypeImg> imgs = uploadImgs(parts, imgPath);
+	public int insertRoomTypeImg(Integer typeId, MultipartFile typePrimaryImg, MultipartFile[] typeImg) {
+		List<RoomTypeImg> imgs = uploadImgs(typePrimaryImg, typeImg);
 		
 		return roomTypeImgDao.insertRoomTypeImg(typeId, imgs);
 	}
@@ -209,22 +209,22 @@ public class RoomServiceImpl implements RoomService {
 		return res;
 	}
 
-	private void deleteImgFile(String imgUrl, String imgPath) {
+	private void deleteImgFile(String imgUrl) {
 		String[] imgUrlSplit = imgUrl.split("/");
 		
 		String imgName = imgUrlSplit[imgUrlSplit.length - 1];
 		
-		File imgFile = new File(imgPath + imgName);
+		File imgFile = new File(uploadPath + imgName);
 		
 		imgFile.delete();
 	}
 	
 	@Override
-	public int deleteRoomTypeById(int typeId, String imgPath) {
+	public int deleteRoomTypeById(int typeId) {
 		RoomType roomType = roomTypeDao.selectTypeAndImgsById(typeId);
 		
 		for (RoomTypeImg img : roomType.getImgs()) {
-			deleteImgFile(img.getImgUrl(), imgPath);
+			deleteImgFile(img.getImgUrl());
 		}
 		
 		roomTypeImgDao.deleteImgByTypeId(typeId);
@@ -238,7 +238,7 @@ public class RoomServiceImpl implements RoomService {
 	}
 
 	@Override
-	public int deleteImgById(String imgIdAndUrl, String imgPath) {
+	public int deleteImgById(String imgIdAndUrl) {
 		
 		String[] splitImgIdAndUrl = imgIdAndUrl.split(",");
 		
@@ -246,14 +246,14 @@ public class RoomServiceImpl implements RoomService {
 		
 		String imgUrl = splitImgIdAndUrl[1];
 		
-		deleteImgFile(imgUrl, imgPath);
+		deleteImgFile(imgUrl);
 		
 		return roomTypeImgDao.deleteImgById(imgId);
 	}
 
 	@Override
-	public int insertRoom(Room room, Integer roomTypeId) {
-		return roomDao.insertRoom(room, roomTypeId);
+	public int insertRoom(Room room) {
+		return roomDao.insertRoom(room);
 	}
 	
 	@Override
@@ -330,8 +330,8 @@ public class RoomServiceImpl implements RoomService {
 	}
 
 	@Override
-	public int updateRoom(Room room, int roomTypeId) {
-		return roomDao.updateRoom(room, roomTypeId);
+	public int updateRoom(Room room) {
+		return roomDao.updateRoom(room);
 	}
 	
 }

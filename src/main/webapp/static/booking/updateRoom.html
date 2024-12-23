@@ -196,6 +196,8 @@
   <aside class="aside"></aside>
   <div class="container">
     <form method="post" action="http://localhost:8080/CloudSerenityHotel/room/updateRoom">
+      <input type="hidden" name="_method" value="PUT">
+
       <label for="roomId">房間ID</label>
       <input type="text" name="roomId" id="roomId" readonly />
       <br />
@@ -284,7 +286,7 @@
       let roomId = urlParam.get("roomId");
       let roomName = urlParam.get("roomName");
       $(".container").prepend(`<h1>修改 ${roomName} 房間</h1>`);
-		
+
       loadRoom();
       function loadRoom() {
         $.ajax({
