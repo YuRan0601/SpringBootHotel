@@ -236,7 +236,7 @@
       $.ajax({
         type: "Get",
         dataType: "json",
-        url: `http://localhost:8080/CloudSerenityHotel/room/getOneRoom?roomId=${roomId}`,
+        url: `http://localhost:8080/CloudSerenityHotel/room/${roomId}`,
         success: (resp) => {
           console.log(resp);
 

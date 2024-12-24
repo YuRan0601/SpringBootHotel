@@ -199,8 +199,7 @@
   <aside class="aside"></aside>
   <div class="container">
     <h1>新增房型</h1>
-    <form action="http://localhost:8080/CloudSerenityHotel/room/insertRoomType" method="post"
-      enctype="multipart/form-data">
+    <form id="roomTypeForm">
       <label for="typeName">房型名稱：
         <input type="text" name="typeName" id="typeName" /> </label><br />
 
@@ -216,7 +215,7 @@
         <input type="file" name="typeImg" id="typeImg" accept="image/*" multiple /> </label><br />
 
       <div class="button-group">
-        <input type="submit" value="新增" />
+        <input type="submit" id="submit" value="新增" />
         <input type="reset" id="resetBtn" value="清除" />
       </div>
     </form>
@@ -270,12 +269,44 @@
       // );
 
       $("#submit").click(function (e) {
-        let confirm = window.confirm("確定要新增此房型?");
+        e.preventDefault();
 
-        if (!confirm) {
-          e.preventDefault();
+        if (!window.confirm('確定要新增此房型?')) {
           return;
         }
+
+        const roomTypeForm = document.querySelector('#roomTypeForm');
+
+        let formData = new FormData(roomTypeForm);
+
+        formData.append('roomTypeJson', JSON.stringify({
+          typeId: formData.get('typeId'),
+          typeName: formData.get('typeName'),
+          typeDesc: formData.get('typeDesc'),
+          maxCapacity: formData.get('maxCapacity')
+        }));
+
+        $.ajax({
+          type: "POST",
+          url: "http://localhost:8080/CloudSerenityHotel/room/type",
+          data: formData,
+          processData: false, // 必須為 false
+          contentType: false, // 讓瀏覽器自動設置類型
+          success: (resp) => {
+            if (resp > 0) {
+              alert('新增成功!');
+              window.location.href = "http://localhost:8080/CloudSerenityHotel/static/booking/roomType.html";
+            } else {
+              alert('新增失敗!');
+              window.location.href = "http://localhost:8080/CloudSerenityHotel/static/booking/roomType.html";
+            }
+          },
+          error: (xhr, status, error) => {
+            console.error('錯誤:', error);
+            window.location.href = "http://localhost:8080/CloudSerenityHotel/static/booking/roomType.html";
+          }
+        });
+
       });
     });
   </script>

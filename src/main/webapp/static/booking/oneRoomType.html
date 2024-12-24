@@ -257,7 +257,7 @@
       $.ajax({
         type: "Get",
         dataType: "json",
-        url: `http://localhost:8080/CloudSerenityHotel/room/getOneRoomType?typeId=${typeId}`,
+        url: `http://localhost:8080/CloudSerenityHotel/room/type/${typeId}`,
         success: (resp) => {
           console.log(resp);
           if (resp.imgs.length != 0) {

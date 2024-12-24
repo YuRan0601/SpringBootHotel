@@ -325,7 +325,7 @@
             url: "http://localhost:8080/CloudSerenityHotel/static/booking/json/zh-HANT.json",
           },
           ajax: {
-            url: "http://localhost:8080/CloudSerenityHotel/room/getAllRooms",
+            url: "http://localhost:8080/CloudSerenityHotel/room",
             dataSrc: "",
             type: "GET",
           },
@@ -380,7 +380,7 @@
         if (confirm) {
           $.ajax({
             type: "DELETE",
-            url: `http://localhost:8080/CloudSerenityHotel/room/deleteRoom?roomId=${roomId}`,
+            url: `http://localhost:8080/CloudSerenityHotel/room/${roomId}`,
             success: (resp) => {
               console.log(resp);
 

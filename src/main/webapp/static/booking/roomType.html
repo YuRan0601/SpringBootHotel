@@ -314,7 +314,7 @@
             url: "http://localhost:8080/CloudSerenityHotel/static/booking/json/zh-HANT.json",
           },
           ajax: {
-            url: "http://localhost:8080/CloudSerenityHotel/room/getAllRoomType",
+            url: "http://localhost:8080/CloudSerenityHotel/room/type",
             dataSrc: "",
             type: "GET",
           },
@@ -363,7 +363,7 @@
           $.ajax({
             type: "DELETE",
             dataType: "json",
-            url: `http://localhost:8080/CloudSerenityHotel/room/deleteRoomType?typeId=${typeId}`,
+            url: `http://localhost:8080/CloudSerenityHotel/room/type/${typeId}`,
             success: (resp) => {
               console.log(resp);
 
@@ -374,7 +374,7 @@
               }
 
               location.reload();
-            },
+            }
           });
         }
       });

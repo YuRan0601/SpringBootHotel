@@ -2,6 +2,7 @@ package com.cloudSerenityHotel.booking.service.impl;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -234,6 +235,7 @@ public class RoomServiceImpl implements RoomService {
 
 	@Override
 	public int updateRoomType(RoomType roomType) {
+		roomType.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
 		return roomTypeDao.updateRoomType(roomType);
 	}
 
@@ -331,6 +333,7 @@ public class RoomServiceImpl implements RoomService {
 
 	@Override
 	public int updateRoom(Room room) {
+		room.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
 		return roomDao.updateRoom(room);
 	}
 	

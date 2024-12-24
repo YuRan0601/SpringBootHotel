@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestAttribute;
@@ -26,6 +27,8 @@ import com.cloudSerenityHotel.base.BaseController;
 import com.cloudSerenityHotel.booking.model.Room;
 import com.cloudSerenityHotel.booking.model.RoomType;
 import com.cloudSerenityHotel.booking.service.RoomService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 
 import jakarta.servlet.ServletException;
@@ -43,69 +46,66 @@ public class RoomController extends BaseController {
 	@Autowired
 	private RoomService roomService;
 	
+	private ObjectMapper objectMapper = new ObjectMapper();
+	
 	@GetMapping("/test")
 	public String test(HttpServletRequest request) {
 		return "static/user/login.jsp";
 	}
 
-	@GetMapping("/getAllRoomType")
+	@GetMapping("/type")
 	public List<Map<String, Object>> getAllRoomType()
 			throws ServletException, IOException {
 		return roomService.getAllRoomTypes();
 	}
 
-	@PostMapping("/insertRoomType")
-	public void insertRoomType(@RequestParam String typeName, 
-			@RequestParam String maxCapacity, 
-			@RequestParam String typeDesc,
-			@RequestParam MultipartFile typePrimaryImg,
-			@RequestParam MultipartFile[] typeImg,
-			HttpServletRequest req,
-			HttpServletResponse resp
+	@PostMapping(path = "/type", consumes = "multipart/form-data")
+	public Integer insertRoomType(@RequestPart String roomTypeJson,
+			@RequestPart MultipartFile typePrimaryImg,
+			@RequestPart MultipartFile[] typeImg
 			)
-			throws ServletException, IOException {
-	
-		RoomType roomType = new RoomType(null, typeName, typeDesc, Integer.parseInt(maxCapacity), null, null);
+	{
 		
-		int row = roomService.insertRoomTypeAndImg(roomType, typePrimaryImg, typeImg);	
-		
-		if(row > 0) {
-			resp.sendRedirect("http://localhost:8080/CloudSerenityHotel/static/booking/roomType.html");
+		RoomType roomType = null;
+		try {
+			roomType = objectMapper.readValue(roomTypeJson, RoomType.class);
+		} catch (JsonProcessingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
+			
+		return roomService.insertRoomTypeAndImg(roomType, typePrimaryImg, typeImg);	
 	}
 
-	@GetMapping("/getOneRoomType")
-	public Map<String, Object> getOneRoomType(@RequestParam String typeId) {
-		return roomService.getRoomTypeAndImgById(Integer.parseInt(typeId));
+	@GetMapping("/type/{typeId}")
+	public Map<String, Object> getOneRoomType(@PathVariable Integer typeId) {
+		return roomService.getRoomTypeAndImgById(typeId);
 	}
 
 	
-	@DeleteMapping("/deleteRoomType")
-	public Integer deleteRoomType(@RequestParam String typeId, HttpServletResponse resp)
-			throws ServletException, IOException {
+	@DeleteMapping("/type/{typeId}")
+	public Integer deleteRoomType(@PathVariable Integer typeId) {
 		
-		return roomService.deleteRoomTypeById(Integer.parseInt(typeId));
+		return roomService.deleteRoomTypeById(typeId);
 		
 	}
 
-	@PutMapping(path = "/updateRoomType")
-	public void updateRoomType(
-			@RequestParam String typeId,
-			@RequestParam String typeName,
-			@RequestParam String typeDesc,
-			@RequestParam String maxCapacity,
-			@RequestParam(required = false) MultipartFile typePrimaryImg,
-			@RequestParam(required = false) MultipartFile[] typeImg,
+	@PutMapping(path = "/type", consumes = "multipart/form-data")
+	public Integer updateRoomType(
+			@RequestPart String roomTypeJson,
+			@RequestPart MultipartFile typePrimaryImg,
+			@RequestPart MultipartFile[] typeImg,
 			@RequestParam(required = false) String deletePrImgIdAndUrl,
 			@RequestParam(required = false) String[] deleteOtherImgsIdAndUrl)
-			throws ServletException, IOException {
+	{
+		RoomType roomType = null;
 		
-		RoomType roomType = new RoomType(Integer.parseInt(typeId), 
-				typeName, 
-				typeDesc, 
-				Integer.parseInt(maxCapacity), 
-				null, 
-				new Timestamp(new Date().getTime()));
+		try {
+			roomType = objectMapper.readValue(roomTypeJson, RoomType.class);
+		} catch (JsonProcessingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		if(deletePrImgIdAndUrl != null) {
 			roomService.deleteImgById(deletePrImgIdAndUrl);
@@ -119,81 +119,34 @@ public class RoomController extends BaseController {
 		
 		int row = roomService.updateRoomType(roomType);
 		
-		roomService.insertRoomTypeImg(Integer.parseInt(typeId), typePrimaryImg, typeImg);
-
+		roomService.insertRoomTypeImg(roomType.getTypeId(), typePrimaryImg, typeImg);
+		
+		return row;
 	}
 	
-	@PostMapping("/insertRoom")
-	public void insertRoom(
-			@RequestParam String roomTypeId,
-			@RequestParam String roomName,
-			@RequestParam String roomDescription,
-			@RequestParam String price,
-			@RequestParam String status,
-			HttpServletResponse resp) throws IOException
-	{
-
-		
-		Room room = new Room(null, 
-				new RoomType(), 
-				roomName, 
-				roomDescription, 
-				new BigDecimal(price), 
-				status, 
-				null, 
-				null);
-		
-		room.getRoomType().setTypeId(Integer.parseInt(roomTypeId));
-		
-		roomService.insertRoom(room);
-		
-		resp.sendRedirect("http://localhost:8080/CloudSerenityHotel/static/booking/room.html");
-		
+	@PostMapping("")
+	public Integer insertRoom(@RequestBody Room room) {
+		return roomService.insertRoom(room);
 	}
 
-	@GetMapping("/getAllRooms")
+	@GetMapping("")
 	public List<Map<String, Object>> getAllRooms(){
 		return roomService.getAllRooms();
 	}
 	
-	@DeleteMapping("/deleteRoom")
-	public Integer deleteRoom(@RequestParam String roomId) {
-		 return roomService.deleteRoom(Integer.parseInt(roomId));
+	@DeleteMapping("{roomId}")
+	public Integer deleteRoom(@PathVariable Integer roomId) {
+		 return roomService.deleteRoom(roomId);
 	}
 	
-	@GetMapping("/getOneRoom")
-	public Map<String, Object> getOneRoom(@RequestParam String roomId){
+	@GetMapping("{roomId}")
+	public Map<String, Object> getOneRoom(@PathVariable Integer roomId){
 		
-		return roomService.getOneRoom(Integer.parseInt(roomId));
+		return roomService.getOneRoom(roomId);
 	}
 	
-	@PutMapping("/updateRoom")
-	public void updateRoom(
-			@RequestParam String roomId,
-			@RequestParam String roomTypeId,
-			@RequestParam String roomName,
-			@RequestParam String roomDescription,
-			@RequestParam String price,
-			@RequestParam String status,
-			HttpServletResponse resp
-			)
-			throws ServletException, IOException {
-		
-		Room room = new Room(Integer.parseInt(roomId) , 
-				new RoomType(), 
-				roomName, 
-				roomDescription, 
-				new BigDecimal(price), 
-				status, 
-				null, 
-				null);
-		
-		room.getRoomType().setTypeId(Integer.parseInt(roomTypeId));
-		
-		int row = roomService.updateRoom(room);
-		
-		if(row > 0) {
-			resp.sendRedirect("http://localhost:8080/CloudSerenityHotel/static/booking/room.html");
-		}
+	@PutMapping("")
+	public Integer updateRoom(@RequestBody Room room) {
+		return roomService.updateRoom(room);
 	}
 }
