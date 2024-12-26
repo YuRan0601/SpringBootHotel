@@ -201,10 +201,10 @@
     <h1>新增房型</h1>
     <form id="roomTypeForm">
       <label for="typeName">房型名稱：
-        <input type="text" name="typeName" id="typeName" /> </label><br />
+        <input type="text" name="typeName" id="typeName" /> <span id="typeNameMsg"></span></label><br />
 
       <label for="maxCapacity">容納人數：
-        <input type="number" name="maxCapacity" id="maxCapacity" /> </label><br />
+        <input type="text" name="maxCapacity" id="maxCapacity" /> <span id="maxCapacityMsg"></span></label><br />
 
       <label for="typeDesc">房型描述： <textarea name="typeDesc" id="typeDesc"></textarea></label><br />
 
@@ -268,8 +268,73 @@
       //   }
       // );
 
+      const getAllType = async () => {
+        return new Promise((resolve, reject) => {
+          $.ajax({
+            type: "GET",
+            url: "http://localhost:8080/CloudSerenityHotel/room/type",
+            dataType: "JSON",
+            success: (resp) => {
+              resolve(resp);
+            }
+          })
+        })
+      }
+
+      let typeNameFlag = true;
+      $('#typeName').blur(async () => {
+        const typeName = $('#typeName').val();
+        console.log($('#typeName').val());
+
+        if (typeName.trim().length === 0) {
+          $('#typeNameMsg').text('輸入框不能為空!')
+          typeNameFlag = false;
+          return;
+        }
+
+        let types = await getAllType();
+
+        console.log(types);
+
+        for (let i = 0; i < types.length; i++) {
+          if (types[i].typeName === typeName) {
+            $('#typeNameMsg').text('已有此房型!')
+            typeNameFlag = false;
+            return;
+          }
+        }
+
+        $('#typeNameMsg').text('')
+        typeNameFlag = true;
+      });
+
+      const capacityReg = /^[1-9]\d*$/;
+      let maxCapacityFlag = true;
+      $('#maxCapacity').blur(() => {
+        const maxCapacity = $('#maxCapacity').val();
+        if (maxCapacity.trim().length === 0) {
+          $('#maxCapacityMsg').text('輸入框不能為空!')
+          maxCapacityFlag = false;
+          return;
+        }
+
+        if (!capacityReg.test(maxCapacity)) {
+          $('#maxCapacityMsg').text('請輸入大於0的數字!')
+          maxCapacityFlag = false;
+          return;
+        }
+
+        $('#maxCapacityMsg').text('')
+        maxCapacityFlag = true;
+      })
+
       $("#submit").click(function (e) {
         e.preventDefault();
+
+        if (!typeNameFlag || !maxCapacityFlag) {
+          alert("請確認輸入的選項合規!")
+          return;
+        }
 
         if (!window.confirm('確定要新增此房型?')) {
           return;
