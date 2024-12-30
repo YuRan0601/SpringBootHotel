@@ -199,28 +199,33 @@
   <div class="container">
     <h1>新增房間</h1>
     <form id="roomForm">
-      <label for="roomTypeId">房型：</label>
-      <select name="roomTypeId" id="roomTypeId"></select>
+      <label for="roomTypeId">房型：
+        <select name="roomTypeId" id="roomTypeId"></select>
+      </label>
       <br />
 
-      <label for="roomName">房名(房號)：</label>
-      <input type="text" name="roomName" id="roomName" />
+      <label for="roomName">房名(房號)：
+        <input type="text" name="roomName" id="roomName" /><span id="roomNameMsg"></span>
+      </label>
       <br />
 
       <label for="roomDescription">房間描述：</label>
       <textarea name="roomDescription" id="roomDescription"></textarea>
+
       <br />
 
-      <label for="price">每晚房價(新台幣)：</label>
-      <input type="number" name="price" id="price" min="0" />
+      <label for="price">每晚房價(新台幣)：
+        <input type="text" name="price" id="price" min="0" /><span id="priceMsg"></span>
+      </label>
       <br />
 
-      <label for="status">房間狀態：</label>
-      <select name="status" id="status">
-        <option value="available">空閒中</option>
-        <option value="occupied">占用中</option>
-        <option value="maintenance">修整中</option>
-      </select>
+      <label for="status">房間狀態：
+        <select name="status" id="status">
+          <option value="available">空閒中</option>
+          <option value="occupied">占用中</option>
+          <option value="maintenance">修整中</option>
+        </select>
+      </label>
       <br />
 
       <div class="button-group">
@@ -235,71 +240,142 @@
 
   <script>
     $(function () {
-      // $(".header").load(
-      //   "http://localhost:8080/CloudSerenityHotel/static/common/header.html",
-      //   function () {
-      //     // header 加載完成後的初始化
-      //     console.log("Header 載入成功");
-      //     // 根據需要填充用戶名稱
+      function headerLoad() {
+        $(".header").load(
+          "http://localhost:8080/CloudSerenityHotel/static/common/header.html",
+          function () {
+            // header 加載完成後的初始化
+            console.log("Header 載入成功");
+            // 根據需要填充用戶名稱
 
-      //     $.ajax({
-      //       type: "GET",
-      //       dataType: "json",
-      //       url: "http://localhost:8080/CloudSerenityHotel/user/getUserInfo",
-      //       success: (resp) => {
-      //         if (resp.code === 505) {
-      //           alert("請先登入!");
-      //           window.location.href =
-      //             "http://localhost:8080/CloudSerenityHotel/static/user/login.jsp";
-      //         } else if (resp.code === 404) {
-      //           alert("找不到此帳號!");
-      //           window.location.href =
-      //             "http://localhost:8080/CloudSerenityHotel/static/user/login.jsp";
-      //         } else {
-      //           if (resp.data.userIdentity != "admin") {
-      //             alert("你不是管理員，無權使用此介面");
-      //             window.location.href =
-      //               "http://localhost:8080/CloudSerenityHotel/user/logout";
-      //             return;
-      //           }
-      //           $("#username").text(`歡迎 ${resp.data.userName} 管理員`);
-      //         }
-      //         console.log("Header 載入成功");
-      //       },
-      //     });
-      //   }
-      // );
-
-      // $(".aside").load(
-      //   "http://localhost:8080/CloudSerenityHotel/static/common/aside.html",
-      //   function () {
-      //     console.log("Aside 載入成功");
-      //   }
-      // );
-
-
-      $.ajax({
-        type: "Get",
-        dataType: "json",
-        url: "http://localhost:8080/CloudSerenityHotel/room/type",
-        success: (resp) => {
-          console.log(resp);
-          for (let i = 0; i < resp.length; i++) {
-            $("#roomTypeId").append(
-              `<option value="${resp[i].typeId}">${resp[i].typeName}</option>`
-            );
+            $.ajax({
+              type: "GET",
+              dataType: "json",
+              url: "http://localhost:8080/CloudSerenityHotel/user/getUserInfo",
+              success: (resp) => {
+                if (resp.code === 505) {
+                  alert("請先登入!");
+                  window.location.href =
+                    "http://localhost:8080/CloudSerenityHotel/static/user/login.jsp";
+                } else if (resp.code === 404) {
+                  alert("找不到此帳號!");
+                  window.location.href =
+                    "http://localhost:8080/CloudSerenityHotel/static/user/login.jsp";
+                } else {
+                  if (resp.data.userIdentity != "admin") {
+                    alert("你不是管理員，無權使用此介面");
+                    window.location.href =
+                      "http://localhost:8080/CloudSerenityHotel/user/logout";
+                    return;
+                  }
+                  $("#username").text(`歡迎 ${resp.data.userName} 管理員`);
+                }
+                console.log("Header 載入成功");
+              },
+            });
           }
-        },
-      });
+        );
+      }
 
-      $("input:submit").click(function (e) {
+      function asideLoad() {
+        $(".aside").load(
+          "http://localhost:8080/CloudSerenityHotel/static/common/aside.html",
+          function () {
+            console.log("Aside 載入成功");
+          }
+        );
+      }
+
+      function getAllRoomTypes() {
+        $.ajax({
+          type: "Get",
+          dataType: "json",
+          url: "http://localhost:8080/CloudSerenityHotel/room/type",
+          success: (resp) => {
+            console.log(resp);
+            for (let i = 0; i < resp.length; i++) {
+              $("#roomTypeId").append(
+                `<option value="${resp[i].typeId}">${resp[i].typeName}</option>`
+              );
+            }
+          },
+        });
+      }
+
+      async function getAllRooms() {
+        return new Promise((resolve, reject) => {
+          $.ajax({
+            type: "GET",
+            url: "http://localhost:8080/CloudSerenityHotel/room",
+            dataType: "json",
+            success: (data) => {
+              resolve(data);
+            }
+          })
+        })
+      }
+
+      let roomNameFlag = false;
+
+      async function checkRoomName() {
+        const roomName = $('#roomName').val();
+        console.log($('#roomName').val());
+
+
+        if (roomName.trim().length === 0) {
+          $('#roomNameMsg').text("房名不能為空!")
+          roomNameFlag = false;
+          return false;
+        }
+
+        const rooms = await getAllRooms();
+
+        for (let i = 0; i < rooms.length; i++) {
+          if (rooms[i].roomName === roomName) {
+            $('#roomNameMsg').text("已有此房名!")
+            roomNameFlag = false;
+            return false;
+          }
+        }
+
+        $('#roomNameMsg').text("")
+        roomNameFlag = true;
+        return true;
+      }
+
+      function checkPrice() {
+        const price = $('#price').val();
+        const priceReg = /^[1-9]\d*$/;
+
+        if (price.trim().length === 0) {
+          $('#priceMsg').text('房價不能為空!')
+          return false;
+        }
+
+        if (!priceReg.test(price)) {
+          $('#priceMsg').text('請輸入大於0的數字!')
+          return false;
+        }
+
+        $('#priceMsg').text('')
+        return true;
+      }
+
+      async function submitRoom(e) {
+        e.preventDefault();
+
         let confirm = window.confirm(`確定要新增此房間？`);
 
         if (!confirm) {
           return;
         }
 
-        e.preventDefault();
+        if (!await checkRoomName() || !checkPrice()) {
+          alert("請確認輸入的資料無誤!")
+          return;
+        }
+
+
 
         const roomForm = document.querySelector('#roomForm');
 
@@ -343,7 +419,17 @@
             window.location.href = "http://localhost:8080/CloudSerenityHotel/static/booking/room.html";
           }
         });
-      });
+      }
+
+      asideLoad();
+
+      getAllRoomTypes();
+
+      $('#roomName').blur(checkRoomName);
+
+      $('#price').blur(checkPrice);
+
+      $("input:submit").click(submitRoom);
     });
   </script>
 </body>

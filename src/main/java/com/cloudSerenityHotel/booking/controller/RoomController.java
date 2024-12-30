@@ -61,8 +61,8 @@ public class RoomController extends BaseController {
 
 	@PostMapping(path = "/type", consumes = "multipart/form-data")
 	public Integer insertRoomType(@RequestPart String roomTypeJson,
-			@RequestPart MultipartFile typePrimaryImg,
-			@RequestPart MultipartFile[] typeImg
+			@RequestPart(required = false) MultipartFile typePrimaryImg,
+			@RequestPart(required = false) MultipartFile[] typeImg
 			)
 	{
 		
