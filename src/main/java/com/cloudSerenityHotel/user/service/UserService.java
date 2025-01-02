@@ -1,45 +1,62 @@
 package com.cloudSerenityHotel.user.service;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.cloudSerenityHotel.user.model.Member;
 import com.cloudSerenityHotel.user.model.User;
 import com.cloudSerenityHotel.user.model.UserDao;
+import com.cloudSerenityHotel.user.model.UserRepository;
 
 import jakarta.servlet.http.HttpSession;
+import jakarta.transaction.Transactional;
 
+@Service
+@Transactional
 public class UserService implements UserServiceInterface {
-
+	@Autowired
 	private UserDao userDao;
 
-	public UserService() {
-		this.userDao = new UserDao();
-	}
+	@Autowired
+	private UserRepository uRepository;
+
+//	public UserService() {
+//		this.userDao = new UserDao();
+//	}
 
 	@Override
 	public User login(String email, String password) {
-		User user = userDao.login(email, password);
-		return user;
+		return uRepository.findByEmailAndPassword(email, password).orElse(null);
+	}
+
+	@Override
+	public int checkEmail(String email) {
+		User checkResult = uRepository.findByEmail(email).orElse(null);
+		if (checkResult == null) {
+			return 1;
+		}
+		return 0;
 	}
 
 	@Override
 	public int register(User user, Member member) {
-		User checkResult = userDao.checkEmail(user);
+		User checkResult = uRepository.findByEmail(user.getEmail()).orElse(null);
 		if (checkResult == null) {
-			try {
-				User status = userDao.addMemeber(user, member);
-				if (status != null) {
-					return 1;
-				}
-				return 0;
-			} catch (Exception e) {
-				e.printStackTrace();
-				return 0;
-			}
+			return 0;
 		}
-		return 0;
+		user.setAccountUpdateTime(LocalDateTime.now());
+		member.setRegisterDate(LocalDateTime.now());
+		member.setDataUpdateTime(LocalDateTime.now());
+		member.setUser(user);
+		user.setMember(member);
+		uRepository.save(user);
+		return 1;
 	}
 
 	@Override
@@ -48,7 +65,7 @@ public class UserService implements UserServiceInterface {
 			userDao.removeUser(userId);
 			return 1;
 		} catch (Exception e) {
-			e.printStackTrace();
+			System.out.println(e);
 			return 0;
 		}
 	}
@@ -59,23 +76,21 @@ public class UserService implements UserServiceInterface {
 			userDao.recoverUser(userId);
 			return 1;
 		} catch (Exception e) {
-			e.printStackTrace();
+			System.out.println(e);
 			return 0;
 		}
 	}
 
 	@Override
 	public int addAdmin(User user) {
-		try {
-			User status = userDao.addAdmin(user);
-			if (status != null) {
-				return 1;
-			}
-			return 0;
-		} catch (Exception e) {
-			e.printStackTrace();
+		User checkResult = uRepository.findByEmail(user.getEmail()).orElse(null);
+		if (checkResult == null) {
 			return 0;
 		}
+		user.setAccountUpdateTime(LocalDateTime.now());
+		user.setMember(null);
+		uRepository.save(user);
+		return 1;
 	}
 
 	@Override
@@ -90,7 +105,7 @@ public class UserService implements UserServiceInterface {
 
 	@Override
 	public List<User> findAllUser() {
-		return userDao.findAllAdmin();
+		return uRepository.findByUserIdentity("admin");
 	}
 
 	@Override
@@ -105,7 +120,7 @@ public class UserService implements UserServiceInterface {
 
 	@Override
 	public List<User> findAllMember() {
-		return userDao.findAllMember();
+		return uRepository.findByUserIdentity("user");
 	}
 
 	@Override
@@ -114,7 +129,7 @@ public class UserService implements UserServiceInterface {
 			userDao.updateUser(user);
 			return 1;
 		} catch (Exception e) {
-			e.printStackTrace();
+			System.out.println(e);
 			return 0;
 		}
 	}
@@ -126,34 +141,34 @@ public class UserService implements UserServiceInterface {
 			userDao.updateMember(user);
 			return 1;
 		} catch (Exception e) {
-			e.printStackTrace();
+			System.out.println(e);
 			return 0;
 		}
 	}
-	
+
 	@Override
 	public Map<String, Object> getUserInfo(HttpSession session) {
 		Map<String, Object> result = new HashMap<String, Object>();
-		
-		Integer userId = (Integer)session.getAttribute("userId");
-		
-		if(userId == null) {
-			result.put("code", 505); //505 顯示未登入
+
+		Integer userId = (Integer) session.getAttribute("userId");
+
+		if (userId == null) {
+			result.put("code", 505); // 505 顯示未登入
 			return result;
 		}
-		
+
 		User user = userDao.findAdminById(userId);
-		
-		if(user == null) {
-			result.put("code", 404); //404 沒有找到user
+
+		if (user == null) {
+			result.put("code", 404); // 404 沒有找到user
 			return result;
 		} else {
-			result.put("code", 200); //200 成功找到
+			result.put("code", 200); // 200 成功找到
 			Map<String, Object> userMap = new HashMap<String, Object>();
 			userMap.put("userId", user.getUserId());
 			userMap.put("userName", user.getUserName());
 			userMap.put("userIdentity", user.getUserIdentity());
-			
+
 			result.put("data", userMap);
 			return result;
 		}

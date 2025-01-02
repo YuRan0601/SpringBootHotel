@@ -15,6 +15,8 @@ public interface UserServiceInterface {
 	
 	//註冊
 	int register(User user, Member member);
+	//檢查email
+	int checkEmail(String email);
 	//查詢
 	User findUserById(int id);
 	List<User> findUserByName(String name);
