@@ -13,7 +13,7 @@ import com.cloudSerenityHotel.user.model.User;
 import com.cloudSerenityHotel.user.service.UserService;
 
 
-@WebServlet("/user/login")
+//@WebServlet("/user/login")
 public class Login extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
@@ -41,7 +41,7 @@ public class Login extends HttpServlet {
 				// 檢查身分組
 				if (identity.equals("admin")) { //管理員
 					response.sendRedirect("/CloudSerenityHotel/static/common/adminPage.html");
-//					request.getRequestDispatcher("/static/user/protected/adminDashBoard.jsp").forward(request, response);
+					//request.getRequestDispatcher("/static/user/protected/adminDashBoard.jsp").forward(request, response);
 				} else if (identity.equals("user")) { //會員
 					request.getRequestDispatcher("/static/user/protected/userDashboard.jsp").forward(request, response);
 				} else { //除admin和user以外的 都是異常身分組

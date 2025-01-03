@@ -14,7 +14,7 @@ import com.cloudSerenityHotel.user.service.UserService;
 import com.cloudSerenityHotel.user.service.UserServiceInterface;
 import com.google.gson.Gson;
 
-@WebServlet("/user/getUserInfo")
+//@WebServlet("/user/getUserInfo")
 public class GetUserInfo extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	

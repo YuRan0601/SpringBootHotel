@@ -9,7 +9,7 @@ import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 
-@WebServlet("/user/logout")
+//@WebServlet("/user/logout")
 public class Logout extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
