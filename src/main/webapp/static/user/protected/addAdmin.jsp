@@ -27,7 +27,7 @@
 <body>
 	<div align="center">
 		<h2>新增管理員帳號</h2>
-		<form method="post" action="/CloudSerenityHotel/user/addAdmin">
+		<form method="post" action="/CloudSerenityHotel/admin/addAdmin">
 			<label for="email">電子信箱</label>
 			 <input type="email" id="email" name="email" placeholder="請輸入電子信箱" required>
 			  <p></p> 

@@ -11,7 +11,7 @@ import com.cloudSerenityHotel.user.model.User;
 import com.cloudSerenityHotel.user.service.UserService;
 
 
-@WebServlet("/user/addAdmin")
+//@WebServlet("/user/addAdmin")
 public class AddAdmin extends HttpServlet {
 	private static final long serialVersionUID = 1L;
        

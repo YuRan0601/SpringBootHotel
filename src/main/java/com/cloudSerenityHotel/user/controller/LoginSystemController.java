@@ -25,7 +25,7 @@ public class LoginSystemController {
 
 	@GetMapping("/login")
 	public String login() {
-		return "/user/login.jsp";
+		return "/user/login.jsp"; //登入頁面 進入點
 	}
 
 	@PostMapping("/checklogin")

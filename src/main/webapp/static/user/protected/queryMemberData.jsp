@@ -10,22 +10,18 @@
 <body>
 <div align="center">
 <h2>查詢會員資料</h2>
-<form method="post" action="/CloudSerenityHotel/user/QueryAllData">
+<form method="post" action="/CloudSerenityHotel/admin/queryAllData">
 	<input type="text" name="targetIdentity" value="user" readonly hidden />
 	<button type="submit">查詢全部資料</button>
 </form>
-<form method="post" action="/CloudSerenityHotel/user/QueryData">
-	<input type="text" name="conditions" value="userId" readonly hidden />
-	<input type="text" name="targetIdentity" value="user" readonly hidden />
+<form method="post" action="/CloudSerenityHotel/admin/queryMemberById">
 	<p>以使用者編號查詢</p>
-	<input type="number" min="1" name="keyword" placeholder="請輸入使用者編號" required />
+	<input type="number" min="1" name="id" placeholder="請輸入使用者編號" required />
 	<button type="submit">查詢</button>
 </form>
-<form method="post" action="/CloudSerenityHotel/user/QueryData">
-	<input type="text" name="conditions" value="userName" readonly hidden />
-	<input type="text" name="targetIdentity" value="user" readonly hidden />
+<form method="post" action="/CloudSerenityHotel/admin/queryMemberByName">
 	<p>以使用者名稱查詢</p>
-	<input type="text" name="keyword" placeholder="請輸入使用者名稱" required />
+	<input type="text" name="name" placeholder="請輸入使用者名稱" required />
 	<button type="submit">查詢</button>
 </form>
 </div>
