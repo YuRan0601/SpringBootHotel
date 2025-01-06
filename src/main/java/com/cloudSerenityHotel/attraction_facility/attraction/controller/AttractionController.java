@@ -10,7 +10,6 @@ import com.cloudSerenityHotel.attraction_facility.attraction.service.AttractionS
 import java.util.List;
 import java.util.Optional;
 
-@CrossOrigin(origins = "http://localhost:8081")
 @RestController
 @RequestMapping("/api/attractions")
 public class AttractionController {
