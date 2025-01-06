@@ -1,13 +1,12 @@
 package com.cloudSerenityHotel.attraction_facility.attraction.model;
 
-
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+
 import java.sql.Timestamp;
 
 @Entity
@@ -46,7 +45,8 @@ public class Attraction {
     @Column(name = "update_at")
     private Timestamp updateAt;
 
-    // Getters 和 setters
+    // Getters and setters
+
     public int getAttractionId() {
         return attractionId;
     }
