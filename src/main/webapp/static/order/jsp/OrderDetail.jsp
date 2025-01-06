@@ -67,11 +67,18 @@ body {
 			<input type="hidden" name="orderId" value="${order.orderId}">
 			<button type="submit">修改訂單資料</button>
 		</form>-->
-		<!-- 顯示刪除確認按鈕 -->
+		<!-- 刪除訂單 -->
+            <form action="/CloudSerenityHotel/Order/${order.orderId}" method="post" style="display:inline;">
+                <!-- 使用 hidden 欄位模擬 DELETE 請求 -->
+                <input type="hidden" name="_method" value="DELETE">
+                <button type="submit" class="button" onclick="return confirm('確認刪除此訂單?');">刪除</button>
+            </form>
+		<!-- 顯示刪除確認按鈕 
 		<form action="/CloudSerenityHotel/Order/deleteOrder" method="post" onsubmit="return confirm('確認刪除此訂單?');">
 			<input type="hidden" name="orderId" value="${order.orderId}">
 			<button type="submit">確認刪除</button>
 		</form>
+		-->
 	</div>
 	<!-- 顯示訂單項目 -->
 	<h3>訂單項目</h3>
@@ -102,7 +109,7 @@ body {
 
 	<br />
 	<!-- 顯示返回或其他操作 -->
-	<form action="/CloudSerenityHotel/Order/findAllOrders" method="post">
+	<form action="/CloudSerenityHotel/Order/findAllOrders" method="get">
 		<button type="submit">返回訂單列表</button>
 	</form>
 </body>

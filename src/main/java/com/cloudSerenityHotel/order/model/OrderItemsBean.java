@@ -12,10 +12,11 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+@Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -27,8 +28,8 @@ public class OrderItemsBean implements java.io.Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "orderitem_id")
 	private Integer orderitemId; // 關聯唯一編號，自動增長
-	@Column(name = "order_id", insertable = false, updatable = false) // 防止重複映射
-	private Integer orderId; // 所屬訂單ID
+	//@Column(name = "order_id", insertable = false, updatable = false) // 防止重複映射
+	//private Integer orderId; // 所屬訂單ID
 	@Column(name = "product_id")
 	private Integer productId; // 購買商品的ID
 	@Column(name = "quantity")

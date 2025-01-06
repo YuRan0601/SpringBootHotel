@@ -14,29 +14,27 @@
 
 <body>
 	<h1>訂單管理</h1>
-	
+
 	<!-- 顯示訊息 -->
-	<c:if test="${not empty sessionScope.message}">
-		<div class="alert alert-success">
-			${sessionScope.message}
-		</div>
-		<!-- 顯示後清除訊息 -->
-		<c:remove var="message" scope="session" />
+	<c:if test="${not empty message}">
+		<div class="alert alert-success">${message}</div>
 	</c:if>
 
 	<!-- 查詢條件輸入框 -->
 	<div class="search-bar">
 		<form action="/CloudSerenityHotel/Order/findOrderById" method="get">
-			<label for="searchOrderId">查詢訂單編號：</label> 
-			<input type="text" name="orderId" id="searchOrderId" placeholder="輸入訂單編號">
+			<label for="searchOrderId">查詢訂單編號：</label> <input type="text"
+				name="orderId" id="searchOrderId" placeholder="輸入訂單編號">
 			<button class="button" type="submit">查詢</button>
 		</form>
 		<div class="action-buttons">
-		<!-- 新增訂單按鈕，並與搜尋框有間距 -->
-        <a href="/CloudSerenityHotel/static/order/html/InsertOrder.html" class="button">新增訂單</a>
-        <!-- 修改訂單按鈕，並與搜尋框有間距 -->
-        <a href="/CloudSerenityHotel/static/order/html/UpdateOrder.html" class="button">修改訂單</a>
-   		</div>
+			<!-- 新增訂單按鈕，並與搜尋框有間距 -->
+			<a href="/CloudSerenityHotel/static/order/html/InsertOrder.html"
+				class="button">新增訂單</a>
+			<!-- 修改訂單按鈕，並與搜尋框有間距 -->
+			<a href="/CloudSerenityHotel/static/order/html/UpdateOrder.html"
+				class="button">修改訂單</a>
+		</div>
 	</div>
 
 	<!-- 訂單列表顯示 -->
@@ -64,17 +62,24 @@
 					<td>${order.finalAmount}</td>
 					<td>${order.orderDate}</td>
 					<td>${order.updatedAt}</td>
-					<td>
-						<a href="/CloudSerenityHotel/Order/findOrderById?orderId=${order.orderId}" class="button">查看詳情</a> 
-						<a href="/CloudSerenityHotel/Order/deleteOrder?orderId=${order.orderId}"
-							class="button" onclick="return confirm('確認刪除此訂單?');">刪除</a>
-					</td>
+					<td><a
+						href="/CloudSerenityHotel/Order/findOrderById?orderId=${order.orderId}"
+						class="button">查看詳情</a> <!-- 刪除訂單 -->
+						<form
+							action="/CloudSerenityHotel/Order/${order.orderId}"
+							method="post" style="display: inline;">
+							<!-- 使用 hidden 欄位模擬 DELETE 請求 -->
+							<input type="hidden" name="_method" value="DELETE">
+							<button type="submit" class="button"
+								onclick="return confirm('確認刪除此訂單?');">刪除</button>
+						</form>
+						</td>
 					<c:set var="num" value="${s.count}" />
 				</tr>
 			</c:forEach>
 		</tbody>
 	</table>
-<h3>共${num}筆訂單資料</h3>
+	<h3>共${num}筆訂單資料</h3>
 	<!-- 訂單詳情彈窗 -->
 	<div id="orderDetailModal" style="display: none;">
 		<h2>訂單詳細資訊</h2>
