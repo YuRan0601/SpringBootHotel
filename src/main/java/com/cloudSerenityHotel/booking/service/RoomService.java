@@ -18,9 +18,9 @@ public interface RoomService {
 	 */
 	List<Map<String, Object>> getAllRoomTypes();
 
-	int insertRoomTypeAndImg(RoomType roomType, Collection<Part> parts, String imgPath);
-
 	Map<String, Object> getRoomTypeAndImgById(int roomTypeId);
+	
+	List<Map<String, Object>> getAll();
 
 	int deleteRoomTypeById(int typeId);
 

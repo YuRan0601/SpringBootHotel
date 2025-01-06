@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.cloudSerenityHotel.booking.dao.RoomDao;
 import com.cloudSerenityHotel.booking.dao.RoomTypeDao;
 import com.cloudSerenityHotel.booking.dao.RoomTypeImgDao;
+import com.cloudSerenityHotel.booking.dao.RoomTypeRepository;
 import com.cloudSerenityHotel.booking.dao.impl.RoomDaoImpl;
 import com.cloudSerenityHotel.booking.dao.impl.RoomTypeDaoImpl;
 import com.cloudSerenityHotel.booking.dao.impl.RoomTypeImgDaoImpl;
@@ -40,8 +41,12 @@ public class RoomServiceImpl implements RoomService {
 	
 	@Autowired
 	private RoomTypeImgDao roomTypeImgDao;
+	
+	@Autowired
+	private RoomTypeRepository roomTypeRepository;
+	
 	private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd a hh:mm:ss");
-	private String prefix = "http://localhost:8080/CloudSerenityHotel/static/booking/upload/imgs/";
+	private String imgUrlPrefix = "http://localhost:8080/CloudSerenityHotel/static/booking/upload/imgs/";
 	private String uploadPath = "src/main/webapp/static/booking/upload/imgs/";
 	
 	private List<Map<String, Object>> roomTypeImgToMapList(List<RoomTypeImg> imgs) {
@@ -92,6 +97,11 @@ public class RoomServiceImpl implements RoomService {
 		return res;
 	}
 	
+	public List<Map<String, Object>> getAll() {
+		List<RoomType> all = roomTypeRepository.findAll();
+		return roomTypeToMapList(all);
+	}
+	
 	
 	@Override
 	public List<Map<String, Object>> getAllRoomTypes() {
@@ -99,52 +109,7 @@ public class RoomServiceImpl implements RoomService {
 		
 		return roomTypeToMapList(roomTypes);
 	}
-
-	private List<RoomTypeImg> uploadImgs(Collection<Part> parts, String imgPath) {
-		List<RoomTypeImg> imgs = new ArrayList<RoomTypeImg>();
-		
-		for(Part part : parts) {
-			if(part.getSubmittedFileName() == null || part.getSubmittedFileName().equals("")) {
-				continue;
-			}
-			System.out.println(part.getName());
-			System.out.println(part.getSubmittedFileName());
-			String cd = part.getHeader("Content-Disposition");
-			
-			String suffix = cd.substring(cd.lastIndexOf("."), cd.length() - 1);
-			System.out.println(suffix);
-			String filename = UUID.randomUUID().toString() + suffix;
-			
-			String imgUrl = prefix + filename;
-			if(part.getName().equals("typePrimaryImg")) {
-				RoomTypeImg img = new RoomTypeImg(null, null, imgUrl, true, null, null);
-				imgs.add(img);
-			} else if(part.getName().equals("typeImg")) {
-				RoomTypeImg img = new RoomTypeImg(null, null, imgUrl, false, null, null);
-				imgs.add(img);
-			}
-			
-			try {
-				part.write(imgPath + filename);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		
-		return imgs;
-	}
-
-
 	
-	@Override
-	public int insertRoomTypeAndImg(RoomType roomType, Collection<Part> parts, String imgPath) {	
-		List<RoomTypeImg> imgs = uploadImgs(parts, imgPath);
-		
-		return roomTypeDao.insertRoomTypeAndImg(roomType, imgs);
-	}
-	
-	
-
 	@Override
 	public int insertRoomTypeAndImg(RoomType roomType, MultipartFile typePrimaryImg, MultipartFile[] typeImg) {
 		List<RoomTypeImg> imgs = uploadImgs(typePrimaryImg, typeImg);
@@ -165,7 +130,7 @@ public class RoomServiceImpl implements RoomService {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			String imgUrl = prefix + fileName;
+			String imgUrl = imgUrlPrefix + fileName;
 			imgs.add(new RoomTypeImg(null, null, imgUrl, true, null, null));
 		}
 		
@@ -184,7 +149,7 @@ public class RoomServiceImpl implements RoomService {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			String imgUrl = prefix + fileName;
+			String imgUrl = imgUrlPrefix + fileName;
 			imgs.add(new RoomTypeImg(null, null, imgUrl, false, null, null));
 		}	
 		

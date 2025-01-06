@@ -24,10 +24,6 @@ public class RoomDaoImpl implements RoomDao {
 	@Autowired
 	private SessionFactory factory;
 	
-//	public RoomDaoImpl() {
-//		this.factory = HibernateUtil.getSessionFactory();
-//	}
-	
 	@Override
 	public int insertRoom(Room room) {
 		Session session = factory.getCurrentSession();

@@ -49,8 +49,8 @@ public class RoomController extends BaseController {
 	private ObjectMapper objectMapper = new ObjectMapper();
 	
 	@GetMapping("/test")
-	public String test(HttpServletRequest request) {
-		return "static/user/login.jsp";
+	public List<Map<String, Object>> test(HttpServletRequest request) {
+		return roomService.getAll();
 	}
 
 	@GetMapping("/type")
@@ -136,7 +136,7 @@ public class RoomController extends BaseController {
 	
 	@DeleteMapping("{roomId}")
 	public Integer deleteRoom(@PathVariable Integer roomId) {
-		 return roomService.deleteRoom(roomId);
+		return roomService.deleteRoom(roomId);
 	}
 	
 	@GetMapping("{roomId}")

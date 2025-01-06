@@ -21,10 +21,6 @@ public class RoomTypeImgDaoImpl implements RoomTypeImgDao {
 	
 	@Autowired
 	private SessionFactory factory;
-	
-//	public RoomTypeImgDaoImpl() {
-//		this.factory = HibernateUtil.getSessionFactory();
-//	}
 
 	@Override
 	public List<RoomTypeImg> selectImgsByTypeId(int roomTypeId) {

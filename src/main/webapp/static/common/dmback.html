@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>後台管理模板</title>
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      /* 基本樣式 */
+      body {
+        font-family: Arial, sans-serif;
+      }
+
+      /* 側邊欄樣式 */
+      .sidebar {
+        height: 100vh;
+        width: 250px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        background-color: #343a40;
+        color: white;
+        padding-top: 1rem;
+      }
+
+      .sidebar a {
+        color: white;
+        text-decoration: none;
+        padding: 0.8rem 1.5rem;
+        display: block;
+        font-size: 1rem;
+      }
+
+      .sidebar a:hover,
+      .sidebar a.active {
+        background-color: #495057;
+        border-radius: 4px;
+      }
+
+      /* 主內容區域 */
+      .content {
+        margin-left: 250px;
+        padding: 2rem;
+        margin-top: 60px; /* 避免內容被 topbar 擋住 */
+      }
+
+      /* 頂部導航欄 */
+      .topbar {
+        width: 100%;
+        height: 60px;
+        background-color: #f8f9fa;
+        display: flex;
+        align-items: center;
+        padding: 0 1.5rem;
+        position: fixed;
+        top: 0;
+        left: 250px;
+        z-index: 1030;
+        border-bottom: 1px solid #ddd;
+      }
+
+      .topbar h1 {
+        margin: 0;
+        font-size: 1.5rem;
+      }
+
+      /* 響應式設計 */
+      @media (max-width: 768px) {
+        .sidebar {
+          width: 100%;
+          height: auto;
+          position: relative;
+        }
+
+        .content {
+          margin-left: 0;
+        }
+
+        .topbar {
+          left: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- 側邊欄 -->
+    <div class="sidebar">
+      <h2 class="text-center mb-4">管理後台</h2>
+      <a href="#" class="active">首頁</a>
+      <a href="https://www.youtube.com/watch?v=c-CYJlA8Rns">儀表板</a>
+      <a href="#users">使用者管理</a>
+      <a href="#orders">訂單管理</a>
+      <a href="#settings">系統設定</a>
+      <a href="#logout">登出</a>
+    </div>
+
+    <!-- 頂部導航欄 -->
+    <div class="topbar">
+      <h1>後台管理系統</h1>
+    </div>
+
+    <!-- 主內容 -->
+    <div class="content">
+      <section id="dashboard">
+        <h2>儀表板</h2>
+        <p>這裡是儀表板的內容。</p>
+      </section>
+
+      <section id="users" style="margin-top: 3rem">
+        <h2>使用者管理</h2>
+        <p>這裡是使用者管理的內容。</p>
+      </section>
+
+      <section id="orders" style="margin-top: 3rem">
+        <h2>訂單管理</h2>
+        <p>這裡是訂單管理的內容。</p>
+      </section>
+
+      <section id="settings" style="margin-top: 3rem">
+        <h2>系統設定</h2>
+        <p>這裡是系統設定的內容。</p>
+      </section>
+
+      <section id="logout" style="margin-top: 3rem">
+        <h2>登出</h2>
+        <p>這裡是登出頁面的內容。</p>
+      </section>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      // 為選中的側邊欄選項添加 active 樣式
+      const links = document.querySelectorAll(".sidebar a");
+      links.forEach((link) => {
+        link.addEventListener("click", () => {
+          links.forEach((l) => l.classList.remove("active"));
+          link.classList.add("active");
+        });
+      });
+    </script>
+  </body>
+</html>

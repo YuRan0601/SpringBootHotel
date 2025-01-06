@@ -20,13 +20,8 @@ import jakarta.transaction.Transactional;
 @Transactional
 public class RoomTypeDaoImpl implements RoomTypeDao {
 	@Autowired
-//	@Qualifier("customSessionFactory")
 	private SessionFactory factory;
 	
-//	public RoomTypeDaoImpl() {
-//		this.factory = HibernateUtil.getSessionFactory();
-//	}
-
 	@Override
 	public List<RoomType> getAllRoomTypes() {
 		Session session = factory.getCurrentSession();

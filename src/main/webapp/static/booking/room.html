@@ -1,409 +1,430 @@
 <!DOCTYPE html>
 <html lang="zh-Hant-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>所有房間</title>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>所有房間</title>
+    <script
+      src="https://code.jquery.com/jquery-3.7.1.js"
+      integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
+      crossorigin="anonymous"
+    ></script>
+    <link
+      rel="stylesheet"
+      href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css"
+    />
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <!-- 引入 Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- 引入 Bootstrap Icons -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
 
-  <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
-    crossorigin="anonymous"></script>
-  <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css" />
-  <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
-  <style>
-    /* 頁面基本樣式 */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    <!-- 引入 Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    /* 設定整體頁面為 flex 佈局 */
-    body {
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      /* 使頁面高度填滿視窗 */
-    }
+    <!-- 引入 SweetAlert2 的 CSS 文件 -->
+    <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css"
+    />
 
-    /* header 樣式 */
-    .header {
-      background-color: lightblue;
-      height: 100px;
-      /* 固定 header 高度 */
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-    }
+    <!-- 引入 SweetAlert2 的 JavaScript 文件 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    .header h1 {
-      margin: 0;
-      font-size: 24px;
-    }
+    <link rel="stylesheet" href="../common/aside.css" />
 
-    /* 設定 aside 樣式 */
-    .aside {
-      position: fixed;
-      /* 固定位置 */
-      left: 0;
-      /* 靠左 */
-      top: 100px;
-      /* 讓側邊欄從 header 下方開始 */
-      width: 170px;
-      /* 側邊欄寬度 */
-      height: calc(100vh - 100px);
-      /* 側邊欄高度，排除 header 占用的空間 */
-      background-color: #f4f4f4;
-      /* 背景色 */
-      padding: 20px;
-      box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-      overflow-y: auto;
-    }
+    <style>
+      /* 頁面基本樣式 */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
 
-    /* 主內容區域 .container */
-    .container {
-      margin-left: 190px;
-      /* 留出側邊欄的空間 */
-      padding: 20px;
-      flex: 1;
-      /* 讓 container 占據剩餘空間 */
-      flex-direction: column;
-      /* 讓子元素垂直排列 */
-      overflow-y: auto;
-      display: flex;
-      justify-content: start;
-      align-items: center;
-    }
+      /* 設定整體頁面為 flex 佈局 */
+      body {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        /* 使頁面高度填滿視窗 */
+      }
 
-    .container h2 {
-      margin-top: 0;
-    }
-
-    /* 適應小螢幕顯示 */
-    @media screen and (max-width: 768px) {
-      .aside-loaded {
+      /* header 樣式 */
+      .header {
+        background-color: lightblue;
+        height: 100px;
+        /* 固定 header 高度 */
+        display: flex;
+        align-items: center;
+        justify-content: center;
         position: relative;
+      }
+
+      .header h1 {
+        margin: 0;
+        font-size: 24px;
+      }
+
+      .content {
+        margin-left: 300px;
+        /* 留出側邊欄的空間 */
+        padding: 20px;
+        flex: 1;
+        /* 讓 container 占據剩餘空間 */
+        flex-direction: column;
+        /* 讓子元素垂直排列 */
+        overflow-y: auto;
+        display: flex;
+        justify-content: start;
+        align-items: center;
+      }
+
+      .container h2 {
+        margin-top: 0;
+      }
+
+      /* 適應小螢幕顯示 */
+      @media screen and (max-width: 768px) {
+        .aside-loaded {
+          position: relative;
+          width: 100%;
+          height: auto;
+          top: 0;
+          box-shadow: none;
+        }
+
+        .container {
+          margin-left: 0;
+        }
+      }
+
+      .mod {
+        margin-bottom: 10px;
+      }
+
+      .mod ul {
+        margin-top: 5px;
+      }
+
+      .mod li {
+        margin-left: 20px;
+      }
+
+      #userInfo {
+        position: absolute;
+        right: 10px;
+        bottom: 10px;
+      }
+
+      #roomTable {
+        margin: 10px;
+      }
+
+      #roomTable_filter {
+        display: flex;
+        justify-content: center;
+        /* 讓搜尋框靠右 */
         width: 100%;
-        height: auto;
-        top: 0;
-        box-shadow: none;
+        /* 與表格寬度一致 */
+        margin: 10px 0;
       }
 
-      .container {
-        margin-left: 0;
+      #roomTable_filter input {
+        width: 200px;
+        padding: 5px;
+        font-size: 14px;
       }
-    }
 
-    .mod {
-      margin-bottom: 10px;
-    }
+      #roomTable_paginate {
+        display: flex;
+        justify-content: center;
+        /* 讓分頁按鈕居中對齊 */
+        width: 100%;
+        /* 與表格寬度一致 */
+        margin: 10px 0;
+      }
 
-    .mod ul {
-      margin-top: 5px;
-    }
+      #roomTable_paginate a {
+        margin: 0 5px;
+        padding: 5px 10px;
+        font-size: 14px;
+        color: #007bff;
+        text-decoration: none;
+        border: 1px solid #007bff;
+        border-radius: 3px;
+        transition: background-color 0.3s ease;
+      }
 
-    .mod li {
-      margin-left: 20px;
-    }
+      #roomTable_paginate a:hover {
+        background-color: #007bff;
+        color: white;
+      }
 
-    #userInfo {
-      position: absolute;
-      right: 10px;
-      bottom: 10px;
-    }
+      h1 {
+        margin-bottom: 20px;
+      }
 
-    #roomTable {
-      margin: 10px;
-    }
+      /* 設定表格外邊框 */
+      table.dataTable {
+        border: 2px solid #007bff;
+        border-collapse: collapse;
+        text-align: center;
+        width: 1200px;
+        justify-content: center;
+      }
 
-    #roomTable_filter {
-      display: flex;
-      justify-content: center;
-      /* 讓搜尋框靠右 */
-      width: 100%;
-      /* 與表格寬度一致 */
-      margin: 10px 0;
-    }
+      /* 設定單元格邊框 */
+      table.dataTable td {
+        border: 2px solid #007bff;
+        padding: 10px;
+      }
 
-    #roomTable_filter input {
-      width: 200px;
-      padding: 5px;
-      font-size: 14px;
-    }
+      table.dataTable th {
+        border: 2px solid #007bff;
+        background-color: aqua;
+        padding: 10px;
+      }
 
-    #roomTable_paginate {
-      display: flex;
-      justify-content: center;
-      /* 讓分頁按鈕居中對齊 */
-      width: 100%;
-      /* 與表格寬度一致 */
-      margin: 10px 0;
-    }
+      /* 設定懸停時的邊框 */
+      table.dataTable tbody tr:hover {
+        border: 2px solid #ff9800;
+      }
 
-    #roomTable_paginate a {
-      margin: 0 5px;
-      padding: 5px 10px;
-      font-size: 14px;
-      color: #007bff;
-      text-decoration: none;
-      border: 1px solid #007bff;
-      border-radius: 3px;
-      transition: background-color 0.3s ease;
-    }
+      /* 設定奇偶列的邊框 */
+      table.dataTable tbody tr:nth-child(odd) td {
+        border: 2px solid #007bff;
+      }
 
-    #roomTable_paginate a:hover {
-      background-color: #007bff;
-      color: white;
-    }
+      table.dataTable tbody tr:nth-child(even) td {
+        border: 2px solid #007bff;
+      }
 
-    h1 {
-      margin-bottom: 20px;
-    }
+      /* 設定 DataTables 搜索框的邊框 */
+      div.dataTables_filter input {
+        border: 1px solid #007bff;
+      }
 
-    /* 設定表格外邊框 */
-    table.dataTable {
-      border: 2px solid #007bff;
-      border-collapse: collapse;
-      text-align: center;
-      width: 1400px;
-      justify-content: center;
-    }
+      /* 設定分頁按鈕的邊框 */
+      div.dataTables_paginate a {
+        border: 1px solid #007bff;
+      }
 
-    /* 設定單元格邊框 */
-    table.dataTable td {
-      border: 2px solid #007bff;
-      padding: 10px;
-    }
+      button {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: background-color 0.3s ease;
+        margin-right: 10px;
+      }
 
-    table.dataTable th {
-      border: 2px solid #007bff;
-      background-color: aqua;
-      padding: 10px;
-    }
+      button:hover {
+        background-color: #0056b3;
+      }
 
-    /* 設定懸停時的邊框 */
-    table.dataTable tbody tr:hover {
-      border: 2px solid #ff9800;
-    }
+      button:focus {
+        outline: none;
+      }
 
-    /* 設定奇偶列的邊框 */
-    table.dataTable tbody tr:nth-child(odd) td {
-      border: 2px solid #007bff;
-    }
+      .desc {
+        display: flex;
+        justify-content: space-between;
+        /* 將 h1 和按鈕分開排列 */
+        align-items: start;
+        /* 垂直置中 */
+        width: 100%;
+        /* 寬度填滿容器 */
+        max-width: 2000px;
+        /* 限制寬度，讓內容居中 */
+        margin-bottom: 20px;
+      }
+    </style>
+  </head>
 
-    table.dataTable tbody tr:nth-child(even) td {
-      border: 2px solid #007bff;
-    }
+  <body>
+    <aside class="aside aside-loaded"></aside>
 
-    /* 設定 DataTables 搜索框的邊框 */
-    div.dataTables_filter input {
-      border: 1px solid #007bff;
-    }
+    <div class="content">
+      <div class="desc">
+        <h1>所有房間</h1>
+      </div>
 
-    /* 設定分頁按鈕的邊框 */
-    div.dataTables_paginate a {
-      border: 1px solid #007bff;
-    }
+      <div class="desc">
+        <button id="insertBtn">新增房間</button>
+      </div>
 
-    button {
-      background-color: #007bff;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
-      border-radius: 5px;
-      transition: background-color 0.3s ease;
-      margin-right: 10px;
-    }
-
-    button:hover {
-      background-color: #0056b3;
-    }
-
-    button:focus {
-      outline: none;
-    }
-
-    .desc {
-      display: flex;
-      justify-content: space-between;
-      /* 將 h1 和按鈕分開排列 */
-      align-items: start;
-      /* 垂直置中 */
-      width: 100%;
-      /* 寬度填滿容器 */
-      max-width: 2000px;
-      /* 限制寬度，讓內容居中 */
-      margin-bottom: 20px;
-    }
-  </style>
-</head>
-
-<body>
-  <header class="header header-loaded"></header>
-  <aside class="aside aside-loaded"></aside>
-
-  <div class="container">
-    <div class="desc">
-      <h1>所有房間</h1>
+      <table id="roomTable">
+        <thead>
+          <tr>
+            <th>房間ID</th>
+            <th>房型</th>
+            <th>房名(房號)</th>
+            <th>每晚房價(新台幣)</th>
+            <th>房間狀態</th>
+            <th>新增日期</th>
+            <th>修改日期</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+      </table>
     </div>
 
-    <div class="desc">
-      <button id="insertBtn">新增房間</button>
-    </div>
+    <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+    <script>
+      $(function () {
+        // $(".header").load(
+        //   "http://localhost:8080/CloudSerenityHotel/static/common/header.html",
+        //   function () {
+        //     // header 加載完成後的初始化
+        //     console.log("Header 載入成功");
+        //     // 根據需要填充用戶名稱
 
-    <table id="roomTable">
-      <thead>
-        <tr>
-          <th>房間ID</th>
-          <th>房型</th>
-          <th>房名(房號)</th>
-          <th>每晚房價(新台幣)</th>
-          <th>房間狀態</th>
-          <th>新增日期</th>
-          <th>修改日期</th>
-          <th>操作</th>
-        </tr>
-      </thead>
-    </table>
-  </div>
+        //     $.ajax({
+        //       type: "GET",
+        //       dataType: "json",
+        //       url: "http://localhost:8080/CloudSerenityHotel/user/getUserInfo",
+        //       success: (resp) => {
+        //         if (resp.code === 505) {
+        //           alert("請先登入!");
+        //           window.location.href =
+        //             "http://localhost:8080/CloudSerenityHotel/static/user/login.jsp";
+        //         } else if (resp.code === 404) {
+        //           alert("找不到此帳號!");
+        //           window.location.href =
+        //             "http://localhost:8080/CloudSerenityHotel/static/user/login.jsp";
+        //         } else {
+        //           if (resp.data.userIdentity != "admin") {
+        //             alert("你不是管理員，無權使用此介面");
+        //             window.location.href =
+        //               "http://localhost:8080/CloudSerenityHotel/user/logout";
+        //             return;
+        //           }
+        //           $("#username").text(`歡迎 ${resp.data.userName} 管理員`);
+        //           tableLoad();
+        //         }
 
-  <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
-  <script>
-    $(function () {
-      // $(".header").load(
-      //   "http://localhost:8080/CloudSerenityHotel/static/common/header.html",
-      //   function () {
-      //     // header 加載完成後的初始化
-      //     console.log("Header 載入成功");
-      //     // 根據需要填充用戶名稱
+        //         console.log("Header 載入成功");
+        //       },
+        //     });
+        //   }
+        // );
 
-      //     $.ajax({
-      //       type: "GET",
-      //       dataType: "json",
-      //       url: "http://localhost:8080/CloudSerenityHotel/user/getUserInfo",
-      //       success: (resp) => {
-      //         if (resp.code === 505) {
-      //           alert("請先登入!");
-      //           window.location.href =
-      //             "http://localhost:8080/CloudSerenityHotel/static/user/login.jsp";
-      //         } else if (resp.code === 404) {
-      //           alert("找不到此帳號!");
-      //           window.location.href =
-      //             "http://localhost:8080/CloudSerenityHotel/static/user/login.jsp";
-      //         } else {
-      //           if (resp.data.userIdentity != "admin") {
-      //             alert("你不是管理員，無權使用此介面");
-      //             window.location.href =
-      //               "http://localhost:8080/CloudSerenityHotel/user/logout";
-      //             return;
-      //           }
-      //           $("#username").text(`歡迎 ${resp.data.userName} 管理員`);
-      //           tableLoad();
-      //         }
+        $(".aside").load("../common/aside.html");
 
-      //         console.log("Header 載入成功");
-      //       },
-      //     });
-      //   }
-      // );
+        tableLoad();
 
-      // $(".aside").load(
-      //   "http://localhost:8080/CloudSerenityHotel/static/common/aside.html",
-      //   function () {
-      //     console.log("Aside 載入成功");
-      //   }
-      // );
-
-      tableLoad();
-
-      function tableLoad() {
-        $("#roomTable").DataTable({
-          language: {
-            url: "http://localhost:8080/CloudSerenityHotel/static/booking/json/zh-HANT.json",
-          },
-          ajax: {
-            url: "http://localhost:8080/CloudSerenityHotel/room",
-            dataSrc: "",
-            type: "GET",
-          },
-          columns: [
-            { data: "roomId" },
-            { data: "roomTypeName" },
-            {
-              data: "roomName",
-              render: function (data, type, row) {
-                return `<a href="http://localhost:8080/CloudSerenityHotel/static/booking/oneRoom.html?roomId=${row.roomId}&roomName=${data}">${data}</a>`;
+        function tableLoad() {
+          $("#roomTable").DataTable({
+            language: {
+              url: "http://localhost:8080/CloudSerenityHotel/static/booking/json/zh-HANT.json",
+            },
+            ajax: {
+              url: "http://localhost:8080/CloudSerenityHotel/room",
+              dataSrc: "",
+              type: "GET",
+            },
+            columns: [
+              { data: "roomId" },
+              { data: "roomTypeName" },
+              {
+                data: "roomName",
+                render: function (data, type, row) {
+                  return `<a href="http://localhost:8080/CloudSerenityHotel/static/booking/oneRoom.html?roomId=${row.roomId}&roomName=${data}">${data}</a>`;
+                },
               },
-            },
-            { data: "price" },
-            { data: "status" },
-            { data: "createdDate" },
-            { data: "updatedDate" },
-            {
-              data: null,
-              render: function (data, type, row) {
-                return '<button class="updateBtn">修改</button><button class="deleteBtn">刪除</button>';
+              { data: "price" },
+              { data: "status" },
+              { data: "createdDate" },
+              { data: "updatedDate" },
+              {
+                data: null,
+                render: function (data, type, row) {
+                  return '<button class="updateBtn">修改</button><button class="deleteBtn">刪除</button>';
+                },
               },
-            },
-          ],
-          columnDefs: [
-            {
-              targets: 0,
-              createdCell: function (td, cellData, rowData, row, col) {
-                $(td).addClass("roomId");
+            ],
+            columnDefs: [
+              {
+                targets: 0,
+                createdCell: function (td, cellData, rowData, row, col) {
+                  $(td).addClass("roomId");
+                },
               },
-            },
-            {
-              targets: 2,
-              createdCell: function (td, cellData, rowData, row, col) {
-                $(td).addClass("roomName");
+              {
+                targets: 2,
+                createdCell: function (td, cellData, rowData, row, col) {
+                  $(td).addClass("roomName");
+                },
               },
-            },
-          ],
-        });
-      }
-
-      $("#insertBtn").click(function () {
-        window.location.href =
-          "http://localhost:8080/CloudSerenityHotel/static/booking/insertRoom.html";
-      });
-
-      $("#roomTable").on("click", ".deleteBtn", function () {
-        let roomId = $(this).closest("tr").find(".roomId").text();
-        let roomName = $(this).closest("tr").find(".roomName").text();
-
-        let confirm = window.confirm(`確定要刪除 ${roomName} ?`);
-
-        if (confirm) {
-          $.ajax({
-            type: "DELETE",
-            url: `http://localhost:8080/CloudSerenityHotel/room/${roomId}`,
-            success: (resp) => {
-              console.log(resp);
-
-              if (resp > 0) {
-                alert("刪除成功");
-              } else {
-                alert("刪除失敗");
-              }
-
-              window.location.reload();
-            },
+            ],
           });
         }
+
+        $("#insertBtn").click(function () {
+          window.location.href =
+            "http://localhost:8080/CloudSerenityHotel/static/booking/insertRoom.html";
+        });
+
+        $("#roomTable").on("click", ".deleteBtn", function () {
+          let roomId = $(this).closest("tr").find(".roomId").text();
+          let roomName = $(this).closest("tr").find(".roomName").text();
+
+          Swal.fire({
+            title: `確定要刪除 ${roomName} ?`,
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "確定",
+            cancelButtonText: "取消",
+          }).then((result) => { 
+              if(result.isConfirmed) {
+                $.ajax({
+                type: "DELETE",
+                url: `http://localhost:8080/CloudSerenityHotel/room/${roomId}`,
+                success: (resp) => {
+                  console.log(resp);
+
+                  if (resp > 0) {
+                    Swal.fire({
+                        title: "刪除成功",
+                        icon: "success",
+                        confirmButtonText: "確定",
+                    }).then(() => {
+                      location.reload();
+                    });
+                  } else {
+                    Swal.fire({
+                        title: "刪除失敗",
+                        icon: "error",
+                        confirmButtonText: "確定",
+                    }).then(() => {
+                      location.reload();
+                    });
+                  }
+                },
+              });
+            }
+          });
+        });
+
+        $("#roomTable").on("click", ".updateBtn", function () {
+          let roomId = $(this).closest("tr").find(".roomId").text();
+          let roomName = $(this).closest("tr").find(".roomName").text();
+
+          window.location.href = `http://localhost:8080/CloudSerenityHotel/static/booking/updateRoom.html?roomId=${roomId}&roomName=${roomName}`;
+        });
       });
-
-      $("#roomTable").on("click", ".updateBtn", function () {
-        let roomId = $(this).closest("tr").find(".roomId").text();
-        let roomName = $(this).closest("tr").find(".roomName").text();
-
-        window.location.href = `http://localhost:8080/CloudSerenityHotel/static/booking/updateRoom.html?roomId=${roomId}&roomName=${roomName}`;
-      });
-    });
-  </script>
-</body>
-
+    </script>
+  </body>
 </html>
