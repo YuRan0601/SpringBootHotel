@@ -210,7 +210,7 @@ public class RoomServiceImpl implements RoomService {
 	@Override
 	public int deleteImgById(String imgIdAndUrl) {
 		
-		String[] splitImgIdAndUrl = imgIdAndUrl.split(",");
+		String[] splitImgIdAndUrl = imgIdAndUrl.split("，");
 		
 		int imgId = Integer.parseInt(splitImgIdAndUrl[0]);
 		

@@ -96,7 +96,7 @@ public class RoomController extends BaseController {
 			@RequestPart MultipartFile typePrimaryImg,
 			@RequestPart MultipartFile[] typeImg,
 			@RequestParam(required = false) String deletePrImgIdAndUrl,
-			@RequestParam(required = false) String[] deleteOtherImgsIdAndUrl)
+			@RequestParam(required = false, defaultValue = "") String[] deleteOtherImgsIdAndUrl)
 	{
 		RoomType roomType = null;
 		
@@ -113,6 +113,7 @@ public class RoomController extends BaseController {
 		
 		if(deleteOtherImgsIdAndUrl != null) {
 			for(String imgIdAndUrl : deleteOtherImgsIdAndUrl) {
+				System.out.println(imgIdAndUrl);
 				roomService.deleteImgById(imgIdAndUrl);
 			}
 		}
