@@ -280,8 +280,10 @@
                 if (xhr.readyState === 4) {
                     if (xhr.status === 200) {
                         alert('車輛資訊更新成功');
+                        window.location.href = "http://localhost:8080/CloudSerenityHotel/static/rent/html/CarModelAll.html"
                     } else {
                         alert('更新車輛資訊失敗');
+                        window.location.href = "http://localhost:8080/CloudSerenityHotel/static/rent/html/CarModelAll.html"
                     }
                 }
             };
@@ -302,8 +304,10 @@
                         if (xhr.status === 200) {
                             alert('車輛刪除成功');
                             // 可以在此處刷新列表，或返回車輛列表頁面
+                            window.location.href = "http://localhost:8080/CloudSerenityHotel/static/rent/html/CarModelAll.html"
                         } else {
                             alert('刪除車輛失敗');
+                            window.location.href = "http://localhost:8080/CloudSerenityHotel/static/rent/html/CarModelAll.html"
                         }
                     }
                 };
@@ -344,8 +348,10 @@
                         // 隱藏表單
                         closeAddCarForm();
                         // 可以在此處刷新列表或其他操作
+                        window.location.href = "http://localhost:8080/CloudSerenityHotel/static/rent/html/CarModelAll.html"
                     } else {
                         alert('新增車輛失敗');
+                        window.location.href = "http://localhost:8080/CloudSerenityHotel/static/rent/html/CarModelAll.html"
                     }
                 }
             };
