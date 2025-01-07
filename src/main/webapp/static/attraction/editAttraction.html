@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>編輯景點</title>
+    <script>
+        // 当页面加载时填充现有的景点数据
+        window.onload = async function() {
+            const id = new URLSearchParams(window.location.search).get('id'); // 获取URL中的ID参数
+            const response = await fetch(`http://localhost:8080/CloudSerenityHotel/api/attractions/${id}`);
+            
+            if (response.ok) {
+                const attraction = await response.json();
+                document.getElementById("attractionId").value = attraction.attractionId;
+                document.getElementById("name").value = attraction.name;
+                document.getElementById("description").value = attraction.description;
+                document.getElementById("location").value = attraction.location;
+                document.getElementById("opening_hours").value = attraction.openingHours;
+                document.getElementById("contact_info").value = attraction.contactInfo;
+                document.getElementById("image_url").value = attraction.imageUrl;
+            } else {
+                alert("未找到景點資料");
+            }
+        };
+
+        // 提交表單以更新景點
+        async function submitForm(event) {
+            event.preventDefault();
+
+            const id = document.getElementById("attractionId").value;
+            const formData = {
+                name: document.getElementById("name").value,
+                description: document.getElementById("description").value,
+                location: document.getElementById("location").value,
+                openingHours: document.getElementById("opening_hours").value,
+                contactInfo: document.getElementById("contact_info").value,
+                imageUrl: document.getElementById("image_url").value
+            };
+
+            try {
+                const response = await fetch(`http://localhost:8080/CloudSerenityHotel/api/attractions/${id}`, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                if (response.ok) {
+                    alert("更新成功！");
+                    window.location.href = "http://localhost:8080/CloudSerenityHotel/static/attraction/GetAllAttractions.html";  // 更新后跳转回景点列表页面
+                } else {
+                    const errorData = await response.json();
+                    alert("更新失敗：" + (errorData.message || "未知錯誤"));
+                }
+            } catch (error) {
+                alert("發生錯誤：" + error.message);
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>編輯景點</h1>
+    <form onsubmit="submitForm(event)">
+        <!-- 隱藏欄位，存儲景點ID -->
+        <input type="hidden" id="attractionId">
+
+        <label for="name">景點名稱：</label>
+        <input type="text" id="name" name="name" required>
+        <br><br>
+
+        <label for="description">描述：</label>
+        <textarea id="description" name="description" required></textarea>
+        <br><br>
+
+        <label for="location">地點：</label>
+        <input type="text" id="location" name="location" required>
+        <br><br>
+
+        <label for="opening_hours">開放時間：</label>
+        <input type="text" id="opening_hours" name="opening_hours" required>
+        <br><br>
+
+        <label for="contact_info">聯絡資訊：</label>
+        <input type="text" id="contact_info" name="contact_info" required>
+        <br><br>
+
+        <label for="image_url">圖片連結：</label>
+        <input type="text" id="image_url" name="image_url" required>
+        <br><br>
+
+        <button type="submit">提交修改</button>
+    </form>
+</body>
+</html>

@@ -42,8 +42,8 @@ public class UpdateAttraction extends HttpServlet {
         attraction.setOpeningHours(openingHours);
         attraction.setContactInfo(contactInfo);
         attraction.setTypeId(typeId);
-        attraction.setImageUrl(imageUrl);
-        attraction.setUpdateAt(updateAt);  // 設置更新時間
+//        attraction.setImageUrl(imageUrl);
+//        attraction.setUpdateAt(updateAt);  // 設置更新時間
 
         // 呼叫 DAO 來更新資料
         AttractionDAO attractionDAO = new AttractionDAO();

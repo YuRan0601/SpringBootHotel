@@ -37,10 +37,10 @@ public class InsertAttraction extends HttpServlet {
         attraction.setTypeId(typeId);
         attraction.setImageUrl(imageUrl);
 
-        // 設置創建和更新日期
-        Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
-        attraction.setCreateAt(currentTimestamp);
-        attraction.setUpdateAt(currentTimestamp);
+//        // 設置創建和更新日期
+//        Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
+//        attraction.setCreateAt(currentTimestamp);
+//        attraction.setUpdateAt(currentTimestamp);
 
         // 使用 Hibernate 來插入資料
         Session session = null;
