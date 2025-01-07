@@ -47,7 +47,7 @@ public class AdminController {
 	}
 	
 	@GetMapping("/queryAllAdmin") //查詢所有管理員資料
-	public String queryAllAdmin(HttpSession session,Model model) {
+	public String queryAllAdmin(HttpSession session) {
 			return "/user/protected/queryAllAdmin.html";
 	}
 	
@@ -61,11 +61,18 @@ public class AdminController {
 	}
 	
 	@GetMapping("/queryAllMember") //查詢所有會員資料
-	public String queryAllMember(HttpSession session,Model model) {
+	public String queryAllMember(HttpSession session) {
+		
+			return "/user/protected/queryAllMember.html";
+	}
+	
+	@GetMapping("/queryAllMemberTojson") //回傳所有會員資料
+	@ResponseBody
+	public ArrayList<User> queryAllMemberJson(HttpSession session,Model model) {
 		
 			List<User> memberDataList = uService.findAllMember();
-			model.addAttribute("memberData", memberDataList);
-			return "/user/protected/queryResultsMember.jsp";
+			ArrayList<User> dataToJson = (ArrayList<User>) memberDataList;
+			return dataToJson;
 	}
 	
 	@PostMapping("/queryAdminById")
