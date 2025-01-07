@@ -45,18 +45,20 @@ public class AdminController {
 		}
 	}
 	
-	@PostMapping("/queryAllData") //查詢所有(管理員,會員)資料
-	public String queryAllData(@RequestParam String targetIdentity,HttpSession session,Model model) {
+	@GetMapping("/queryAllAdmin") //查詢所有管理員資料
+	public String queryAllAdmin(HttpSession session,Model model) {
 		
-		if(targetIdentity.equals("admin")) { //admin
 			List<User> dataList = uService.findAllUser();
 			model.addAttribute("userData", dataList);
 			return "/user/protected/queryResultsAdmin.jsp";
-		}else { //user
+	}
+	
+	@GetMapping("/queryAllMember") //查詢所有會員資料
+	public String queryAllMember(HttpSession session,Model model) {
+		
 			List<User> memberDataList = uService.findAllMember();
 			model.addAttribute("memberData", memberDataList);
 			return "/user/protected/queryResultsMember.jsp";
-		}
 	}
 	
 	@PostMapping("/queryAdminById")
