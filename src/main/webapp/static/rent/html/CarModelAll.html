@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>雲澄飯店租車系統</title>
+
+
+
+    <!-- 引入 Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <!-- 引入 Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet" />
+
+    <!-- 引入 Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- 引入 jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.js"
+        integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+
+
+    <style>
+        .aside {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            overflow-y: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            margin-top: 30px;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tr:hover {
+            background-color: #e0e0e0;
+        }
+
+        .content {
+            margin-left: 300px
+        }
+
+        /* 模態對話框的樣式 */
+        .modal {
+            display: none;
+            /* 初始時隱藏 */
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            overflow: auto;
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 20px;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 8px;
+        }
+
+        .modal-content input,
+        .modal-content textarea {
+            margin: 10px 0;
+            padding: 8px;
+            width: 100%;
+        }
+
+        button {
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+
+</head>
+
+<body>
+    <aside class="aside"></aside>
+    <div class="content">
+        <table>
+            <tr>
+                <th>型號</th>
+                <th>品牌</th>
+                <th>車型id</th>
+                <th>操作</th>
+            </tr>
+            <div id="newCarButton">
+                <button onclick="showAddCarForm()">新增</button>
+            </div>
+            <!-- 模態對話框，包含新增車輛表單 -->
+            <div id="addCarModal" class="modal">
+                <div class="modal-content">
+                    <span class="close" onclick="closeAddCarForm()">&times;</span>
+                    <h3>新增車輛</h3>
+                    <form id="newCarForm">
+                        <div>
+                            <label for="carModel">車輛型號:</label>
+                            <input type="text" id="carModel" name="carModel" required>
+                        </div>
+                        <div>
+                            <label for="brand">品牌:</label>
+                            <input type="text" id="brand" name="brand" required>
+                        </div>
+                        <div>
+                            <label for="description">車型描述:</label>
+                            <textarea id="description" name="description" required></textarea>
+                        </div>
+                        <button type="button" onclick="submitNewCar()">提交</button>
+                        <button type="button" onclick="closeAddCarForm()">取消</button>
+                    </form>
+                </div>
+            </div>
+
+            <tbody id="result">
+            </tbody>
+        </table>
+
+        <div id="car-details">
+        </div>
+
+    </div>
+
+    <script>
+        $(function () {
+            $(".aside").load("../../common/aside.html");
+
+        });
+    </script>
+
+    <script>
+        window.onload = function () {
+            const result = document.getElementById("result");
+
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', 'http://localhost:8080/CloudSerenityHotel/CarModel/queryAll', true);
+            xhr.send();
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        let cars = JSON.parse(xhr.responseText);
+                        result.innerHTML = '';
+                        cars.forEach(car => {
+                            const row = document.createElement('tr');
+
+                            const carModelCell = document.createElement('td');
+                            carModelCell.textContent = car.carModel; //填充型號
+
+                            const carBrandCell = document.createElement('td');
+                            carBrandCell.textContent = car.brand; //填充品牌
+
+                            const carIdCell = document.createElement('td');
+                            carIdCell.textContent = car.carId; //填充車型ID
+
+                            const actionsCell = document.createElement('td');
+                            actionsCell.innerHTML = `<button onclick="editCar('${car.carId}')">查看</button>`;  // 操作按鈕
+
+                            // 將欄位添加到行中
+                            row.appendChild(carModelCell);
+                            row.appendChild(carBrandCell);
+                            row.appendChild(carIdCell);
+                            row.appendChild(actionsCell);
+                            result.appendChild(row);
+                        });
+                    }
+                }
+            };
+        };
+
+        function editCar(carid) {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', `http://localhost:8080/CloudSerenityHotel/CarModel/queryOne/${carid}`, true);
+            xhr.send();
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        const carDetails = JSON.parse(xhr.responseText);
+                        displayCarDetails(carDetails);
+                    }
+                }
+            }
+        }
+
+        function displayCarDetails(carDetails) {
+            const detailsContainer = document.getElementById("car-details");
+
+            // 在詳細資料區域中顯示車輛詳細信息
+            detailsContainer.innerHTML = `
+        <form id="carDetailsForm">
+            <div>
+                <label for="carModel">車輛型號:</label>
+                <input type="text" id="ucarModel" name="carModel" value="${carDetails.carModel}" required>
+            </div>
+            <div>
+                <label for="brand">品牌:</label>
+                <input type="text" id="ubrand" name="brand" value="${carDetails.brand}" required>
+            </div>
+            <div>
+                <label for="carId">車型ID:</label>
+                <input type="text" id="carId" name="carId" value="${carDetails.carId}" disabled>
+            </div>
+            <div>
+                <label for="description">車型描述:</label>
+                <textarea id="udescription" name="description" required>${carDetails.description}</textarea>
+            </div>
+
+            <!-- 修改與刪除按鈕 -->
+            <button type="button" onclick="updateCar(${carDetails.carId})">修改</button>
+            <button type="button" onclick="deleteCar(${carDetails.carId})">刪除</button>
+        </form>
+    `;
+        }
+        function updateCar(carId) {
+            // 取得表單中的數據
+            const carModel = document.getElementById('ucarModel').value;
+            const brand = document.getElementById('ubrand').value;
+            const description = document.getElementById('udescription').value;
+
+            // 構建要發送的資料
+            const updatedCar = {
+                carId: carId,
+                carModel: carModel,
+                brand: brand,
+                description: description
+            };
+
+            // 發送 PUT 請求來更新車輛資訊
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', 'http://localhost:8080/CloudSerenityHotel/CarModel/update', true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.send(JSON.stringify(updatedCar));
+
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        alert('車輛資訊更新成功');
+                    } else {
+                        alert('更新車輛資訊失敗');
+                    }
+                }
+            };
+        }
+
+        function deleteCar(carId) {
+            // 確認用戶是否確定刪除
+            const confirmDelete = confirm('確定要刪除這個車輛嗎?');
+            if (confirmDelete) {
+                // 發送 DELETE 請求來刪除車輛
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', 'http://localhost:8080/CloudSerenityHotel/CarModel/delete', true);
+                xhr.setRequestHeader('Content-Type', 'application/json');
+                xhr.send(JSON.stringify({ carId: carId }));
+
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState === 4) {
+                        if (xhr.status === 200) {
+                            alert('車輛刪除成功');
+                            // 可以在此處刷新列表，或返回車輛列表頁面
+                        } else {
+                            alert('刪除車輛失敗');
+                        }
+                    }
+                };
+            }
+        }
+
+        function showAddCarForm() {
+            document.getElementById('addCarModal').style.display = 'block';
+        }
+
+        // 關閉新增車輛表單（模態對話框）
+        function closeAddCarForm() {
+            document.getElementById('addCarModal').style.display = 'none';
+        }
+
+        // 提交新增車輛的表單
+        function submitNewCar() {
+            const carModel = document.getElementById('carModel').value;
+            const brand = document.getElementById('brand').value;
+            const description = document.getElementById('description').value;
+
+            const newCar = {
+                carModel: carModel,
+                brand: brand,
+                description: description
+            };
+
+            // 使用 XMLHttpRequest 發送 POST 請求
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', 'http://localhost:8080/CloudSerenityHotel/CarModel/add', true);  // 假設是新增車輛的API
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.send(JSON.stringify(newCar));
+
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        alert('新增車輛成功');
+                        // 隱藏表單
+                        closeAddCarForm();
+                        // 可以在此處刷新列表或其他操作
+                    } else {
+                        alert('新增車輛失敗');
+                    }
+                }
+            };
+        }
+    </script>
+</body>
+
+</html>
