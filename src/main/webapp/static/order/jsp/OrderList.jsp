@@ -3,47 +3,47 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-<meta charset="UTF-8">
-<title>訂單列表</title>
-
-<link rel="stylesheet"
-	href="/CloudSerenityHotel/static/order/css/OrderList.css" />
-
-<!-- 引入 jQuery -->
-<script src="https://code.jquery.com/jquery-3.7.1.js"
-	integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
-	crossorigin="anonymous"></script>
-
-<!-- 引入 Bootstrap CSS -->
-<link
-	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-	rel="stylesheet" />
-
-<!-- 引入 Bootstrap Icons -->
-<link
-	href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"
-	rel="stylesheet" />
-
-<!-- 引入 Bootstrap JS -->
-<script
-	src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-<!-- 引入aside.css -->
-<link rel="stylesheet" href="/CloudSerenityHotel/static/common/aside.css" />
-
-<script>
-		$(function() {
-			$(".aside").load("/CloudSerenityHotel/static/common/aside.html");
-
-		});
+	<meta charset="UTF-8">
+	<title>訂單列表</title>
+	
+	<link rel="stylesheet"
+		href="/CloudSerenityHotel/static/order/css/OrderList.css" />
+	
+	<!-- 引入 jQuery -->
+	<script src="https://code.jquery.com/jquery-3.7.1.js"
+		integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
+		crossorigin="anonymous"></script>
+	
+	<!-- 引入 Bootstrap CSS -->
+	<link
+		href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+		rel="stylesheet" />
+	
+	<!-- 引入 Bootstrap Icons -->
+	<link
+		href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"
+		rel="stylesheet" />
+	
+	<!-- 引入 Bootstrap JS -->
+	<script
+		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+	
+	<!-- 引入aside.css -->
+	<link rel="stylesheet" href="/CloudSerenityHotel/static/common/aside.css" />
+	
+	<script>
+			$(function() {
+				$(".aside").load("/CloudSerenityHotel/static/common/aside.html");
+	
+			});
 	</script>
-
-<style>
-	/* 主要內容的樣式，假設class名為content */
-	/*.content {
-		margin-left: 300px
-	}*/
-</style>
+	
+	<style>
+		/* 主要內容的樣式，假設class名為content */
+		/*.content {
+			margin-left: 300px
+		}*/
+	</style>
 
 </head>
 
