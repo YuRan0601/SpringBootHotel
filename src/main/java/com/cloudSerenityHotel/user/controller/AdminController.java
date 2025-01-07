@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.cloudSerenityHotel.user.model.User;
 import com.cloudSerenityHotel.user.service.UserService;
@@ -47,10 +48,16 @@ public class AdminController {
 	
 	@GetMapping("/queryAllAdmin") //查詢所有管理員資料
 	public String queryAllAdmin(HttpSession session,Model model) {
+			return "/user/protected/queryAllAdmin.html";
+	}
+	
+	@GetMapping("/queryAllAdminTojson") //回傳所有管理員資料
+	@ResponseBody
+	public ArrayList<User> queryAllAdminJson(HttpSession session,Model model) {
 		
 			List<User> dataList = uService.findAllUser();
-			model.addAttribute("userData", dataList);
-			return "/user/protected/queryResultsAdmin.jsp";
+			ArrayList<User> dataToJson = (ArrayList<User>) dataList;
+			return dataToJson;
 	}
 	
 	@GetMapping("/queryAllMember") //查詢所有會員資料
