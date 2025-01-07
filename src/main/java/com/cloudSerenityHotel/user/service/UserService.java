@@ -50,6 +50,7 @@ public class UserService implements UserServiceInterface {
 		if (checkResult == null) {
 			return 0;
 		}
+		user.setUserStatus("In_use");
 		user.setAccountUpdateTime(LocalDateTime.now());
 		member.setRegisterDate(LocalDateTime.now());
 		member.setDataUpdateTime(LocalDateTime.now());
@@ -84,9 +85,10 @@ public class UserService implements UserServiceInterface {
 	@Override
 	public int addAdmin(User user) {
 		User checkResult = uRepository.findByEmail(user.getEmail()).orElse(null);
-		if (checkResult == null) {
+		if (checkResult != null) {
 			return 0;
 		}
+		user.setUserStatus("In_use");
 		user.setAccountUpdateTime(LocalDateTime.now());
 		user.setMember(null);
 		uRepository.save(user);

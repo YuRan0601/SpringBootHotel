@@ -29,6 +29,8 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.5/css/dataTables.bootstrap5.min.css">
     <script src="https://cdn.datatables.net/1.13.5/js/dataTables.bootstrap5.min.js"></script>
 
+    <!-- sweetalert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <link rel="stylesheet" href="../static/common/aside.css" />
     <style>
@@ -67,19 +69,33 @@
                     console.error("資料加載失敗", error);
                 });
 
+            // 打開 Modal
+            $('#addAdminBtn').on('click', function () {
+                $('#addAdminModal').modal('show');
+            });
 
             // 初始化 DataTable
             const table = $('#adminTable').DataTable({
                 language: {
                     url: "https://cdn.datatables.net/plug-ins/1.13.5/i18n/zh-HANT.json"
                 },
-                columns: [
-                    { title: "使用者編號", data: "userId" },
-                    { title: "使用者姓名", data: "userName" },
-                    { title: "電子信箱", data: "email" },
+                columns: [{
+                        title: "使用者編號",
+                        data: "userId"
+                    },
                     {
-                        title: "密碼", data: "password",
-                        className: 'dt-center', render: function (data, type, row) {
+                        title: "使用者姓名",
+                        data: "userName"
+                    },
+                    {
+                        title: "電子信箱",
+                        data: "email"
+                    },
+                    {
+                        title: "密碼",
+                        data: "password",
+                        className: 'dt-center',
+                        render: function (data, type, row) {
                             return `
                             <span class="password-text d-none">${data}</span>
                             <button class="btn btn-secondary btn-sm toggle-password">
@@ -88,8 +104,14 @@
                             `;
                         }
                     },
-                    { title: "使用狀態", data: "userStatus" },
-                    { title: "帳號更新時間", data: "accountUpdateTime" },
+                    {
+                        title: "使用狀態",
+                        data: "userStatus"
+                    },
+                    {
+                        title: "帳號更新時間",
+                        data: "accountUpdateTime"
+                    },
                     {
                         title: "操作",
                         data: null,
@@ -102,6 +124,43 @@
                     }
                 ]
             });
+
+            // 表單提交
+            $('#addAdminForm').on('submit', function (e) {
+                e.preventDefault(); // 阻止預設表單提交
+
+                // 獲取表單資料
+                const adminData = {
+                    userName: $('#username').val(),
+                    password: $('#password').val(),
+                    email: $('#email').val()
+                };
+
+                //post給後端API
+                axios.post('http://localhost:8080/CloudSerenityHotel/admin/addAdmin', adminData)
+                    .then(function (response) {
+                        $('#addAdminModal').modal('hide'); // 關閉 Modal
+                        $('#addAdminForm')[0].reset(); // 清空表單
+                        swal.fire({
+                            title: "新增管理員成功",
+                            text: "請重新整理頁面!",
+                            icon: "success",
+                            allowOutsideClick: false
+                        });
+                    })
+                    .catch(function (error) {
+                        swal.fire({
+                            title: "新增管理員失敗",
+                            text: "請稍後再試!",
+                            icon: "error",
+                            allowOutsideClick: false
+                        });
+
+                    });
+            });
+
+
+
         });
 
         // 按鈕點擊事件：顯示/隱藏密碼
@@ -119,8 +178,6 @@
                 button.text('顯示密碼');
             }
         });
-
-
     </script>
 </head>
 
@@ -129,10 +186,39 @@
     <div class="content" align="center">
         <div class="container mt-4">
             <h1 class="mb-4">管理員列表</h1>
-            <div class="d-grid mb-3 d-md-flex justify-content-md-start"> <button
-                    class="addAdmin btn btn-primary">新增管理員</button></div>
+            <div class="d-grid mb-3 d-md-flex justify-content-md-start">
+                <button class="addAdmin btn btn-primary" id="addAdminBtn">新增管理員</button></div>
             <table id="adminTable" class="table table-striped table-bordered dt-responsive nowrap "></table>
 
+        </div>
+        <!-- 新增管理員 modal -->
+        <div class="modal fade" id="addAdminModal" tabindex="-1" aria-labelledby="addAdminModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addAdminModalLabel">新增管理員</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="addAdminForm">
+                            <div class="mb-3">
+                                <label for="username" class="form-label">使用者姓名</label>
+                                <input type="text" class="form-control" id="username" name="username" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="password" class="form-label">密碼</label>
+                                <input type="password" class="form-control" id="password" name="password" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="email" class="form-label">電子郵件</label>
+                                <input type="email" class="form-control" id="email" name="email" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">送出</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </body>

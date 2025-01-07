@@ -4,10 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -24,25 +27,19 @@ public class AdminController {
 	@Autowired
 	private UserService uService;
 	
-	@GetMapping("/addAdmin")
-	public String showAddAdmin() {
-		return "/user/protected/addAdmin.jsp";
-	}
-	
 	@PostMapping("/addAdmin") //新增管理員帳號
-	public String addAdmin(@RequestParam String email,@RequestParam String password,@RequestParam String name,HttpSession session,
-			Model model) {
+	public ResponseEntity<String> addAdmin(@RequestBody User admin) {
 		User user = new User();
-		user.setEmail(email);
-		user.setPassword(password);
-		user.setUserName(name);
+		user.setEmail(admin.getEmail());
+		user.setPassword(admin.getPassword());
+		user.setUserName(admin.getUserName());
 		user.setUserIdentity("admin");
 		int addStatus = uService.addAdmin(user);
 		if (addStatus != 0) {
-			return "/user/protected/queryAdminData.jsp";
+			return ResponseEntity.ok("新增成功");
 		}else {
-            model.addAttribute("errorMessage", "註冊失敗，請檢查輸入的Email是否重複或稍後重試");
-            return "/user/protected/addAdmin.jsp";
+		    String errorMessage = "新增失敗";
+		    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage);
 		}
 	}
 	
