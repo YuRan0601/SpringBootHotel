@@ -1,160 +1,130 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>側邊欄</title>
 
     <style>
-      .bg-custom {
-        background-color: rgb(100, 212, 247);
-      }
+        .bg-custom {
+            background-color: rgb(100, 212, 247);
+        }
 
-      .text-custom {
-        color: rgb(29, 29, 31);
-        font-weight: bold;
-      }
+        .text-custom {
+            color: rgb(29, 29, 31);
+            font-weight: bold;
+        }
 
-      .text-title {
-        font-size: 23px;
-        font-weight: bolder;
-        margin-bottom: 20px;
-      }
+        .text-title {
+            font-size: 23px;
+            font-weight: bolder;
+            margin-bottom: 20px;
+        }
     </style>
-  </head>
-  <body>
-    <div
-      class="d-flex flex-column p-3 bg-custom"
-      style="width: 280px; min-height: 100vh"
-    >
-      <div>
-        <h4 style="font-weight: bolder">雲澄飯店後台管理系統</h4>
-      </div>
-      <hr />
-      <ul class="nav flex-column">
-        <li class="nav-item">
-          <h2 class="text-custom text-title">會員</h2>
-          <div class="ps-3" id="userMenu">
-            <ul class="nav flex-column">
-              <li>
-                <a
-                  class="nav-link text-custom"
-                  href="http://localhost:8080/CloudSerenityHotel/static/user/protected/queryAdminData.jsp"
-                  >查看管理員</a
-                >
-              </li>
-              <li>
-                <a
-                  class="nav-link text-custom"
-                  href="http://localhost:8080/CloudSerenityHotel/static/user/protected/queryMemberData.jsp"
-                  >查看會員</a
-                >
-              </li>
-            </ul>
-          </div>
-        </li>
-        <hr />
+</head>
 
-        <li class="nav-item">
-          <h2 class="text-custom text-title">訂房</h2>
-          <div class="ps-3" id="bookingMenu">
-            <ul class="nav flex-column">
-              <li>
-                <a
-                  class="nav-link text-custom"
-                  href="http://localhost:8080/CloudSerenityHotel/static/booking/roomType.html"
-                  >房型管理</a
-                >
-              </li>
-              <li>
-                <a
-                  class="nav-link text-custom"
-                  href="http://localhost:8080/CloudSerenityHotel/static/booking/room.html"
-                  >房間管理</a
-                >
-              </li>
-            </ul>
-          </div>
-        </li>
+<body>
+    <div class="d-flex flex-column p-3 bg-custom" style="width: 280px; min-height: 100vh">
+        <div>
+            <h4 style="font-weight: bolder">雲澄飯店後台管理系統</h4>
+        </div>
         <hr />
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <h2 class="text-custom text-title">會員</h2>
+                <div class="ps-3" id="userMenu">
+                    <ul class="nav flex-column">
+                        <li>
+                            <a class="nav-link text-custom"
+                                href="http://localhost:8080/CloudSerenityHotel/admin/queryAllAdmin">查看管理員</a>
+                        </li>
+                        <li>
+                            <a class="nav-link text-custom"
+                                href="http://localhost:8080/CloudSerenityHotel/static/user/protected/queryMemberData.jsp">查看會員</a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+            <hr />
 
-        <li class="nav-item">
-          <h2 class="text-custom text-title">商城商品</h2>
-          <div class="ps-3" id="productMenu">
-            <ul class="nav flex-column">
-              <li>
-                <a
-                  class="nav-link text-custom"
-                  href="http://localhost:8080/CloudSerenityHotel/static/product/Home.html"
-                  >商品管理</a
-                >
-              </li>
-            </ul>
-          </div>
-        </li>
-        <hr />
+            <li class="nav-item">
+                <h2 class="text-custom text-title">訂房</h2>
+                <div class="ps-3" id="bookingMenu">
+                    <ul class="nav flex-column">
+                        <li>
+                            <a class="nav-link text-custom"
+                                href="http://localhost:8080/CloudSerenityHotel/static/booking/roomType.html">房型管理</a>
+                        </li>
+                        <li>
+                            <a class="nav-link text-custom"
+                                href="http://localhost:8080/CloudSerenityHotel/static/booking/room.html">房間管理</a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+            <hr />
 
-        <li class="nav-item">
-          <h2 class="text-custom text-title">商城訂單</h2>
-          <div class="ps-3" id="orderMenu">
-            <ul class="nav flex-column">
-              <li>
-                <a
-                  class="nav-link text-custom"
-                  href="http://localhost:8080/CloudSerenityHotel/Order/findAllOrders"
-                  >訂單管理</a
-                >
-              </li>
-            </ul>
-          </div>
-        </li>
-        <hr />
+            <li class="nav-item">
+                <h2 class="text-custom text-title">商城商品</h2>
+                <div class="ps-3" id="productMenu">
+                    <ul class="nav flex-column">
+                        <li>
+                            <a class="nav-link text-custom"
+                                href="http://localhost:8080/CloudSerenityHotel/static/product/Home.html">商品管理</a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+            <hr />
 
-        <li class="nav-item">
-          <h2 class="text-custom text-title">景點</h2>
-          <div class="ps-3" id="attractionMenu">
-            <ul class="nav flex-column">
-              <li>
-                <a
-                  class="nav-link text-custom"
-                  href="http://localhost:8080/CloudSerenityHotel/static/attraction/SelectAttraction.jsp"
-                  >景點管理</a
-                >
-              </li>
-              <li>
-                <a
-                  class="nav-link text-custom"
-                  href="http://localhost:8080/CloudSerenityHotel/static/facility/SelectFacility.jsp"
-                  >設施管理</a
-                >
-              </li>
-              <li>
-                <a
-                  class="nav-link text-custom"
-                  href="http://localhost:8080/CloudSerenityHotel/static/picture/SelectPicture.jsp"
-                  >圖片管理</a
-                >
-              </li>
-            </ul>
-          </div>
-        </li>
-        <hr />
+            <li class="nav-item">
+                <h2 class="text-custom text-title">商城訂單</h2>
+                <div class="ps-3" id="orderMenu">
+                    <ul class="nav flex-column">
+                        <li>
+                            <a class="nav-link text-custom"
+                                href="http://localhost:8080/CloudSerenityHotel/Order/findAllOrders">訂單管理</a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+            <hr />
 
-        <li class="nav-item">
-          <h2 class="text-custom text-title">租車</h2>
-          <div class="ps-3" id="rentMenu">
-            <ul class="nav flex-column">
-              <li>
-                <a
-                  class="nav-link text-custom"
-                  href="http://localhost:8080/CloudSerenityHotel/static/rent/html/home.html"
-                  >車輛管理</a
-                >
-              </li>
-            </ul>
-          </div>
-        </li>
-      </ul>
+            <li class="nav-item">
+                <h2 class="text-custom text-title">景點</h2>
+                <div class="ps-3" id="attractionMenu">
+                    <ul class="nav flex-column">
+                        <li>
+                            <a class="nav-link text-custom"
+                                href="http://localhost:8080/CloudSerenityHotel/static/attraction/SelectAttraction.jsp">景點管理</a>
+                        </li>
+                        <li>
+                            <a class="nav-link text-custom"
+                                href="http://localhost:8080/CloudSerenityHotel/static/facility/SelectFacility.jsp">設施管理</a>
+                        </li>
+                        <li>
+                            <a class="nav-link text-custom"
+                                href="http://localhost:8080/CloudSerenityHotel/static/picture/SelectPicture.jsp">圖片管理</a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+            <hr />
+
+            <li class="nav-item">
+                <h2 class="text-custom text-title">租車</h2>
+                <div class="ps-3" id="rentMenu">
+                    <ul class="nav flex-column">
+                        <li>
+                            <a class="nav-link text-custom"
+                                href="http://localhost:8080/CloudSerenityHotel/static/rent/html/home.html">車輛管理</a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+        </ul>
     </div>
-  </body>
+</body>
+
 </html>
