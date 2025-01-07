@@ -69,10 +69,10 @@ public class ProductController {
 		
 		//上傳圖片
 		String fileName = mf.getOriginalFilename();
-		String saveFileDir = "D:/hotel/workspace/SpringBootHotel/src/main/webapp/static/product/uploadImage/";
+		String saveFileDir = "src/main/webapp/static/product/uploadImage/";
 		
 		File saveFilePath = new File(saveFileDir, fileName);
-		mf.transferTo(saveFilePath);
+		mf.transferTo(saveFilePath.getAbsoluteFile());
 		
         //把圖片路徑存到資料庫表格裡
         ProductImages image = new ProductImages();
@@ -80,9 +80,9 @@ public class ProductController {
         productService.uploadImage(products,image);
 		
 		
-		m.addAttribute("allProducts", productService.selectAllProduct());
+//		m.addAttribute("allProducts", productService.selectAllProduct());
 		
-		return "/product/ProductAllList.jsp";
+		return "redirect:/selectAll";
 	}
 	
 	//刪除
@@ -120,10 +120,10 @@ public class ProductController {
 		
 		//上傳圖片
 		String fileName = mf.getOriginalFilename();
-		String saveFileDir = "D:/hotel/workspace/SpringBootHotel/src/main/webapp/static/product/uploadImage/";
+		String saveFileDir = "src/main/webapp/static/product/uploadImage/";
 		
 		File saveFilePath = new File(saveFileDir, fileName);
-		mf.transferTo(saveFilePath);
+		mf.transferTo(saveFilePath.getAbsoluteFile());
 		
         //把圖片路徑存到資料庫表格裡
         ProductImages image = new ProductImages();
