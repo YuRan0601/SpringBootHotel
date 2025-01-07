@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.cloudSerenityHotel.user.model.User;
 import com.cloudSerenityHotel.user.service.UserService;
@@ -73,9 +74,10 @@ public class LoginSystemController {
 	}
 
 	@GetMapping("/getUserInfo")
-	public ResponseEntity<Map<String, Object>> getUserInfo(HttpSession session) {
+	@ResponseBody
+	public Map<String, Object> getUserInfo(HttpSession session) {
 	    Map<String, Object> result = uService.getUserInfo(session);
-	    return ResponseEntity.ok(result);
+	    return result;
 	}
 
 }
