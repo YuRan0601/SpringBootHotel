@@ -1,3 +1,9 @@
+
+/* 主要內容的樣式，假設class名為content */
+.content {
+		margin-left: 300px
+}
+
 h2 {
     font-size: 40px;
 }
