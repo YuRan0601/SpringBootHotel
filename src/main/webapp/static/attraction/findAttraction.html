@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>查詢景點</title>
+</head>
+<body>
+    <h1>查詢景點</h1>
+    <form id="findAttractionForm">
+        <label for="attractionId">景點ID:</label><input type="number" id="attractionId" required><br>
+        <button type="submit">查詢</button>
+    </form>
+    <div id="attractionDetails"></div>
+
+    <script>
+        document.getElementById('findAttractionForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const id = document.getElementById('attractionId').value;
+
+            fetch(`/api/attractions/${id}`)
+                .then(response => response.json())
+                .then(data => {
+                    const detailsDiv = document.getElementById('attractionDetails');
+                    detailsDiv.innerHTML = `
+                        <p>景點名稱: ${data.name}</p>
+                        <p>描述: ${data.description}</p>
+                        <p>位置: ${data.location}</p>
+                        <p>開放時間: ${data.openingHours}</p>
+                        <p>聯絡資訊: ${data.contactInfo}</p>
+                        <p>圖片連結: ${data.imageUrl}</p>
+                    `;
+                })
+                .catch(() => alert("找不到該景點"));
+        });
+    </script>
+</body>
+</html>
