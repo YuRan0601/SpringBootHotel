@@ -5,53 +5,33 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-
-import java.sql.Timestamp;
 
 @Entity
-@Table(name = "Attraction")
 public class Attraction {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "attraction_id")
-    private int attractionId;
-
-    @Column(name = "name")
+    private Integer attractionId;
+    
     private String name;
-
-    @Column(name = "description")
     private String description;
-
-    @Column(name = "location")
     private String location;
-
     @Column(name = "opening_hours")
     private String openingHours;
-
     @Column(name = "contact_info")
     private String contactInfo;
-
     @Column(name = "type_id")
-    private int typeId;
-
+    private Integer typeId;
     @Column(name = "image_url")
     private String imageUrl;
 
-    @Column(name = "create_at")
-    private Timestamp createAt;
-
-    @Column(name = "update_at")
-    private Timestamp updateAt;
-
-    // Getters and setters
-
-    public int getAttractionId() {
+    // Getters and Setters
+    public Integer getAttractionId() {
         return attractionId;
     }
 
-    public void setAttractionId(int attractionId) {
+    public void setAttractionId(Integer attractionId) {
         this.attractionId = attractionId;
     }
 
@@ -95,11 +75,11 @@ public class Attraction {
         this.contactInfo = contactInfo;
     }
 
-    public int getTypeId() {
+    public Integer getTypeId() {
         return typeId;
     }
 
-    public void setTypeId(int typeId) {
+    public void setTypeId(Integer typeId) {
         this.typeId = typeId;
     }
 
@@ -109,21 +89,5 @@ public class Attraction {
 
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
-    }
-
-    public Timestamp getCreateAt() {
-        return createAt;
-    }
-
-    public void setCreateAt(Timestamp createAt) {
-        this.createAt = createAt;
-    }
-
-    public Timestamp getUpdateAt() {
-        return updateAt;
-    }
-
-    public void setUpdateAt(Timestamp updateAt) {
-        this.updateAt = updateAt;
     }
 }

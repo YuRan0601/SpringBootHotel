@@ -5,18 +5,10 @@ import com.cloudSerenityHotel.attraction_facility.attraction.model.Attraction;
 import java.util.List;
 import java.util.Optional;
 
-public interface AttractionService {  // 確保這是interface
-	
-
-	
+public interface AttractionService {
     List<Attraction> getAllAttractions();
-
-    Optional<Attraction> getAttractionById(int id);
-
-    Attraction addAttraction(Attraction attraction);
-
-    Attraction updateAttraction(int id, Attraction attraction);
-
-    void deleteAttraction(int id);
+    Optional<Attraction> getAttractionById(Integer id);
+    Attraction createAttraction(Attraction attraction);
+    void deleteAttraction(Integer id);
+    Attraction updateAttraction(Integer id, Attraction updatedAttraction);
 }
-

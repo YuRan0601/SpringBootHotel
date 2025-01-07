@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>新增景點</title>
+</head>
+<body>
+    <h1>新增景點</h1>
+    <form id="addAttractionForm">
+        <label for="name">景點名稱:</label><input type="text" id="name" required><br>
+        <label for="description">描述:</label><input type="text" id="description" required><br>
+        <label for="location">位置:</label><input type="text" id="location" required><br>
+        <label for="openingHours">開放時間:</label><input type="text" id="openingHours" required><br>
+        <label for="contactInfo">聯絡資訊:</label><input type="text" id="contactInfo" required><br>
+        <label for="typeId">類型ID:</label><input type="number" id="typeId" required><br>
+        <label for="imageUrl">圖片連結:</label><input type="text" id="imageUrl" required><br>
+        <button type="submit">提交</button>
+    </form>
+
+    <script>
+        document.getElementById('addAttractionForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const attraction = {
+                name: document.getElementById('name').value,
+                description: document.getElementById('description').value,
+                location: document.getElementById('location').value,
+                openingHours: document.getElementById('openingHours').value,
+                contactInfo: document.getElementById('contactInfo').value,
+                typeId: document.getElementById('typeId').value,
+                imageUrl: document.getElementById('imageUrl').value
+            };
+
+            fetch('http://localhost:8080/CloudSerenityHotel/api/attractions/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(attraction)
+            })
+            .then(() => location.href = 'GetAllAttractions.html');
+        });
+    </script>
+</body>
+</html>

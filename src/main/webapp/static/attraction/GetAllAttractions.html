@@ -1,116 +1,62 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <title>景點查詢</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f9f9f9;
-            margin: 0;
-            padding: 0;
-        }
-        h1 {
-            color: #9b59b6; /* 淡紫色 */
-            text-align: center;
-            margin-top: 40px;
-            font-size: 36px;
-        }
-        h2 {
-            color: #9b59b6;
-            font-size: 28px;
-            text-align: center;
-            margin-top: 30px;
-        }
-        .container {
-            width: 80%;
-            margin: auto;
-            background-color: #ffffff;
-            padding: 20px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            border-radius: 10px;
-        }
-        form {
-            text-align: center;
-            margin-top: 20px;
-        }
-        input[type="submit"] {
-            background-color: #9b59b6; /* 淡紫色 */
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-        input[type="submit"]:hover {
-            background-color: #8e44ad; /* 深紫色 */
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 30px;
-        }
-        th, td {
-            padding: 12px;
-            text-align: center;
-            font-size: 16px;
-        }
-        th {
-            background-color: #9b59b6; /* 淡紫色 */
-            color: white;
-        }
-        td {
-            background-color: #f2f2f2;
-        }
-        tr:nth-child(even) td {
-            background-color: #f9f9f9;
-        }
-        tr:hover td {
-            background-color: #f1f1f1;
-        }
-        a {
-            color: #9b59b6; /* 淡紫色 */
-            text-decoration: none;
-            font-weight: bold;
-        }
-        a:hover {
-            text-decoration: underline;
-        }
-        hr {
-            border: 1px solid #9b59b6;
-            width: 80%;
-            margin: 30px auto;
-        }
-    </style>
+    <title>景點列表</title>
 </head>
 <body>
-    <div class="container">
-        <h1>景點查詢系統</h1>
-        <form method="get" action="/CloudSerenityHotel/GetAllAttractions">
-            <input type="submit" value="顯示所有景點" />
-        </form>
-        <hr />
-        <h2>景點資料列表</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>景點編號</th>
-                    <th>名稱</th>
-                    <th>簡介</th>
-                    <th>地址</th>
-                    <th>營業時間</th>
-                    <th>聯絡方式</th>
-                    <th>類型編號</th>
-                    <th>圖片</th>
-                    <th>建立日期</th>
-                    <th>更新日期</th>
-                </tr>
-            </thead>
-            <tbody id="data-table">
-                <!-- 景點資料將由 JSP 動態生成 -->
-            </tbody>
-        </table>
-    </div>
+    <h1>景點列表</h1>
+    <button onclick="location.href='http://localhost:8080/CloudSerenityHotel/static/attraction/addAttraction.html'">新增景點</button>
+    <button onclick="location.href='http://localhost:8080/CloudSerenityHotel/static/attraction/findAttraction.html'">查詢單筆景點</button>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>景點名稱</th>
+                <th>描述</th>
+                <th>位置</th>
+                <th>開放時間</th>
+                <th>聯絡資訊</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody id="attractionTable">
+            <!-- 景點資料由JavaScript填充 -->
+        </tbody>
+    </table>
+
+    <script>
+        // 使用Fetch獲取所有景點並顯示
+        fetch('http://localhost:8080/CloudSerenityHotel/api/attractions/')
+            .then(response => response.json())
+            .then(data => {
+                const tableBody = document.getElementById('attractionTable');
+                data.forEach(attraction => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${attraction.name}</td>
+                        <td>${attraction.description}</td>
+                        <td>${attraction.location}</td>
+                        <td>${attraction.openingHours}</td>
+                        <td>${attraction.contactInfo}</td>
+                        <td>
+                            <button onclick="deleteAttraction(${attraction.attractionId})">刪除</button>
+                            <button onclick="editAttraction(${attraction.attractionId})">修改</button>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            });
+
+        // 刪除景點
+        function deleteAttraction(id) {
+            fetch(`http://localhost:8080/CloudSerenityHotel/api/attractions/${id}`, { method: 'DELETE' })
+                .then(() => location.reload());
+        }
+
+        // 修改景點
+        function editAttraction(id) {
+            location.href = `http://localhost:8080/CloudSerenityHotel/static/attraction/editAttraction.html?id=${id}`;
+        }
+    </script>
 </body>
 </html>

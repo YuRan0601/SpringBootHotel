@@ -1,16 +1,17 @@
 package com.cloudSerenityHotel.attraction_facility.attraction.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
 import com.cloudSerenityHotel.attraction_facility.attraction.model.Attraction;
 import com.cloudSerenityHotel.attraction_facility.attraction.service.AttractionService;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
 
 @RestController
+@SpringBootApplication
 @RequestMapping("/api/attractions")
 public class AttractionController {
 
@@ -23,27 +24,22 @@ public class AttractionController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Attraction> getAttractionById(@PathVariable int id) {
-        Optional<Attraction> attraction = attractionService.getAttractionById(id);
-        return attraction.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    public Optional<Attraction> getAttractionById(@PathVariable Integer id) {
+        return attractionService.getAttractionById(id);
     }
 
     @PostMapping("/")
     public Attraction createAttraction(@RequestBody Attraction attraction) {
-        return attractionService.addAttraction(attraction);
+        return attractionService.createAttraction(attraction);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Attraction> updateAttraction(@PathVariable int id, @RequestBody Attraction attraction) {
-        Attraction updatedAttraction = attractionService.updateAttraction(id, attraction);
-        return updatedAttraction != null ? ResponseEntity.ok(updatedAttraction) : ResponseEntity.notFound().build();
+    public Attraction updateAttraction(@PathVariable Integer id, @RequestBody Attraction updatedAttraction) {
+        return attractionService.updateAttraction(id, updatedAttraction);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteAttraction(@PathVariable int id) {
+    public void deleteAttraction(@PathVariable Integer id) {
         attractionService.deleteAttraction(id);
-        return ResponseEntity.noContent().build();
-        
-        
     }
 }
