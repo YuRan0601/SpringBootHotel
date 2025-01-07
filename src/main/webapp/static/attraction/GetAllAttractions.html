@@ -3,60 +3,131 @@
 <head>
     <meta charset="UTF-8">
     <title>景點列表</title>
+
+    <!-- 引入 jQuery -->
+    <script
+        src="https://code.jquery.com/jquery-3.7.1.js"
+        integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
+        crossorigin="anonymous"
+    ></script>
+
+    <!-- 引入 Bootstrap CSS -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    />
+
+    <!-- 引入 Bootstrap Icons -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"
+        rel="stylesheet"
+    />
+
+    <!-- 引入 Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- 引入aside.css -->
+    <link rel="stylesheet" href="/static/common/aside.css" />
+
+    <style>
+        body {
+            display: flex;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* 主要內容的樣式 */
+        .content {
+            margin-left: 300px;  /* 為側邊欄留出空間 */
+            width: 80%;           /* 設置主要內容的寬度 */
+            margin-right: auto;   /* 讓內容區域水平居中 */
+            margin-top: 20px;     /* 可選，讓內容與上方有些許間距 */
+        }
+
+        table {
+            width: 80%;        /* 設置表格寬度，可以調整 */
+            margin: 0 auto;    /* 讓表格水平居中 */
+            margin-top: 20px;  /* 表格與其他內容的距離 */
+        }
+
+        /* 表格邊框樣式 */
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 8px 12px;
+            text-align: left;
+        }
+    </style>
 </head>
 <body>
-    <h1>景點列表</h1>
-    <button onclick="location.href='http://localhost:8080/CloudSerenityHotel/static/attraction/addAttraction.html'">新增景點</button>
-    <button onclick="location.href='http://localhost:8080/CloudSerenityHotel/static/attraction/findAttraction.html'">查詢單筆景點</button>
-    <table border="1">
-        <thead>
-            <tr>
-                <th>景點名稱</th>
-                <th>描述</th>
-                <th>位置</th>
-                <th>開放時間</th>
-                <th>聯絡資訊</th>
-                <th>操作</th>
-            </tr>
-        </thead>
-        <tbody id="attractionTable">
-            <!-- 景點資料由JavaScript填充 -->
-        </tbody>
-    </table>
+    <!-- 載入側邊欄 -->
+    <aside class="aside"></aside>
 
-    <script>
-        // 使用Fetch獲取所有景點並顯示
-        fetch('http://localhost:8080/CloudSerenityHotel/api/attractions/')
-            .then(response => response.json())
-            .then(data => {
-                const tableBody = document.getElementById('attractionTable');
-                data.forEach(attraction => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${attraction.name}</td>
-                        <td>${attraction.description}</td>
-                        <td>${attraction.location}</td>
-                        <td>${attraction.openingHours}</td>
-                        <td>${attraction.contactInfo}</td>
-                        <td>
-                            <button onclick="deleteAttraction(${attraction.attractionId})">刪除</button>
-                            <button onclick="editAttraction(${attraction.attractionId})">修改</button>
-                        </td>
-                    `;
-                    tableBody.appendChild(row);
+    <!-- 主要內容 -->
+    <div class="content">
+        <h1>景點列表</h1>
+        <button onclick="location.href='http://localhost:8080/CloudSerenityHotel/static/attraction/addAttraction.html'">新增景點</button>
+        <button onclick="location.href='http://localhost:8080/CloudSerenityHotel/static/attraction/findAttraction.html'">查詢單筆景點</button>
+        <table>
+            <thead>
+                <tr>
+                    <th>景點名稱</th>
+                    <th>描述</th>
+                    <th>位置</th>
+                    <th>開放時間</th>
+                    <th>聯絡資訊</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody id="attractionTable">
+                <!-- 景點資料由JavaScript填充 -->
+            </tbody>
+        </table>
+		
+        <script>
+            // 使用Fetch獲取所有景點並顯示
+            fetch('http://localhost:8080/CloudSerenityHotel/api/attractions/')
+                .then(response => response.json())
+                .then(data => {
+                    const tableBody = document.getElementById('attractionTable');
+                    data.forEach(attraction => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${attraction.name}</td>
+                            <td>${attraction.description}</td>
+                            <td>${attraction.location}</td>
+                            <td>${attraction.openingHours}</td>
+                            <td>${attraction.contactInfo}</td>
+                            <td>
+                                <button onclick="deleteAttraction(${attraction.attractionId})">刪除</button>
+                                <button onclick="editAttraction(${attraction.attractionId})">修改</button>
+                            </td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
                 });
-            });
 
-        // 刪除景點
-        function deleteAttraction(id) {
-            fetch(`http://localhost:8080/CloudSerenityHotel/api/attractions/${id}`, { method: 'DELETE' })
-                .then(() => location.reload());
-        }
+            // 刪除景點
+            function deleteAttraction(id) {
+                fetch(`http://localhost:8080/CloudSerenityHotel/api/attractions/${id}`, { method: 'DELETE' })
+                    .then(() => location.reload());
+            }
 
-        // 修改景點
-        function editAttraction(id) {
-            location.href = `http://localhost:8080/CloudSerenityHotel/static/attraction/editAttraction.html?id=${id}`;
-        }
-    </script>
+            // 修改景點
+            function editAttraction(id) {
+                location.href = `http://localhost:8080/CloudSerenityHotel/static/attraction/editAttraction.html?id=${id}`;
+            }
+        </script>
+        
+	    <script>
+	        // 使用jQuery載入aside.html作為側邊欄內容
+	        $(function () {
+	            $(".aside").load("http://localhost:8080/CloudSerenityHotel/static/common/aside.html");
+	        });
+	    </script>
+    </div>
 </body>
 </html>
