@@ -8,7 +8,7 @@ document.getElementById("upload").addEventListener("change", function () {
 })
 
 $(function () {
-	$(".aside").load("http://localhost:8080/CloudSerenityHotel/productHome");
+	$(".aside").load("http://localhost:8080/CloudSerenityHotel/aside");
 	
 });
 

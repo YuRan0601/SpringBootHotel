@@ -34,6 +34,11 @@ thead {
     height: 50px;
 }
 
+/*表格標題置中*/
+.titleField{
+	text-align: center;
+}
+
 /* 清單第一欄位設4角圓角 */
 thead th:first-child {
     background-color: #f4f4f4;

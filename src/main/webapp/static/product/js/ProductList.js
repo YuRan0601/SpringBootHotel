@@ -15,6 +15,6 @@ document.querySelectorAll('.productLaunched').forEach(button => {
 
 
 $(function () {
-	$(".aside").load("productHome");
+	$(".aside").load("aside");
 	
 });

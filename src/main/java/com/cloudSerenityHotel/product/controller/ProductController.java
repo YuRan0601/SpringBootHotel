@@ -36,7 +36,8 @@ public class ProductController {
 	@Autowired
 	private ProductServiceImpl productService;
 	
-	@GetMapping("/productHome")
+	//側邊選單(套版用)
+	@GetMapping("/aside")
 	public String productHome() {
 		return "/common/aside.html";
 	}
@@ -48,6 +49,7 @@ public class ProductController {
 		return "/product/ProductList.jsp";
 	}
 	
+	//新增
 	@PostMapping("/insert")
 	public String insert(@RequestParam String name, @RequestParam String description, @RequestParam BigDecimal price,
 						@RequestParam BigDecimal specialPrice,@RequestParam String categoriesName, @RequestParam("file") MultipartFile mf, Model m) throws IllegalStateException, IOException {
