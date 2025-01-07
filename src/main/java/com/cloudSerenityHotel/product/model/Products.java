@@ -8,6 +8,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.springframework.stereotype.Component;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -27,13 +29,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Entity
 @Table(name = "Products")
+@Component
 public class Products implements Serializable{
 	private static final long serialVersionUID = 1L;
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "product_id")
-	private Integer product_id;
+	private Integer productId;
 	
 	@Column(name = "name")
 	private String name;
@@ -45,13 +48,13 @@ public class Products implements Serializable{
 	private BigDecimal price;
 	
 	@Column(name = "special_price")
-	private BigDecimal special_price;
+	private BigDecimal specialPrice;
 	
-	@Column(name = "created_at", insertable = false, updatable =  false)
-	private Timestamp created_at;
+	@Column(name = "created_at", insertable = false, updatable =  false)//hibernate新增修改時關掉 防止null
+	private Timestamp createdAt;
 	
-	@Column(name = "updated_at", insertable = false, updatable =  false)
-	private Timestamp updated_at;
+	@Column(name = "updated_at", insertable =  false)//修改時間用了，修改會沒變化，在DAO那邊另外處理
+	private Timestamp updatedAt;
 	
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "products",cascade = CascadeType.ALL)
 	private List<ProductImages> productImages = new ArrayList<ProductImages>();

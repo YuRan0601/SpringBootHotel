@@ -1,3 +1,9 @@
+
+/* 主要內容的樣式，假設class名為content */
+.content {
+		margin-left: 300px
+}
+
 h2 {
     font-size: 40px;
 }
@@ -26,6 +32,11 @@ table {
 thead {
     background-color: #f4f4f4;
     height: 50px;
+}
+
+/*表格標題置中*/
+.titleField{
+	text-align: center;
 }
 
 /* 清單第一欄位設4角圓角 */

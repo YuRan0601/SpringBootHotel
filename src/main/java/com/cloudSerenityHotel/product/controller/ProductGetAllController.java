@@ -1,39 +1,24 @@
 package com.cloudSerenityHotel.product.controller;
 
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.List;
-
-import com.cloudSerenityHotel.product.model.ProductImages;
-import com.cloudSerenityHotel.product.model.Products;
-import com.cloudSerenityHotel.product.service.ProductService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
 import com.cloudSerenityHotel.product.service.impl.ProductServiceImpl;
 
 
 
-@WebServlet("/ProductGetAllController")
-public class ProductGetAllController extends HttpServlet {
-	private static final long serialVersionUID = 1L;
+@Controller
+public class ProductGetAllController {
 	
-    ProductService productService = new ProductServiceImpl();
-    
-    public ProductGetAllController() {
-        super();
-    }
-
-    //查詢全部
-	protected void doGet(HttpServletRequest request,HttpServletResponse response)
-			throws ServletException, IOException {
-		request.setAttribute("allProducts", productService.selectAllProduct());
-		request.getRequestDispatcher("/static/product/ProductAllList.jsp").forward(request, response);
-	}
+	@Autowired
+	private ProductServiceImpl productService;
 	
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		doGet(request, response);
+	//查詢全部
+	@GetMapping("/selectAll")
+	public String selectAll(Model m) {
+		m.addAttribute("allProducts",productService.selectAllProduct());
+		return "/product/ProductAllList.jsp";
 	}
     
 }
