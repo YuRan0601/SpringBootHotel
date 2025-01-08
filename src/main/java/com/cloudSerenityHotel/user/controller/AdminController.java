@@ -105,4 +105,15 @@ public class AdminController {
 		}
 	}
 	
+	@PostMapping("/upDateMember")
+	public ResponseEntity<String> UpDateMember(@RequestBody User member) {
+		int update = uService.updateMember(member);
+		if (update != 0) {
+			return ResponseEntity.ok("更新成功");
+		}else {
+			String errorMessage = "更新失敗";
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage);
+		}
+	}
+	
 }
