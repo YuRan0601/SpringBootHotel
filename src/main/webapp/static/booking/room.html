@@ -110,8 +110,8 @@
     }
 
     #roomTable {
-      margin: 10px;
-      width: 80%;
+      margin: 0px;
+      width: 100%;
     }
 
     #roomTable_filter {
@@ -163,7 +163,6 @@
       border: 2px solid #007bff;
       border-collapse: collapse;
       text-align: center;
-      width: 1200px;
       justify-content: center;
     }
 
@@ -305,6 +304,8 @@
 
       function tableLoad() {
         $("#roomTable").DataTable({
+          autoWidth: false, // 關閉自動列寬
+          responsive: true,
           language: {
             url: "http://localhost:8080/CloudSerenityHotel/static/booking/json/zh-HANT.json",
           },

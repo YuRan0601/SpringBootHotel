@@ -6,7 +6,7 @@
   <title>所有房型</title>
   <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
     crossorigin="anonymous"></script>
-  <link rel="stylesheet" href="css/style.css" />
+  <!-- <link rel="stylesheet" href="css/style.css" /> -->
   <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css" />
 
   <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
@@ -37,15 +37,25 @@
     body {
       display: flex;
       flex-direction: column;
-      /* 使頁面高度填滿視窗 */
       height: 100vh;
     }
 
     /* 主內容區域*/
-    .content {
+    /* .content {
       margin-left: 350px;
-      /* 留出側邊欄的空間 */
       padding-top: 50px;
+      flex: 1;
+      flex-direction: column;
+      overflow-y: auto;
+      display: flex;
+      justify-content: start;
+      align-items: center;
+    } */
+
+    .content {
+      margin-left: 300px;
+      /* 留出側邊欄的空間 */
+      padding: 20px;
       flex: 1;
       /* 讓 container 占據剩餘空間 */
       flex-direction: column;
@@ -56,12 +66,13 @@
       align-items: center;
     }
 
+
     .content h2 {
       margin-top: 0;
     }
 
     /* 適應小螢幕顯示 */
-    @media screen and (max-width: 768px) {
+    /* @media screen and (max-width: 768px) {
       .aside-loaded {
         position: relative;
         width: 100%;
@@ -73,7 +84,7 @@
       .container {
         margin-left: 0;
       }
-    }
+    } */
 
     .mod {
       margin-bottom: 10px;
@@ -87,15 +98,10 @@
       margin-left: 20px;
     }
 
-    #userInfo {
-      position: absolute;
-      right: 10px;
-      bottom: 10px;
-    }
-
     #typeTable {
-      margin: 10px;
-      width: 60%;
+      width: 100%;
+      margin: 0;
+      max-width: 1500px;
     }
 
     #typeTable_filter {
@@ -143,7 +149,6 @@
       border: 2px solid #007bff;
       border-collapse: collapse;
       text-align: center;
-      width: 1000px;
       justify-content: center;
     }
 
@@ -250,42 +255,6 @@
 
   <script>
     $(function () {
-      // $(".header").load(
-      //   "http://localhost:8080/CloudSerenityHotel/static/common/header.html",
-      //   function () {
-      //     // header 加載完成後的初始化
-      //     console.log("Header 載入成功");
-      //     // 根據需要填充用戶名稱
-
-      //     $.ajax({
-      //       type: "GET",
-      //       dataType: "json",
-      //       url: "http://localhost:8080/CloudSerenityHotel/user/getUserInfo",
-      //       success: (resp) => {
-      //         if (resp.code === 505) {
-      //           alert("請先登入!");
-      //           window.location.href =
-      //             "http://localhost:8080/CloudSerenityHotel/static/user/login.jsp";
-      //         } else if (resp.code === 404) {
-      //           alert("找不到此帳號!");
-      //           window.location.href =
-      //             "http://localhost:8080/CloudSerenityHotel/static/user/login.jsp";
-      //         } else {
-      //           if (resp.data.userIdentity != "admin") {
-      //             alert("你不是管理員，無權使用此介面");
-      //             window.location.href =
-      //               "http://localhost:8080/CloudSerenityHotel/user/logout";
-      //             return;
-      //           }
-      //           $("#username").text(`歡迎 ${resp.data.userName} 管理員`);
-      //           tableLoad();
-      //         }
-      //         console.log("Header 載入成功");
-      //       },
-      //     });
-      //   }
-      // );
-
       $(".aside").load("../common/aside.html", () => {
         $.ajax({
           type: "GET",
@@ -318,6 +287,8 @@
 
       function tableLoad() {
         $("#typeTable").DataTable({
+          autoWidth: false, // 關閉自動列寬
+          responsive: true,
           language: {
             url: "http://localhost:8080/CloudSerenityHotel/static/booking/json/zh-HANT.json",
           },
