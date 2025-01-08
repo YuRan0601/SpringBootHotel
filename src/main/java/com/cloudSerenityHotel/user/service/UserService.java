@@ -47,16 +47,12 @@ public class UserService implements UserServiceInterface {
 	@Override
 	public int register(User user, Member member) {
 		User checkResult = uRepository.findByEmail(user.getEmail()).orElse(null);
-		if (checkResult == null) {
+		if (checkResult != null) {
 			return 0;
 		}
 		user.setUserStatus("In_use");
-		user.setAccountUpdateTime(LocalDateTime.now());
-		member.setRegisterDate(LocalDateTime.now());
-		member.setDataUpdateTime(LocalDateTime.now());
-		member.setUser(user);
-		user.setMember(member);
-		uRepository.save(user);
+		user.setUserIdentity("user");
+		userDao.addMemeber(user, member);
 		return 1;
 	}
 

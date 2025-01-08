@@ -59,7 +59,7 @@ public class UserDao {
 		}
 	}
 	
-	//新增會員資料 //以JPA取代
+	//新增會員資料
 	public User addMemeber(User user,Member member) {
 		Session session = factory.getCurrentSession();
 		user.setAccountUpdateTime(LocalDateTime.now());

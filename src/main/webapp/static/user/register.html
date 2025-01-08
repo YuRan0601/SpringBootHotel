@@ -1,5 +1,3 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-pageEncoding="UTF-8" %>
 <!DOCTYPE html>
 <html lang="zh-tw">
 
@@ -7,16 +5,25 @@ pageEncoding="UTF-8" %>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>雲澄旅館-註冊會員</title>
+    <!-- bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
+    <!-- font-awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/css/all.min.css" />
+
+    <!-- sweetalert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- axios -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <style>
         .nav-bgc {
             background-color: lightblue;
         }
 
         #twIdMsg,
-        #passwordMsg {
+        #passwordMsg,
+        #EmailMsg {
             color: #c70000;
             font-weight: bold;
         }
@@ -39,18 +46,19 @@ pageEncoding="UTF-8" %>
         </div>
     </nav>
     <div class="container">
-        
-            <h2 style="text-align: center; margin: 0">歡迎註冊</h2>
-            <br />
-            <label for="identity" class="form-label fs-5">身分別</label>
-            <select class="form-select w-25" id="identity" required>
-                <option selected value="native">本國人</option>
-                <option value="foreigner">外國人</option>
-            </select>
-            <br />
-            <form method="post" action="/CloudSerenityHotel/user/register">
+
+        <h2 style="text-align: center; margin: 0">歡迎註冊</h2>
+        <br />
+        <label for="identity" class="form-label fs-5">身分別</label>
+        <select class="form-select w-25" id="identity" required>
+            <option selected value="native">本國人</option>
+            <option value="foreigner">外國人</option>
+        </select>
+        <br />
+        <form method="post" id="register">
             <label for="email" class="form-label fs-5">電子信箱</label>
             <input type="email" class="form-control w-25" id="email" name="email" placeholder="請輸入電子信箱" required />
+            <span id="EmailMsg" style="visibility: hidden"><i class="fa-solid fa-circle-xmark"></i></span>
             <br />
             <label for="password" class="form-label fs-5">密碼</label>
             <input type="password" class="form-control w-25" id="password" name="password" placeholder="請輸入密碼"
@@ -93,16 +101,11 @@ pageEncoding="UTF-8" %>
             <br />
             <button type="submit" class="btn btn-primary">註冊</button>
         </form>
-        <p id="errorMessage">
-            <i class="fa-solid fa-circle-xmark"></i>
-            <% String errorMessage=(String) request.getAttribute("errorMessage"); if
-        (errorMessage !=null) { out.print(errorMessage); } %>
-        </p>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous">
-    </script>
+        </script>
     <script src="https://code.jquery.com/jquery-3.7.1.js"
         integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
     <script>
@@ -124,21 +127,57 @@ pageEncoding="UTF-8" %>
                 });
             })
             .catch((error) => console.error("Error fetching country data:", error));
-        //處理錯誤訊息
-        $(document).ready(function () {
-            showErrorMsg(); // 在頁面加載時執行
+
+        $('#register').on('submit', function (e) {
+            e.preventDefault(); // 防止表單預設提交行為
+
+            // 獲取表單資料
+            const registerData = {
+                userName: $('#name').val(),
+                email: $('#email').val(),
+                password: $('#password').val(),
+                member: {
+                    gender: $('#gender').val(),
+                    birthday: $('#birthday').val(),
+                    phone: $('#phone').val(),
+                    personalIdNo: $('#personal-id-no').val(),
+                    country: $('#country').val(),
+                    address: $('#address').val(),
+                    passportNo: $('#passport-no').val()
+                }
+            };
+
+            // console.log(registerData);
+
+
+            //發送請求給後端
+            axios.post('http://localhost:8080/CloudSerenityHotel/user/register', registerData)
+                .then(function (response) {
+                    // 彈出成功提示
+                    Swal.fire({
+                        title: '註冊成功',
+                        text: '將跳轉到登入頁面！',
+                        icon: 'success',
+                        allowOutsideClick: false,
+                        timer: 3000, // 設定 3 秒後自動關閉
+                        timerProgressBar: true, // 顯示倒數計時進度條
+                        didClose: () => {
+                            // 跳轉到登入頁面
+                            window.location.href = 'http://localhost:8080/CloudSerenityHotel/user/login';
+                        }
+                    });
+                })
+                .catch(function (error) {
+                    Swal.fire({
+                        title: '註冊失敗',
+                        text: '請稍後再試！',
+                        icon: 'error',
+                        allowOutsideClick: false
+                    });
+                });
         });
 
-        function showErrorMsg() {
-            let msg = $("#errorMessage").text().trim(); // 取得錯誤訊息
-            if (msg.length > 0) {
-                // 如果訊息不為空，顯示錯誤訊息
-                $("#errorMessage").css("visibility", "visible");
-            } else {
-                // 如果沒有訊息，隱藏錯誤訊息
-                $("#errorMessage").css("visibility", "hidden");
-            }
-        }
+
 
         //判斷身分別 移除必填屬性
         addEventListener("load", (e) => {
@@ -165,6 +204,25 @@ pageEncoding="UTF-8" %>
                 $("#personal-id-no").removeAttr("required");
                 $("#passport-no").attr("required", true);
             }
+        });
+
+        //email
+        $("#email").blur(function () {
+            let email = $(this).val();
+            axios.post('http://localhost:8080/CloudSerenityHotel/user/checkEmail', email)
+                .then(function (response) {
+                    console.log(response.data);
+
+                    if (response.data == "ok") {
+                        $("#EmailMsg").html('<i class="fa-solid fa-circle-check"></i> 此Email可以使用').css("color", "green")
+                    } else {
+                        $("#EmailMsg").html('<i class="fa-solid fa-circle-xmark"></i> 此Email已被使用')
+                    }
+                    $("#EmailMsg").css("visibility", "visible");
+                })
+                .catch(function (error) {
+                    console.log(error);
+                })
         });
 
         //password
@@ -220,11 +278,11 @@ pageEncoding="UTF-8" %>
 
             // 字母對應數字表
             const letterMapping = {
-                A: 10,B: 11,C: 12,D: 13,E: 14,F: 15,
-                G: 16,H: 17,I: 34,J: 18,K: 19,L: 20,
-                M: 21,N: 22,O: 35,P: 23,Q: 24,R: 25,
-                S: 26,T: 27,U: 28,V: 29,W: 32,X: 30,
-                Y: 31,Z: 33,
+                A: 10, B: 11, C: 12, D: 13, E: 14, F: 15,
+                G: 16, H: 17, I: 34, J: 18, K: 19, L: 20,
+                M: 21, N: 22, O: 35, P: 23, Q: 24, R: 25,
+                S: 26, T: 27, U: 28, V: 29, W: 32, X: 30,
+                Y: 31, Z: 33,
             };
 
             // 將第一個字母轉換為數字並拆分成兩部分 ex:10 -> 1 0
