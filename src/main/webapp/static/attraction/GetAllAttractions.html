@@ -22,62 +22,50 @@
     <link rel="stylesheet" href="/static/common/aside.css" />
 
     <style>
-        /* 重置全局的margin和padding */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            /* 確保所有元素的寬高都不會被padding和border影響 */
         }
 
         body {
             display: flex;
             height: 100vh;
-            /* 設定頁面高度為視窗高度 */
             overflow: hidden;
-            /* 隱藏滾動條 */
         }
 
-        /* 主要內容的樣式 */
         .content {
             margin-left: 300px;
-            /* 為側邊欄留出空間 */
             width: 100%;
-            /* 設置主要內容的寬度 */
-            margin-top: 0;
-            /* 去掉頂部空間 */
             padding: 20px;
-            /* 設置內容的內邊距 */
             overflow-y: auto;
-            /* 讓內容區域能夠垂直滾動 */
         }
 
         table {
             width: 100%;
-            /* 設置表格寬度，填滿父容器 */
             margin-top: 20px;
-            /* 表格與其他內容的距離 */
             border-collapse: collapse;
             border: 1px solid #ddd;
         }
 
-        /* 表格標題 */
         th {
             background-color: #f8f9fa;
             padding: 10px;
             text-align: center;
         }
 
-        /* 表格內容 */
         td {
             padding: 10px;
             text-align: left;
+            white-space: nowrap;
         }
 
-        /* 按鈕樣式 */
-        button {
-            padding: 5px 10px;
-            margin: 5px;
+        .delete-btn,
+        .edit-btn {
+            width: 60px; /* 固定寬度 */
+            padding: 5px; /* 增加內部填充 */
+            text-align: center;
+            white-space: nowrap; /* 防止文字換行 */
             cursor: pointer;
         }
 
@@ -95,7 +83,17 @@
             border-radius: 5px;
         }
 
-        /* 主要內容標題 */
+        .link-btn {
+            background-color: #5B00AE;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px;
+            cursor: pointer;
+            float: right;
+            margin-bottom: 20px;
+        }
+
         h1 {
             font-size: 2rem;
             margin-bottom: 20px;
@@ -105,7 +103,6 @@
             margin-bottom: 20px;
         }
 
-        /* 側邊欄 */
         .aside {
             background-color: #f8f9fa;
             position: fixed;
@@ -113,39 +110,61 @@
             left: -20px;
             width: 310px;
             height: 100vh;
-            /* 保證側邊欄佔滿整個視窗高度 */
             padding: 20px;
             overflow-x: hidden;
-            /* 禁止水平滾動 */
             overflow-y: auto;
-            /* 讓側邊欄內容可以滾動 */
+        }
+
+        .search-container {
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            width: 200px;
+            padding: 5px;
+            margin-right: 10px;
+        }
+
+        .search-btn {
+            padding: 5px 10px;
+        }
+
+        td.description {
+            word-wrap: break-word;
+            word-break: break-word;
+            max-width: 300px; /* 根據需要調整描述欄位的寬度 */
+            white-space: pre-wrap; /* 保留換行 */
         }
     </style>
 </head>
 
 <body>
-    <!-- 載入側邊欄 -->
     <aside class="aside"></aside>
 
-    <!-- 主要內容 -->
     <div class="content">
         <h1>景點列表</h1>
-        <div class="btn-container">
-            <button
-                onclick="location.href='http://localhost:8080/CloudSerenityHotel/static/attraction/addAttraction.html'"
-                class="btn btn-primary">新增景點</button>
-            <button
-                onclick="location.href='http://localhost:8080/CloudSerenityHotel/static/attraction/findAttraction.html'"
-                class="btn btn-secondary">查詢單筆景點</button>
+        <div class="search-container">
+            <input type="text" id="searchInput" class="search-input" placeholder="輸入景點ID">
+            <button onclick="searchById()" class="search-btn btn btn-primary">查詢</button>
         </div>
+        <div class="btn-container">
+            <button onclick="location.href='http://localhost:8080/CloudSerenityHotel/static/attraction/addAttraction.html'" class="btn btn-primary">新增景點</button>
+            <button onclick="location.href='http://localhost:8080/CloudSerenityHotel/static/attraction/findAttraction.html'" class="btn btn-secondary">查詢單筆景點</button>
+            <button onclick="location.href='http://localhost:8080/CloudSerenityHotel/static/attraction/GetAllAttractions.html'" class="btn btn-secondary">返回</button>
+            
+            <button class="link-btn" onclick="location.href='http://localhost:8080/CloudSerenityHotel/static/attraction/GetAllPicture.html'">查看所有圖片</button>
+        </div>
+
         <table>
             <thead>
                 <tr>
+                    <th>ID</th>
                     <th>景點名稱</th>
                     <th>描述</th>
                     <th>位置</th>
                     <th>開放時間</th>
                     <th>聯絡資訊</th>
+                    <th>圖片連結</th>
                     <th>操作</th>
                 </tr>
             </thead>
@@ -155,42 +174,92 @@
         </table>
 
         <script>
-            // 使用Fetch獲取所有景點並顯示
+            // 使用 Fetch 獲取所有景點並顯示
             fetch('http://localhost:8080/CloudSerenityHotel/api/attractions/')
                 .then(response => response.json())
                 .then(data => {
                     const tableBody = document.getElementById('attractionTable');
                     data.forEach(attraction => {
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td>${attraction.name}</td>
-                            <td>${attraction.description}</td>
-                            <td>${attraction.location}</td>
-                            <td>${attraction.openingHours}</td>
-                            <td>${attraction.contactInfo}</td>
-                            <td>
-                                <button onclick="deleteAttraction(${attraction.attractionId})" class="delete-btn">刪除</button>
-                                <button onclick="editAttraction(${attraction.attractionId})" class="edit-btn">修改</button>
-                            </td>
-                        `;
-                        tableBody.appendChild(row);
+                        const description = attraction.description.length > 25
+                            ? attraction.description.match(/.{1,25}/g).join('\n')
+                            : attraction.description;
+
+                        const row = `
+                            <tr>
+                                <td>${attraction.attractionId}</td>
+                                <td>${attraction.name}</td>
+                                <td class="description">${description}</td>
+                                <td>${attraction.location}</td>
+                                <td>${attraction.openingHours}</td>
+                                <td>${attraction.contactInfo}</td>
+                                <td>
+                                	<a href="${attraction.imageLink}" target="_blank" style="pointer-events: none; color: #2894FF;">查看圖片</a>
+                                </td>
+                                <td>
+                                    <button onclick="confirmDelete(${attraction.attractionId})" class="delete-btn">刪除</button>
+                                    <button onclick="editAttraction(${attraction.attractionId})" class="edit-btn">修改</button>
+                                </td>
+                            </tr>`;
+                        tableBody.innerHTML += row;
                     });
                 });
 
-            // 刪除景點
-            function deleteAttraction(id) {
-                fetch(`http://localhost:8080/CloudSerenityHotel/api/attractions/${id}`, { method: 'DELETE' })
-                    .then(() => location.reload());
+            function searchById() {
+                const id = document.getElementById('searchInput').value.trim();
+                if (!id) {
+                    alert('請輸入有效的景點 ID！');
+                    return;
+                }
+
+                fetch(`http://localhost:8080/CloudSerenityHotel/api/attractions/${id}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('景點不存在或伺服器錯誤');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        const tableBody = document.getElementById('attractionTable');
+                        tableBody.innerHTML = ''; // 清空表格
+
+                        const description = data.description.length > 25
+                            ? data.description.match(/.{1,25}/g).join('\n')
+                            : data.description;
+
+                        const row = `
+                            <tr>
+                                <td>${data.attractionId}</td>
+                                <td>${data.name}</td>
+                                <td class="description">${description}</td>
+                                <td>${data.location}</td>
+                                <td>${data.openingHours}</td>
+                                <td>${data.contactInfo}</td>
+                                <td>
+                                    <a href="${data.imageLink}" target="_blank">查看圖片</a>
+                                </td>
+                                <td>
+                                    <button onclick="confirmDelete(${data.attractionId})" class="delete-btn">刪除</button>
+                                    <button onclick="editAttraction(${data.attractionId})" class="edit-btn">修改</button>
+                                </td>
+                            </tr>`;
+                        tableBody.innerHTML = row;
+                    })
+                    .catch(error => {
+                        alert(error.message);
+                    });
             }
 
-            // 修改景點
+            function confirmDelete(id) {
+                if (confirm('您確定要刪除此景點嗎？')) {
+                    fetch(`http://localhost:8080/CloudSerenityHotel/api/attractions/${id}`, { method: 'DELETE' })
+                        .then(() => location.reload());
+                }
+            }
+
             function editAttraction(id) {
                 location.href = `http://localhost:8080/CloudSerenityHotel/static/attraction/editAttraction.html?id=${id}`;
             }
-        </script>
 
-        <script>
-            // 使用jQuery載入aside.html作為側邊欄內容
             $(function () {
                 $(".aside").load("http://localhost:8080/CloudSerenityHotel/static/common/aside.html", () => {
                     $.ajax({
