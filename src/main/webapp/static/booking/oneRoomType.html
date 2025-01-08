@@ -1,146 +1,141 @@
 <!DOCTYPE html>
 <html lang="zh-Hant-TW">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>查看房型</title>
 
-    <!-- 引入 Bootstrap CSS -->
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
-    <!-- 引入 Bootstrap Icons -->
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"
-      rel="stylesheet"
-    />
-    <!-- 引入 Owl Carousel CSS -->
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.theme.default.min.css"
-    />
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>查看房型</title>
 
-    <link rel="stylesheet" href="../common/aside.css" />
+  <!-- 引入 Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <!-- 引入 Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet" />
+  <!-- 引入 Owl Carousel CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css" />
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.theme.default.min.css" />
 
-    <!-- 引入 jQuery -->
-    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
-    <!-- 引入 Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- 引入 Owl Carousel JS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
+  <link rel="stylesheet" href="../common/aside.css" />
 
-    <style>
-      #imgDiv img {
-        width: 100%; /* 確保圖片寬度填滿容器 */
-        height: auto; /* 保持圖片比例 */
-        object-fit: cover; /* 裁剪圖片使其適應容器 */
-      }
+  <!-- 引入 jQuery -->
+  <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+  <!-- 引入 Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- 引入 Owl Carousel JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
 
-      #imgDiv {
-        max-width: 800px; /* 限制輪播的最大寬度 */
-        margin: 0 auto; /* 容器水平居中 */
-      }
+  <style>
+    #imgDiv img {
+      width: 100%;
+      /* 確保圖片寬度填滿容器 */
+      height: auto;
+      /* 保持圖片比例 */
+      object-fit: cover;
+      /* 裁剪圖片使其適應容器 */
+    }
 
-      table {
-        border: 1px solid black;
-      }
+    #imgDiv {
+      max-width: 800px;
+      /* 限制輪播的最大寬度 */
+      margin: 0 auto;
+      /* 容器水平居中 */
+    }
 
-      table td {
-        background-color: rgb(167, 232, 252);
-      }
+    table {
+      border: 1px solid black;
+    }
 
-      table th,
-      td {
-        border: 1px solid black;
-      }
+    table td {
+      background-color: rgb(167, 232, 252);
+    }
 
-      /* 頁面基本樣式 */
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
+    table th,
+    td {
+      border: 1px solid black;
+    }
 
-      /* 設定整體頁面為 flex 佈局 */
-      body {
-        display: flex;
-        flex-direction: column;
-        height: 100vh;
-        /* 使頁面高度填滿視窗 */
-      }
+    /* 頁面基本樣式 */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-      /* header 樣式 */
-      .header {
-        background-color: lightblue;
-        height: 100px;
-        /* 固定 header 高度 */
-        display: flex;
-        align-items: center;
-        justify-content: center;
+    /* 設定整體頁面為 flex 佈局 */
+    body {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      /* 使頁面高度填滿視窗 */
+    }
+
+    /* header 樣式 */
+    .header {
+      background-color: lightblue;
+      height: 100px;
+      /* 固定 header 高度 */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    /* 主內容區域 .container */
+    .content {
+      margin-left: 300px;
+      /* 留出側邊欄的空間 */
+      padding: 20px;
+      flex: 1;
+      /* 讓 container 占據剩餘空間 */
+      overflow-y: auto;
+      display: flex;
+      justify-content: center;
+      align-items: start;
+    }
+
+    .container h2 {
+      margin-top: 0;
+    }
+
+    /* 適應小螢幕顯示 */
+    @media screen and (max-width: 768px) {
+      .aside-loaded {
         position: relative;
+        width: 100%;
+        height: auto;
+        top: 0;
+        box-shadow: none;
       }
 
-      .header h1 {
-        margin: 0;
-        font-size: 24px;
+      .container {
+        margin-left: 0;
       }
+    }
 
-      /* 主內容區域 .container */
-      .content {
-        margin-left: 300px;
-        /* 留出側邊欄的空間 */
-        padding: 20px;
-        flex: 1;
-        /* 讓 container 占據剩餘空間 */
-        overflow-y: auto;
-        display: flex;
-        justify-content: center;
-        align-items: start;
-      }
+    .mod {
+      margin-bottom: 10px;
+    }
 
-      .container h2 {
-        margin-top: 0;
-      }
+    .mod ul {
+      margin-top: 5px;
+    }
 
-      /* 適應小螢幕顯示 */
-      @media screen and (max-width: 768px) {
-        .aside-loaded {
-          position: relative;
-          width: 100%;
-          height: auto;
-          top: 0;
-          box-shadow: none;
-        }
+    .mod li {
+      margin-left: 20px;
+    }
 
-        .container {
-          margin-left: 0;
-        }
-      }
+    #userInfo {
+      position: absolute;
+      right: 10px;
+      bottom: 10px;
+    }
 
-      .mod {
-        margin-bottom: 10px;
-      }
-
-      .mod ul {
-        margin-top: 5px;
-      }
-
-      .mod li {
-        margin-left: 20px;
-      }
-
-      #userInfo {
-        position: absolute;
-        right: 10px;
-        bottom: 10px;
-      }
-
-      /* .container {
+    /* .container {
         max-width: 900px;
         margin: auto;
         background: white;
@@ -149,160 +144,145 @@
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
       } */
 
-      h1 {
-        text-align: center;
-        color: #333;
-        margin-bottom: 20px;
-      }
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 20px;
+    }
 
-      /* 表格樣式 */
-      #typeTable {
-        width: 1000px;
-        border-collapse: collapse;
-        margin: 20px 0;
-        font-size: 16px;
-        text-align: left;
-        background-color: #ffffff;
-      }
+    /* 表格樣式 */
+    #typeTable {
+      width: 1000px;
+      border-collapse: collapse;
+      margin: 20px 0;
+      font-size: 16px;
+      text-align: left;
+      background-color: #ffffff;
+    }
 
-      #typeTable th,
-      #typeTable td {
-        border: 1px solid #ddd;
-        padding: 12px 15px;
-        text-align: center;
-      }
+    #typeTable th,
+    #typeTable td {
+      border: 1px solid #ddd;
+      padding: 12px 15px;
+      text-align: center;
+    }
 
-      /* 表格表頭樣式 */
-      #typeTable th {
-        background-color: #007bff;
-        color: white;
-        text-transform: uppercase;
-        font-weight: bold;
-      }
+    /* 表格表頭樣式 */
+    #typeTable th {
+      background-color: #007bff;
+      color: white;
+      text-transform: uppercase;
+      font-weight: bold;
+    }
 
-      /* 突出顯示表頭行（跨列） */
-      /* #roomTable th[colspan] {
+    /* 突出顯示表頭行（跨列） */
+    /* #roomTable th[colspan] {
         background-color: #0056b3;
         color: #ffffff;
         font-size: 18px;
         text-align: center;
       } */
 
-      /* 表單內容描述樣式 */
-      /* #typeTable td[colspan] {
+    /* 表單內容描述樣式 */
+    /* #typeTable td[colspan] {
         padding: 15px;
         text-align: justify;
       } */
 
-      /* 調整響應式樣式 */
-      @media screen and (max-width: 768px) {
-        #typeTable {
-          font-size: 14px;
-        }
-
-        #typeTable th,
-        #typeTable td {
-          padding: 8px;
-        }
+    /* 調整響應式樣式 */
+    @media screen and (max-width: 768px) {
+      #typeTable {
+        font-size: 14px;
       }
-    </style>
-  </head>
 
-  <body>
-    <aside class="aside"></aside>
+      #typeTable th,
+      #typeTable td {
+        padding: 8px;
+      }
+    }
+  </style>
+</head>
 
-    <div class="content">
-      <table id="typeTable">
-        <tr>
-          <th colspan="3">房型照片</th>
-        </tr>
-        <tr>
-          <td colspan="3">
-            <div id="imgDiv" class="owl-carousel owl-theme"></div>
-          </td>
-        </tr>
-      </table>
-    </div>
+<body>
+  <aside class="aside"></aside>
 
-    <script>
-      $(function () {
-        // $(".header").load(
-        // "http://localhost:8080/CloudSerenityHotel/static/common/header.html",
-        // function () {
-        //     // header 加載完成後的初始化
-        //     console.log("Header 載入成功");
-        //     // 根據需要填充用戶名稱
+  <div class="content">
+    <table id="typeTable">
+      <tr>
+        <th colspan="3">房型照片</th>
+      </tr>
+      <tr>
+        <td colspan="3">
+          <div id="imgDiv" class="owl-carousel owl-theme"></div>
+        </td>
+      </tr>
+    </table>
+  </div>
 
-        //     $.ajax({
-        //     type: "GET",
-        //     dataType: "json",
-        //     url: "http://localhost:8080/CloudSerenityHotel/user/getUserInfo",
-        //     success: (resp) => {
-        //         if (resp.code === 505) {
-        //         alert("請先登入!");
-        //         window.location.href =
-        //             "http://localhost:8080/CloudSerenityHotel/static/user/login.jsp";
-        //         } else if (resp.code === 404) {
-        //         alert("找不到此帳號!");
-        //         window.location.href =
-        //             "http://localhost:8080/CloudSerenityHotel/static/user/login.jsp";
-        //         } else {
-        //         if (resp.data.userIdentity != "admin") {
-        //             alert("你不是管理員，無權使用此介面");
-        //             window.location.href =
-        //             "http://localhost:8080/CloudSerenityHotel/user/logout";
-        //             return;
-        //         }
-        //         $("#username").text(`歡迎 ${resp.data.userName} 管理員`);
-        //         }
-        //         console.log("Header 載入成功");
-        //     },
-        //     });
-        // }
-        // );
-
-        // $(".aside").load(
-        // "http://localhost:8080/CloudSerenityHotel/static/common/aside.html",
-        // function () {
-        //     console.log("Aside 載入成功");
-        // }
-        // );
-        $(".aside").load("../common/aside.html");
-
-        let urlParam = new URL(location.href).searchParams;
-        let typeId = urlParam.get("typeId");
-
+  <script>
+    $(function () {
+      $(".aside").load("../common/aside.html", () => {
         $.ajax({
-          type: "Get",
+          type: "GET",
           dataType: "json",
-          url: `http://localhost:8080/CloudSerenityHotel/room/type/${typeId}`,
+          url: "http://localhost:8080/CloudSerenityHotel/user/getUserInfo",
           success: (resp) => {
-            console.log(resp);
-            if (resp.imgs.length != 0) {
-              $("#imgDiv").empty();
+            if (resp.code === 505) {
+              alert("請先登入!");
+              window.location.href =
+                "http://localhost:8080/CloudSerenityHotel/static/user/login.jsp";
+            } else if (resp.code === 404) {
+              alert("找不到此帳號!");
+              window.location.href =
+                "http://localhost:8080/CloudSerenityHotel/static/user/login.jsp";
+            } else {
+              if (resp.data.userIdentity != "admin") {
+                alert("你不是管理員，無權使用此介面");
+                window.location.href =
+                  "http://localhost:8080/CloudSerenityHotel/user/logout";
+                return;
+              }
+              $("#username").text(`歡迎 ${resp.data.userName} 管理員`);
+              $("#loginUser").append(`<div><a href="http://localhost:8080/CloudSerenityHotel/user/logout">登出</a></div>`);
+            }
+          },
+        });
+      });
 
-              for (let i = 0; i < resp.imgs.length; i++) {
-                $("#imgDiv").append(`
+      let urlParam = new URL(location.href).searchParams;
+      let typeId = urlParam.get("typeId");
+
+      $.ajax({
+        type: "Get",
+        dataType: "json",
+        url: `http://localhost:8080/CloudSerenityHotel/room/type/${typeId}`,
+        success: (resp) => {
+          console.log(resp);
+          if (resp.imgs.length != 0) {
+            $("#imgDiv").empty();
+
+            for (let i = 0; i < resp.imgs.length; i++) {
+              $("#imgDiv").append(`
                             <img src="${resp.imgs[i].imgUrl}" />
                             `);
-              }
-
-              // 初始化或刷新 Owl Carousel
-              $(".owl-carousel").owlCarousel({
-                loop: true,
-                margin: 10,
-                nav: false, // 關閉導航箭頭
-                dots: true, // 啟用點導航
-                items: 1, // 每次顯示一張
-                autoplay: true,
-                autoplayTimeout: 3000, // 3秒切換
-                autoplayHoverPause: true, // 滑鼠懸停暫停
-              });
             }
 
-            let type = resp.roomType;
+            // 初始化或刷新 Owl Carousel
+            $(".owl-carousel").owlCarousel({
+              loop: true,
+              margin: 10,
+              nav: false, // 關閉導航箭頭
+              dots: true, // 啟用點導航
+              items: 1, // 每次顯示一張
+              autoplay: true,
+              autoplayTimeout: 3000, // 3秒切換
+              autoplayHoverPause: true, // 滑鼠懸停暫停
+            });
+          }
 
-            $("#typeTable").append(`
+          let type = resp.roomType;
+
+          $("#typeTable").append(`
                         <tr>
                             <th>房型ID</th>
                             
@@ -321,9 +301,8 @@
                             
                         </tr>
                         <tr>
-                            <td colspan="3">${
-                              type.typeDesc ? type.typeDesc : ""
-                            }</td>
+                            <td colspan="3">${type.typeDesc ? type.typeDesc : ""
+            }</td>
                         </tr>
 
                         <tr>
@@ -336,9 +315,10 @@
                             <td colspan="2">${type.updatedDate}</td>
                         </tr>
                     `);
-          },
-        });
+        },
       });
-    </script>
-  </body>
+    });
+  </script>
+</body>
+
 </html>

@@ -1,27 +1,19 @@
 <!DOCTYPE html>
 <html lang="zh">
+
 <head>
     <meta charset="UTF-8">
     <title>查詢景點</title>
 
     <!-- 引入 jQuery -->
-    <script
-        src="https://code.jquery.com/jquery-3.7.1.js"
-        integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
-        crossorigin="anonymous"
-    ></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.js"
+        integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
 
     <!-- 引入 Bootstrap CSS -->
-    <link
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-        rel="stylesheet"
-    />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
 
     <!-- 引入 Bootstrap Icons -->
-    <link
-        href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"
-        rel="stylesheet"
-    />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet" />
 
     <!-- 引入 Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -68,6 +60,7 @@
         }
     </style>
 </head>
+
 <body>
     <!-- 載入側邊欄 -->
     <aside class="aside"></aside>
@@ -86,7 +79,7 @@
     </div>
 
     <script>
-        document.getElementById('findAttractionForm').addEventListener('submit', function(e) {
+        document.getElementById('findAttractionForm').addEventListener('submit', function (e) {
             e.preventDefault();
             const id = document.getElementById('attractionId').value;
 
@@ -110,8 +103,35 @@
     <script>
         // 使用jQuery載入aside.html作為側邊欄內容
         $(function () {
-            $(".aside").load("http://localhost:8080/CloudSerenityHotel/static/common/aside.html");
+            $(".aside").load("http://localhost:8080/CloudSerenityHotel/static/common/aside.html", () => {
+                $.ajax({
+                    type: "GET",
+                    dataType: "json",
+                    url: "http://localhost:8080/CloudSerenityHotel/user/getUserInfo",
+                    success: (resp) => {
+                        if (resp.code === 505) {
+                            alert("請先登入!");
+                            window.location.href =
+                                "http://localhost:8080/CloudSerenityHotel/static/user/login.jsp";
+                        } else if (resp.code === 404) {
+                            alert("找不到此帳號!");
+                            window.location.href =
+                                "http://localhost:8080/CloudSerenityHotel/static/user/login.jsp";
+                        } else {
+                            if (resp.data.userIdentity != "admin") {
+                                alert("你不是管理員，無權使用此介面");
+                                window.location.href =
+                                    "http://localhost:8080/CloudSerenityHotel/user/logout";
+                                return;
+                            }
+                            $("#username").text(`歡迎 ${resp.data.userName} 管理員`);
+                            $("#loginUser").append(`<div><a href="http://localhost:8080/CloudSerenityHotel/user/logout">登出</a></div>`);
+                        }
+                    },
+                });
+            });
         });
     </script>
 </body>
+
 </html>
