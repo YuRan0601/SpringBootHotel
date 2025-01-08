@@ -9,6 +9,7 @@
     <style>
         .bg-custom {
             background-color: rgb(100, 212, 247);
+            overflow-y: auto;
         }
 
         .text-custom {
@@ -71,7 +72,7 @@
                     <ul class="nav flex-column">
                         <li>
                             <a class="nav-link text-custom"
-                                href="http://localhost:8080/CloudSerenityHotel/static/product/Home.html">商品管理</a>
+                                href="http://localhost:8080/CloudSerenityHotel/selectAll">商品管理</a>
                         </li>
                     </ul>
                 </div>
@@ -97,15 +98,7 @@
                     <ul class="nav flex-column">
                         <li>
                             <a class="nav-link text-custom"
-                                href="http://localhost:8080/CloudSerenityHotel/static/attraction/SelectAttraction.jsp">景點管理</a>
-                        </li>
-                        <li>
-                            <a class="nav-link text-custom"
-                                href="http://localhost:8080/CloudSerenityHotel/static/facility/SelectFacility.jsp">設施管理</a>
-                        </li>
-                        <li>
-                            <a class="nav-link text-custom"
-                                href="http://localhost:8080/CloudSerenityHotel/static/picture/SelectPicture.jsp">圖片管理</a>
+                                href="http://localhost:8080/CloudSerenityHotel/static/attraction/GetAllAttractions.html">景點管理</a>
                         </li>
                     </ul>
                 </div>
@@ -118,11 +111,18 @@
                     <ul class="nav flex-column">
                         <li>
                             <a class="nav-link text-custom"
-                                href="http://localhost:8080/CloudSerenityHotel/static/rent/html/home.html">車輛管理</a>
+                                href="http://localhost:8080/CloudSerenityHotel/static/rent/html/CarModelAll.html">車輛管理</a>
+
                         </li>
                     </ul>
                 </div>
             </li>
+
+            <hr>
+            <div id="loginUser" style="text-align: center;">
+                <span id="username"></span>
+            </div>
+            <hr>
         </ul>
     </div>
 </body>
