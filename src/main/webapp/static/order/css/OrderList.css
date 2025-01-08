@@ -1,101 +1,106 @@
 @charset "UTF-8";
-/* 設置整體背景色為淺藍色 */
-body {
-    font-family: Arial, sans-serif;
-    text-align: center;
-    background-color: #d0eaf9; /* 藍色系背景 */
-}
-
-/* 設置表格樣式 */
-table {
-    width: 90%; /* 調整表格的寬度 */
-    border-collapse: collapse;
-    margin: 20px auto; /* 讓表格居中 */
-}
-
-table, th, td {
-    border: 1px solid black;
-}
-
-th, td {
-    padding: 8px;
-    text-align: center; /* 讓表格內的文字置中 */
-}
-
-th {
-    background-color: #f2f2f2;
-}
-
-/* 搜尋框區塊的樣式 */
-.search-bar {
-    margin: 20px 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.search-bar form {
-    margin-right: 20px; /* 留下搜尋框與新增按鈕之間的間距 */
-}
-
-.search-bar input {
-    padding: 5px;
-    margin-right: 10px; /* 調整搜尋框內與按鈕之間的間距 */
-    border-radius: 5px;
-}
-
-.search-bar .button {
-    background-color: #ECF5FF;
-    color: #1162be;
-    padding: 5px 10px;
-    font-weight: bold;
-    border-radius: 10px;
-    cursor: pointer;
-    border: none;
-}
-
-.search-bar .button:hover {
-    background-color: #357ac8;
-    color: #ffffff;
-}
-
-/* 訂單列表按鈕（查看詳情和刪除）樣式 */
-table .button {
-    background-color: #ECF5FF;
-    color: #1162be;
-    padding: 5px 10px;
-    font-weight: bold;
-    border-radius: 10px;
-    cursor: pointer;
-    border: none;
-}
-
-table .button:hover {
-    background-color: #357ac8;
-    color: #ffffff;
-}
-
-/* 彈窗的樣式 */
-#orderDetailModal {
-    display: none;
-    padding: 20px;
-    background-color: #fff;
-    border: 1px solid #ccc;
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 1000;
-}
-
-#orderDetailModal button {
-    padding: 5px 10px;
-    background-color: #f44336;
-    color: white;
-    border: none;
-    cursor: pointer;
-}
-
-#orderDetailModal button:hover {
-    background-color: #d32f2f;
-}
+	/* 設置整體背景色為淺藍色 */
+	body {
+		font-family: Arial, sans-serif;
+		text-align: center;
+		background-color: #d0eaf9; /* 藍色系背景 */
+	}
+	
+	/* 主要內容的樣式，假設class名為content */
+	.content {
+		margin-left: 300px
+	}
+	
+	/* 設置表格樣式 */
+	table {
+		width: 90%; /* 調整表格的寬度 */
+		border-collapse: collapse;
+		margin: 20px auto; /* 讓表格居中 */
+	}
+	
+	table, th, td {
+		border: 1px solid black;
+	}
+	
+	th, td {
+		padding: 8px;
+		text-align: center; /* 讓表格內的文字置中 */
+	}
+	
+	th {
+		background-color: #f2f2f2;
+	}
+	
+	/* 搜尋框區塊的樣式 */
+	.search-bar {
+		margin: 20px 0;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+	
+	.search-bar form {
+		margin-right: 20px; /* 留下搜尋框與新增按鈕之間的間距 */
+	}
+	
+	.search-bar input {
+		padding: 5px;
+		margin-right: 10px; /* 調整搜尋框內與按鈕之間的間距 */
+		border-radius: 5px;
+	}
+	
+	.search-bar .button {
+		background-color: #ECF5FF;
+		color: #1162be;
+		padding: 5px 10px;
+		font-weight: bold;
+		border-radius: 10px;
+		cursor: pointer;
+		border: none;
+	}
+	
+	.search-bar .button:hover {
+		background-color: #357ac8;
+		color: #ffffff;
+	}
+	
+	/* 訂單列表按鈕（查看詳情和刪除）樣式 */
+	table .button {
+		background-color: #ECF5FF;
+		color: #1162be;
+		padding: 5px 10px;
+		font-weight: bold;
+		border-radius: 10px;
+		cursor: pointer;
+		border: none;
+	}
+	
+	table .button:hover {
+		background-color: #357ac8;
+		color: #ffffff;
+	}
+	
+	/* 彈窗的樣式 */
+	#orderDetailModal {
+		display: none;
+		padding: 20px;
+		background-color: #fff;
+		border: 1px solid #ccc;
+		position: fixed;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		z-index: 1000;
+	}
+	
+	#orderDetailModal button {
+		padding: 5px 10px;
+		background-color: #f44336;
+		color: white;
+		border: none;
+		cursor: pointer;
+	}
+	
+	#orderDetailModal button:hover {
+		background-color: #d32f2f;
+	}

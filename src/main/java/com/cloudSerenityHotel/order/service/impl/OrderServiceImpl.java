@@ -4,70 +4,87 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.cloudSerenityHotel.order.dao.impl.OrderDaoImpl;
-import com.cloudSerenityHotel.order.dao.impl.OrderItemsDaoImpl;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.cloudSerenityHotel.order.dao.OrderDao;
+import com.cloudSerenityHotel.order.dao.OrderItemsDao;
 import com.cloudSerenityHotel.order.model.OrderBean;
 import com.cloudSerenityHotel.order.model.OrderItemsBean;
 import com.cloudSerenityHotel.order.service.OrderService;
 
+import jakarta.transaction.Transactional;
+
+// JPA 的 save 方法會根據物件是否有主鍵來自動選擇是執行「新增」還是「更新」。
+@Service
+@Transactional // 自動交易管理員
 public class OrderServiceImpl implements OrderService{
 
-	private OrderDaoImpl orderDaoImpl;
-	private OrderItemsDaoImpl orderItemsDaoImpl;
-
-    public OrderServiceImpl() {
-        this.orderDaoImpl = new OrderDaoImpl();
-        this.orderItemsDaoImpl = new OrderItemsDaoImpl();
-    }
+	@Autowired
+	private OrderDao orderDao;
+	
+	@Autowired
+	private OrderItemsDao orderItemsDao;
 
 //整筆訂單
 		// delete_刪除訂單_依據訂單Id, 參數 Id
 		@Override
 		public boolean deleteOrderById(Integer orderId) {
-			return orderDaoImpl.deleteOne(orderId);
+			try {
+				orderDao.deleteById(orderId);
+				return true;
+			} catch (Exception e) {
+				e.printStackTrace();
+				return false;
+			}
+			//return orderDao.deleteOne(orderId); // 舊Hibernate&自定義方法
 		}
 	
 		// find_查詢全部訂單資料_好多OrderBean物件就是為一個集合
 		@Override
 		public List<OrderBean> selectAll() {
-			return orderDaoImpl.selectAll();
+			return orderDao.findAll();
 		}
 	
 		// find_查詢單筆訂單_依據訂單Id, 參數 Id
 		@Override
 		public OrderBean selectOrderById(Integer orderId) {
-			return orderDaoImpl.selectById(orderId);
+			return orderDao.findById(orderId).orElse(null);
+			// .orElse(null)?? 不懂
 		}
 	
 		// 新增必須連同細項一起新增
 		// insert_新增訂單
 		@Override
 		public OrderBean insertOrder(OrderBean orderBean) {
-			return orderDaoImpl.insert(orderBean);
+			return orderDao.save(orderBean);
 		}
 	
 		// update_修改訂單
 		@Override
 		public OrderBean updateOrderById(OrderBean orderBean) {
-			return orderDaoImpl.updateOne(orderBean);
+			return orderDao.save(orderBean);
 		}
 	
 //單純訂單細項
 		// 為已存在訂單新增訂單細項
 		@Override
 		public List<OrderItemsBean> insertItemsToExistingOrder(Integer orderId, List<OrderItemsBean> items) {
-			List<OrderItemsBean> insertItems = new ArrayList<>();
-			// 使用傳入的 orderItems 列表，而不是 insertItems 列表
-			for (OrderItemsBean oneItem : insertItems) {
-				// 設置每個訂單項目的 orderId
-				oneItem.setOrderId(orderId);
-				// 插入並返回結果
-				OrderItemsBean insert_item = orderItemsDaoImpl.insert(oneItem);
-				// 收集所有插入的項目
-				insertItems.add(insert_item);
+			// 透過 orderId 查找訂單
+			OrderBean order = orderDao.findById(orderId).orElse(null);
+			
+			if (order != null) {
+				for (OrderItemsBean oneItem : items) {
+					// 將 OrderBean 設定到 OrderItemsBean
+					oneItem.setOrder(order); 
+				}
+				
+				// 使用 saveAll 一次插入所有訂單細項
+				return orderItemsDao.saveAll(items);
 			}
-			// 返回所有插入的訂單細項
-			return insertItems;
+			
+			// 如果找不到對應的訂單，則返回空的列表
+			return new ArrayList<>();
 		}
 	
 		// 修改單一訂單細項
@@ -80,32 +97,42 @@ public class OrderServiceImpl implements OrderService{
 		// 刪除單一訂單細項
 		@Override
 		public boolean deleteOrderItemById(Integer orderItemId) {
-			return orderItemsDaoImpl.deleteOne(orderItemId);
+			try {
+				orderItemsDao.deleteById(orderItemId);
+				return true;
+			} catch (Exception e) {
+				e.printStackTrace();
+				return false;
+			}
+			//return orderItemsDao.deleteOne(orderItemId); // 舊Hibernate&自定義方法
 		}
 
 //訂單&訂單細項 
 		// find_查詢訂單&訂單細項
 		@Override
 		public List<OrderItemsBean> findOrderItemsByOrderId(Integer orderId) {
-			return orderItemsDaoImpl.selectOrderItemsByOrderId(orderId);
+			return orderItemsDao.findByOrderOrderId(orderId);
 		}
 	
 		// insert_新增訂單&訂單細項
 		@Override
 		public OrderBean insertOrderWithItems(OrderBean orderBean, List<OrderItemsBean> items) {
-			// 插入訂單並返回訂單 ID
-			// 假設返回的是包含生成的 orderId 的完整 OrderBean
-			orderBean = orderDaoImpl.insert(orderBean);
+			// 插入訂單，並返回已設定的 orderId
+			// 使用 save 插入訂單，會自動生成 orderId
+			orderBean = orderDao.save(orderBean);
 			
-			// 插入訂單項目並將 orderId 設置給每個訂單細項
+			// 為每個訂單細項設置 orderId 並一次性插入所有細項
 			for (OrderItemsBean oneItem : items) {
-				// 設置 orderId
-				oneItem.setOrderId(orderBean.getOrderId());
-				// 插入訂單細項
-				orderItemsDaoImpl.insert(oneItem);
-				//System.out.println("Inserted OrderId: " + orderBean.getOrderId());
+				// 設置 order 實體
+				// 設置 OrderBean 實體
+				oneItem.setOrder(orderBean);
 			}
-			 // 返回插入後的完整訂單資料，包含所有訂單項目
+			
+			// 使用 saveAll 一次插入所有訂單細項
+			orderItemsDao.saveAll(items);
+			//System.out.println("Inserted OrderId: " + orderBean.getOrderId());
+			
+			// 返回插入後的訂單資料，包含所有訂單細項
 			return orderBean;
 		}
 	

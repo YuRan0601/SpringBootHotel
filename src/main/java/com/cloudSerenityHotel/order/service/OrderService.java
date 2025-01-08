@@ -37,7 +37,14 @@ public interface OrderService {
 		    boolean deleteOrderItemById(Integer orderItemId);
 
     //訂單&訂單細項 
-			// find_查詢訂單&訂單細項
+		    
+		    /*
+		     * 1.) 屬於 Service 層，負責處理業務邏輯，是連接 Controller 和 DAO 的橋樑。
+		     * 2.) 方法名稱如 findOrderItemsByOrderId 代表一個業務邏輯功能。
+		     * 3.) 它的責任是「提供給 Controller 符合業務需求的功能」，會基於 DAO 做更多的邏輯處理（如額外計算或驗證等）。 
+		     */
+		    
+			// find_查詢訂單&訂單細項_OrderItemsDao(interface)有相同名稱的方法
 			List<OrderItemsBean> findOrderItemsByOrderId(Integer orderId);
 			
 			// insert_新增訂單&訂單細項

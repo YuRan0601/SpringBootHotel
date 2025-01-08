@@ -28,16 +28,13 @@
       }
 
       /* 設定 aside 樣式 */
+      /*固定在左側 + 瀏覽器畫面長度太小時滾動*/
       .aside {
-        position: fixed; /* 固定位置 */
-        left: 0; /* 靠左 */
-        top: 100px; /* 讓側邊欄從 header 下方開始 */
-        width: 170px; /* 側邊欄寬度 */
-        height: calc(100vh - 100px); /* 側邊欄高度，排除 header 占用的空間 */
-        background-color: #f4f4f4; /* 背景色 */
-        padding: 20px;
-        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-        overflow-y: auto;
+	    position: fixed;
+	    left: 0;
+	    top: 0;
+	    bottom: 0;
+	    overflow-y: auto;
       }
 
       /* 主內容區域 .container */

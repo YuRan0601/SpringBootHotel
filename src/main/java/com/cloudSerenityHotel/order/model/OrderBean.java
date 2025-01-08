@@ -16,11 +16,12 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-// BigDecimal
-@Data
+// BigDecimalO
+@Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -30,7 +31,7 @@ public class OrderBean implements java.io.Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "order_id", insertable = false, updatable = false)
+	@Column(name = "order_id")
 	private Integer orderId; // 訂單唯一編號，自動增長
 	@Column(name = "userid")
 	private Integer userId; // 使用者編號
