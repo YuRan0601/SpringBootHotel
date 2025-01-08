@@ -74,10 +74,6 @@
                 $('#addAdminModal').modal('show');
             });
 
-            $('#edit').on('click', function () {
-                $('#editAdminModal').modal('show');
-            });
-
             // 初始化 DataTable
             const table = $('#adminTable').DataTable({
                 language: {
@@ -200,6 +196,56 @@
             }
             );
 
+            //編輯帳號資料
+            $(document).on('click', '#edit', function () {
+                // 獲取該行資料
+                const rowData = table.row($(this).closest('tr')).data();
+
+                // 將資料填入編輯表單
+                $('#editUserId').val(rowData.userId);
+                $('#editUserName').val(rowData.userName);
+                $('#editEmail').val(rowData.email);
+                $('#editPassword').val(rowData.password);
+
+                // 打開 Modal
+                $('#editAdminModal').modal('show');
+            });
+
+            $('#editAdminForm').on('submit', function (e) {
+                e.preventDefault(); // 防止表單預設提交行為
+
+                // 獲取表單資料
+                const updatedData = {
+                    userId: $('#editUserId').val(),
+                    userName: $('#editUserName').val(),
+                    email: $('#editEmail').val(),
+                    password: $('#editPassword').val()
+                };
+
+                // 發送更新請求給後端
+                axios.post('http://localhost:8080/CloudSerenityHotel/admin/upDateAdmin', updatedData)
+                    .then(function (response) {
+                        // 關閉 Modal
+                        $('#editAdminModal').modal('hide');
+
+                        // 彈出成功提示
+                        Swal.fire({
+                            title: '更新成功',
+                            text: '管理員資料已更新！',
+                            icon: 'success',
+                            allowOutsideClick: false
+                        });
+                    })
+                    .catch(function (error) {
+                        Swal.fire({
+                            title: '更新失敗',
+                            text: '請稍後再試！',
+                            icon: 'error',
+                            allowOutsideClick: false
+                        });
+                    });
+            });
+
 
         });
 
@@ -256,6 +302,37 @@
                                 <input type="email" class="form-control" id="email" name="email" required>
                             </div>
                             <button type="submit" class="btn btn-primary">送出</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 編輯管理員 modal -->
+        <div class="modal fade" id="editAdminModal" tabindex="-1" aria-labelledby="editAdminModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editAdminModalLabel">編輯管理員</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="editAdminForm">
+                            <input type="hidden" id="editUserId" name="userId">
+                            <div class="mb-3">
+                                <label for="editUserName" class="form-label">使用者姓名</label>
+                                <input type="text" class="form-control" id="editUserName" name="userName" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="editEmail" class="form-label">電子郵件</label>
+                                <input type="email" class="form-control" id="editEmail" name="email" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="editPassword" class="form-label">密碼</label>
+                                <input type="password" class="form-control" id="editPassword" name="password" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">保存變更</button>
                         </form>
                     </div>
                 </div>
