@@ -242,6 +242,7 @@
                   "http://localhost:8080/CloudSerenityHotel/user/logout";
                 return;
               }
+              loadRoomType();
               $("#username").text(`歡迎 ${resp.data.userName} 管理員`);
               $("#loginUser").append(`<div><a href="http://localhost:8080/CloudSerenityHotel/user/logout">登出</a></div>`);
             }
@@ -252,71 +253,73 @@
       let urlParam = new URL(location.href).searchParams;
       let typeId = urlParam.get("typeId");
 
-      $.ajax({
-        type: "Get",
-        dataType: "json",
-        url: `http://localhost:8080/CloudSerenityHotel/room/type/${typeId}`,
-        success: (resp) => {
-          console.log(resp);
-          if (resp.imgs.length != 0) {
-            $("#imgDiv").empty();
+      function loadRoomType() {
+        $.ajax({
+          type: "Get",
+          dataType: "json",
+          url: `http://localhost:8080/CloudSerenityHotel/room/type/${typeId}`,
+          success: (resp) => {
+            console.log(resp);
+            if (resp.imgs.length != 0) {
+              $("#imgDiv").empty();
 
-            for (let i = 0; i < resp.imgs.length; i++) {
-              $("#imgDiv").append(`
-                            <img src="${resp.imgs[i].imgUrl}" />
-                            `);
+              for (let i = 0; i < resp.imgs.length; i++) {
+                $("#imgDiv").append(`
+                              <img src="${resp.imgs[i].imgUrl}" />
+                              `);
+              }
+
+              // 初始化或刷新 Owl Carousel
+              $(".owl-carousel").owlCarousel({
+                loop: true,
+                margin: 10,
+                nav: false, // 關閉導航箭頭
+                dots: true, // 啟用點導航
+                items: 1, // 每次顯示一張
+                autoplay: true,
+                autoplayTimeout: 3000, // 3秒切換
+                autoplayHoverPause: true, // 滑鼠懸停暫停
+              });
             }
 
-            // 初始化或刷新 Owl Carousel
-            $(".owl-carousel").owlCarousel({
-              loop: true,
-              margin: 10,
-              nav: false, // 關閉導航箭頭
-              dots: true, // 啟用點導航
-              items: 1, // 每次顯示一張
-              autoplay: true,
-              autoplayTimeout: 3000, // 3秒切換
-              autoplayHoverPause: true, // 滑鼠懸停暫停
-            });
-          }
+            let type = resp.roomType;
 
-          let type = resp.roomType;
+            $("#typeTable").append(`
+                          <tr>
+                              <th>房型ID</th>
+                              
+                              <th>房型名稱</th>
+                              
+                              <th>容納人數</th>
+                              
+                          </tr>
+                          <tr>
+                              <td>${type.typeId}</td>
+                              <td>${type.typeName}</td>
+                              <td>${type.maxCapacity}</td>
+                          </tr>
+                          <tr>
+                              <th colspan="3">房型描述</th>
+                              
+                          </tr>
+                          <tr>
+                              <td colspan="3">${type.typeDesc ? type.typeDesc : ""
+              }</td>
+                          </tr>
 
-          $("#typeTable").append(`
-                        <tr>
-                            <th>房型ID</th>
-                            
-                            <th>房型名稱</th>
-                            
-                            <th>容納人數</th>
-                            
-                        </tr>
-                        <tr>
-                            <td>${type.typeId}</td>
-                            <td>${type.typeName}</td>
-                            <td>${type.maxCapacity}</td>
-                        </tr>
-                        <tr>
-                            <th colspan="3">房型描述</th>
-                            
-                        </tr>
-                        <tr>
-                            <td colspan="3">${type.typeDesc ? type.typeDesc : ""
-            }</td>
-                        </tr>
+                          <tr>
+                              <th>新增時間</th>
+                              <th colspan="2">最後更改時間</th>    
+                          </tr>
 
-                        <tr>
-                            <th>新增時間</th>
-                            <th colspan="2">最後更改時間</th>    
-                        </tr>
-
-                        <tr>
-                            <td>${type.createdDate}</td>
-                            <td colspan="2">${type.updatedDate}</td>
-                        </tr>
-                    `);
-        },
-      });
+                          <tr>
+                              <td>${type.createdDate}</td>
+                              <td colspan="2">${type.updatedDate}</td>
+                          </tr>
+                      `);
+          },
+        });
+      }
     });
   </script>
 </body>

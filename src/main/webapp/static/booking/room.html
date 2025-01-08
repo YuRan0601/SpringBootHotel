@@ -294,14 +294,13 @@
                   "http://localhost:8080/CloudSerenityHotel/user/logout";
                 return;
               }
+              tableLoad();
               $("#username").text(`歡迎 ${resp.data.userName} 管理員`);
               $("#loginUser").append(`<div><a href="http://localhost:8080/CloudSerenityHotel/user/logout">登出</a></div>`);
             }
           },
         });
       });
-
-      tableLoad();
 
       function tableLoad() {
         $("#roomTable").DataTable({
