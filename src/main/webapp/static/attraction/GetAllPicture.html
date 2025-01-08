@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>圖片列表</title>
+
+    <!-- 引入 jQuery -->
+    <script
+        src="https://code.jquery.com/jquery-3.7.1.js"
+        integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
+        crossorigin="anonymous"
+    ></script>
+
+    <!-- 引入 Bootstrap CSS -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    />
+
+    <!-- 引入 Bootstrap Icons -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"
+        rel="stylesheet"
+    />
+
+    <!-- 引入 Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- 引入aside.css -->
+    <link rel="stylesheet" href="/static/common/aside.css" />
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .content {
+            margin-left: 300px;
+            width: 100%;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            padding: 10px;
+            text-align: center;
+        }
+
+        td {
+            padding: 10px;
+            text-align: left;
+        }
+
+        button {
+            padding: 5px 10px;
+            margin: 5px;
+            cursor: pointer;
+        }
+
+        .delete-btn {
+            background-color: #5B00AE;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+
+        .edit-btn {
+            background-color: black;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+
+        .btn-container {
+            margin-bottom: 20px;
+        }
+
+        .aside {
+            background-color: #f8f9fa;
+            position: fixed;
+            top: -20px;
+            left: -20px;
+            width: 310px;
+            height: 100vh;
+            padding: 20px;
+            overflow-y: auto;
+            overflow-x: hidden;  /* 禁止水平滾動 */
+        }
+        
+        /* 新增按鈕樣式 */
+        .link-btn {
+            background-color: red;
+            color: black;
+            border: none;
+            border-radius: 5px;
+            padding: 10px;
+            cursor: pointer;
+            float: right;
+            margin-bottom: 20px;
+        }
+        
+        .search-container {
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            width: 200px;
+            padding: 5px;
+            margin-right: 10px;
+        }
+
+        .search-btn {
+            padding: 5px 10px;
+        }
+        
+        
+    </style>
+</head>
+<body>
+    <aside class="aside"></aside>
+
+    <div class="content">
+    	<h1>圖片列表</h1>
+        <!-- 
+        <div class="search-container">
+            <input type="text" id="searchInput" class="search-input" placeholder="輸入景點ID">
+            <button onclick="searchById()" class="search-btn btn btn-primary">查詢</button>
+        </div>
+        -->
+        <div class="btn-container">
+            <button onclick="location.href='http://localhost:8080/CloudSerenityHotel/static/attraction/addPicture.html'" class="btn btn-primary">新增圖片</button>
+            <button onclick="location.href='http://localhost:8080/CloudSerenityHotel/static/attraction/findPicture.html'" class="btn btn-secondary">查詢單張圖片</button>
+
+			<!-- 右上角的按鈕 -->
+			<button onclick="location.href='http://localhost:8080/CloudSerenityHotel/static/attraction/GetAllAttractions.html'" class="link-btn">
+			返回景點列表
+			</button>
+        </div>        
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>圖片ID</th>
+                    <th>關聯ID</th>
+                    <th>類型</th>
+                    <th>圖片連結</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody id="pictureTable">
+                <!-- 圖片資料由JavaScript填充 -->
+            </tbody>
+        </table>
+        
+        <script>
+            // 使用Fetch獲取所有圖片並顯示
+            fetch('http://localhost:8080/CloudSerenityHotel/api/pictures/')
+                .then(response => response.json())
+                .then(data => {
+                    const tableBody = document.getElementById('pictureTable');
+                    data.forEach(picture => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${picture.imageId}</td>
+                            <td>${picture.referenceId}</td>
+                            <td>${picture.referenceType}</td>
+                            <td><a href="${picture.imageUrl}" target="_blank">${picture.imageUrl}</a></td>
+                            <td>
+                                <button onclick="confirmDelete(${picture.imageId})" class="delete-btn">刪除</button>
+                                <button onclick="editPicture(${picture.imageId})" class="edit-btn">修改</button>
+                            </td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+                });
+
+            // 刪除圖片前顯示確認提示
+            function confirmDelete(id) {
+                if (confirm("您確定要刪除這張圖片嗎？")) {
+                    deletePicture(id);
+                }
+            }
+
+            // 刪除圖片
+            function deletePicture(id) {
+                fetch(`http://localhost:8080/CloudSerenityHotel/api/pictures/${id}`, { method: 'DELETE' })
+                    .then(() => location.reload());
+            }
+
+            // 修改圖片
+            function editPicture(id) {
+                location.href = `http://localhost:8080/CloudSerenityHotel/static/attraction/editPicture.html?id=${id}`;
+            }
+        </script>
+        
+        <script>
+            $(function () {
+                $(".aside").load("http://localhost:8080/CloudSerenityHotel/static/common/aside.html");
+            });
+        </script>
+    </div>
+</body>
+</html>
