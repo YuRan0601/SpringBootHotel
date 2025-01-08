@@ -6,18 +6,25 @@ import java.util.List;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
 import com.cloudSerenityHotel.utils.HibernateUtil;
 
-public class UserDao {
+import jakarta.transaction.Transactional;
 
+@Repository
+@Transactional
+public class UserDao {
+	
+	@Autowired
 	private SessionFactory factory;
 	
-	public UserDao() {
-		this.factory = HibernateUtil.getSessionFactory();
-	}
+//	public UserDao() {
+//		this.factory = HibernateUtil.getSessionFactory();
+//	}
 
-	//登入
+	//登入 //以JPA取代
 	public User login(String email,String pwd) {
 		Session session = factory.getCurrentSession();
 		
@@ -36,7 +43,7 @@ public class UserDao {
 	}
 	
 	//註冊
-	//檢查email
+	//檢查email //以JPA取代
 	public User checkEmail(User user) {
 		Session session = factory.getCurrentSession();
 		
@@ -52,7 +59,7 @@ public class UserDao {
 		}
 	}
 	
-	//新增會員資料
+	//新增會員資料 //以JPA取代
 	public User addMemeber(User user,Member member) {
 		Session session = factory.getCurrentSession();
 		user.setAccountUpdateTime(LocalDateTime.now());
@@ -93,6 +100,7 @@ public class UserDao {
 		return query.list();
 	}
 	
+	//以JPA取代
 	public List<User> findAllAdmin() {
 		Session session = factory.getCurrentSession();
 		
@@ -127,6 +135,7 @@ public class UserDao {
 		return query.list();
 	}
 	
+	//以JPA取代
 	public List<User> findAllMember() {
 		Session session = factory.getCurrentSession();
 		
@@ -179,7 +188,7 @@ public class UserDao {
 		
 	}
 	
-	//新增管理員帳號
+	//新增管理員帳號 //以JPA取代
 	public User addAdmin(User user) {
 		Session session = factory.getCurrentSession();
 		user.setAccountUpdateTime(LocalDateTime.now());

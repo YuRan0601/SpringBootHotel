@@ -4,6 +4,10 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import org.springframework.stereotype.Component;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -54,6 +58,7 @@ public class Member implements Serializable {
 	@Column(name = "update_time")
 	private LocalDateTime dataUpdateTime; //資料更新時間
 	
+	@JsonIgnore
 	@MapsId
 	@OneToOne
 	@JoinColumn(name = "userid")

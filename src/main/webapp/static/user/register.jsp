@@ -39,7 +39,7 @@ pageEncoding="UTF-8" %>
         </div>
     </nav>
     <div class="container">
-        <form method="post" action="/CloudSerenityHotel/user/register">
+        
             <h2 style="text-align: center; margin: 0">歡迎註冊</h2>
             <br />
             <label for="identity" class="form-label fs-5">身分別</label>
@@ -48,6 +48,7 @@ pageEncoding="UTF-8" %>
                 <option value="foreigner">外國人</option>
             </select>
             <br />
+            <form method="post" action="/CloudSerenityHotel/user/register">
             <label for="email" class="form-label fs-5">電子信箱</label>
             <input type="email" class="form-control w-25" id="email" name="email" placeholder="請輸入電子信箱" required />
             <br />

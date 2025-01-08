@@ -13,7 +13,7 @@ import com.cloudSerenityHotel.user.model.User;
 import com.cloudSerenityHotel.user.service.UserService;
 
 
-@WebServlet("/user/QueryAllData")
+//@WebServlet("/user/QueryAllData")
 public class QueryAllData extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 

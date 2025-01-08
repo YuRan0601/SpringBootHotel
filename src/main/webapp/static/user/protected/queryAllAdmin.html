@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="zh_TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理員列表</title>
+    <!-- 引入 jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.js"
+        integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+
+    <!-- 引入 Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <!-- 引入 Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet" />
+
+    <!-- 引入 Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- axios -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <!-- 引入 DataTables CSS 和 JS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.5/css/jquery.dataTables.min.css">
+    <script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
+
+    <!-- 引入 DataTables Bootstrap 5 插件 -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.5/css/dataTables.bootstrap5.min.css">
+    <script src="https://cdn.datatables.net/1.13.5/js/dataTables.bootstrap5.min.js"></script>
+
+    <!-- sweetalert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <link rel="stylesheet" href="../static/common/aside.css" />
+    <style>
+        .content {
+            margin-left: 300px
+        }
+
+        #adminTable {
+            border: 1px solid black;
+            width: 100%;
+
+            th {
+                background-color: aqua;
+            }
+        }
+
+        .dataTables_length select {
+            min-width: 65px;
+        }
+
+        .dt-center {
+            text-align: center;
+        }
+    </style>
+    <script>
+        $(function () {
+            $(".aside").load("../static/common/aside.html");
+
+            // 從後端獲取資料並渲染到 DataTable
+            axios.get('http://localhost:8080/CloudSerenityHotel/admin/queryAllAdminTojson')
+                .then(function (response) {
+                    // 使用後端返回的資料填充 DataTable
+                    table.clear().rows.add(response.data).draw();
+                })
+                .catch(function (error) {
+                    console.error("資料加載失敗", error);
+                });
+
+            // 打開 Modal
+            $('#addAdminBtn').on('click', function () {
+                $('#addAdminModal').modal('show');
+            });
+
+            // 初始化 DataTable
+            const table = $('#adminTable').DataTable({
+                language: {
+                    url: "https://cdn.datatables.net/plug-ins/1.13.5/i18n/zh-HANT.json"
+                },
+                columns: [{
+                        title: "使用者編號",
+                        data: "userId"
+                    },
+                    {
+                        title: "使用者姓名",
+                        data: "userName"
+                    },
+                    {
+                        title: "電子信箱",
+                        data: "email"
+                    },
+                    {
+                        title: "密碼",
+                        data: "password",
+                        className: 'dt-center',
+                        render: function (data, type, row) {
+                            return `
+                            <span class="password-text d-none">${data}</span>
+                            <button class="btn btn-secondary btn-sm toggle-password">
+                                顯示密碼
+                            </button>
+                            `;
+                        }
+                    },
+                    {
+                        title: "使用狀態",
+                        data: "userStatus"
+                    },
+                    {
+                        title: "帳號更新時間",
+                        data: "accountUpdateTime"
+                    },
+                    {
+                        title: "操作",
+                        data: null,
+                        className: 'dt-center',
+                        render: function (data, type, row) {
+                            return `
+                                <button class='btn btn-primary btn-sm'>編輯</button>
+                            `;
+                        }
+                    }
+                ]
+            });
+
+            // 表單提交
+            $('#addAdminForm').on('submit', function (e) {
+                e.preventDefault(); // 阻止預設表單提交
+
+                // 獲取表單資料
+                const adminData = {
+                    userName: $('#username').val(),
+                    password: $('#password').val(),
+                    email: $('#email').val()
+                };
+
+                //post給後端API
+                axios.post('http://localhost:8080/CloudSerenityHotel/admin/addAdmin', adminData)
+                    .then(function (response) {
+                        $('#addAdminModal').modal('hide'); // 關閉 Modal
+                        $('#addAdminForm')[0].reset(); // 清空表單
+                        swal.fire({
+                            title: "新增管理員成功",
+                            text: "請重新整理頁面!",
+                            icon: "success",
+                            allowOutsideClick: false
+                        });
+                    })
+                    .catch(function (error) {
+                        swal.fire({
+                            title: "新增管理員失敗",
+                            text: "請稍後再試!",
+                            icon: "error",
+                            allowOutsideClick: false
+                        });
+
+                    });
+            });
+
+
+
+        });
+
+        // 按鈕點擊事件：顯示/隱藏密碼
+        $(document).on('click', '.toggle-password', function () {
+            const button = $(this);
+            const passwordText = button.siblings('.password-text');
+
+            if (passwordText.hasClass('d-none')) {
+                // 顯示密碼
+                passwordText.removeClass('d-none');
+                button.text('隱藏密碼');
+            } else {
+                // 隱藏密碼
+                passwordText.addClass('d-none');
+                button.text('顯示密碼');
+            }
+        });
+    </script>
+</head>
+
+<body>
+    <aside class="aside"></aside>
+    <div class="content" align="center">
+        <div class="container mt-4">
+            <h1 class="mb-4">管理員列表</h1>
+            <div class="d-grid mb-3 d-md-flex justify-content-md-start">
+                <button class="addAdmin btn btn-primary" id="addAdminBtn">新增管理員</button></div>
+            <table id="adminTable" class="table table-striped table-bordered dt-responsive nowrap "></table>
+
+        </div>
+        <!-- 新增管理員 modal -->
+        <div class="modal fade" id="addAdminModal" tabindex="-1" aria-labelledby="addAdminModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addAdminModalLabel">新增管理員</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="addAdminForm">
+                            <div class="mb-3">
+                                <label for="username" class="form-label">使用者姓名</label>
+                                <input type="text" class="form-control" id="username" name="username" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="password" class="form-label">密碼</label>
+                                <input type="password" class="form-control" id="password" name="password" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="email" class="form-label">電子郵件</label>
+                                <input type="email" class="form-control" id="email" name="email" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">送出</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
