@@ -1,121 +1,142 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
+
 <head>
-    <meta charset="UTF-8">
-    <title>修改訂單資料及訂單細項</title>
-    <link rel="stylesheet" href="/CloudSerenityHotel/static/order/css/xxx.css" />
-    
-    <!-- 引入 jQuery -->
+	<meta charset="UTF-8">
+	<title>修改訂單資料及訂單細項</title>
+	<link rel="stylesheet" href="/CloudSerenityHotel/static/order/css/xxx.css" />
+
+	<!-- 引入 jQuery -->
 	<script src="https://code.jquery.com/jquery-3.7.1.js"
-		integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
-		crossorigin="anonymous"></script>
-	
+		integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+
 	<!-- 引入 Bootstrap CSS -->
-	<link
-		href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-		rel="stylesheet" />
-	
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
 	<!-- 引入 Bootstrap Icons -->
-	<link
-		href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"
-		rel="stylesheet" />
-	
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet" />
+
 	<!-- 引入 Bootstrap JS -->
-	<script
-		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-	
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 	<!-- 引入aside.css -->
-	<link rel="stylesheet"
-		href="/CloudSerenityHotel/static/common/aside.css" />
+	<link rel="stylesheet" href="/CloudSerenityHotel/static/common/aside.css" />
 	<script>
-				$(function() {
-					$(".aside").load("/CloudSerenityHotel/static/common/aside.html");
-		
+		$(function () {
+			$(".aside").load("/CloudSerenityHotel/static/common/aside.html", () => {
+				$.ajax({
+					type: "GET",
+					dataType: "json",
+					url: "http://localhost:8080/CloudSerenityHotel/user/getUserInfo",
+					success: (resp) => {
+						if (resp.code === 505) {
+							alert("請先登入!");
+							window.location.href =
+								"http://localhost:8080/CloudSerenityHotel/static/user/login.jsp";
+						} else if (resp.code === 404) {
+							alert("找不到此帳號!");
+							window.location.href =
+								"http://localhost:8080/CloudSerenityHotel/static/user/login.jsp";
+						} else {
+							if (resp.data.userIdentity != "admin") {
+								alert("你不是管理員，無權使用此介面");
+								window.location.href =
+									"http://localhost:8080/CloudSerenityHotel/user/logout";
+								return;
+							}
+							$("#username").text(`歡迎 ${resp.data.userName} 管理員`);
+							$("#loginUser").append(`<div><a href="http://localhost:8080/CloudSerenityHotel/user/logout">登出</a></div>`);
+						}
+					},
 				});
+			});
+
+		});
 	</script>
-    
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #fdf5e6;
-            text-align: center;
-        }
-        
-        /* 主要內容的樣式，假設class名為content */
+
+	<style>
+		body {
+			font-family: Arial, sans-serif;
+			background-color: #fdf5e6;
+			text-align: center;
+		}
+
+		/* 主要內容的樣式，假設class名為content */
 		.content {
 			margin-left: 300px
 		}
 
-        fieldset {
-            border: 1px solid #ccc;
-            padding: 20px;
-            margin: 20px auto;
-            width: 70%;
-            background-color: #fff;
-        }
+		fieldset {
+			border: 1px solid #ccc;
+			padding: 20px;
+			margin: 20px auto;
+			width: 70%;
+			background-color: #fff;
+		}
 
-        legend {
-            font-size: 1.5em;
-            font-weight: bold;
-            color: #1162be;
-        }
+		legend {
+			font-size: 1.5em;
+			font-weight: bold;
+			color: #1162be;
+		}
 
-        form {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+		form {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+		}
 
-        .form-group {
-            display: flex;
-            justify-content: space-between;
-            margin: 10px 0;
-            width: 80%;
-        }
+		.form-group {
+			display: flex;
+			justify-content: space-between;
+			margin: 10px 0;
+			width: 80%;
+		}
 
-        .form-group label {
-            width: 30%;
-            text-align: left;
-            font-weight: bold;
-        }
+		.form-group label {
+			width: 30%;
+			text-align: left;
+			font-weight: bold;
+		}
 
-        .form-group input {
-            width: 65%;
-            padding: 8px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-        }
+		.form-group input {
+			width: 65%;
+			padding: 8px;
+			border-radius: 5px;
+			border: 1px solid #ccc;
+		}
 
-        input[type="submit"] {
-            background-color: #1162be;
-            color: white;
-            padding: 10px 20px;
-            font-weight: bold;
-            border-radius: 5px;
-            border: none;
-            cursor: pointer;
-        }
+		input[type="submit"] {
+			background-color: #1162be;
+			color: white;
+			padding: 10px 20px;
+			font-weight: bold;
+			border-radius: 5px;
+			border: none;
+			cursor: pointer;
+		}
 
-        input[type="submit"]:hover {
-            background-color: #357ac8;
-        }
+		input[type="submit"]:hover {
+			background-color: #357ac8;
+		}
 
-        .button {
-            background-color: #ECF5FF;
-            color: #1162be;
-            padding: 5px 10px;
-            font-weight: bold;
-            border-radius: 10px;
-            cursor: pointer;
-            border: none;
-        }
+		.button {
+			background-color: #ECF5FF;
+			color: #1162be;
+			padding: 5px 10px;
+			font-weight: bold;
+			border-radius: 10px;
+			cursor: pointer;
+			border: none;
+		}
 
-        .button:hover {
-            background-color: #357ac8;
-            color: #ffffff;
-        }
-    </style>
+		.button:hover {
+			background-color: #357ac8;
+			color: #ffffff;
+		}
+	</style>
 </head>
+
 <body>
 	<aside class="aside"></aside>
 
@@ -126,32 +147,25 @@
 			<fieldset>
 				<legend>訂單資料</legend>
 				<div class="form-group">
-					<label for="orderId">訂單ID：</label> <input type="text"
-						name="orderId" required />
+					<label for="orderId">訂單ID：</label> <input type="text" name="orderId" required />
 				</div>
 				<div class="form-group">
-					<label for="userId">會員ID：</label> <input type="text" name="userId"
-						required />
+					<label for="userId">會員ID：</label> <input type="text" name="userId" required />
 				</div>
 				<div class="form-group">
-					<label for="receiveName">收件人：</label> <input type="text"
-						name="receiveName" required />
+					<label for="receiveName">收件人：</label> <input type="text" name="receiveName" required />
 				</div>
 				<div class="form-group">
-					<label for="email">email：</label> <input type="email" name="email"
-						required />
+					<label for="email">email：</label> <input type="email" name="email" required />
 				</div>
 				<div class="form-group">
-					<label for="phoneNumber">電話號碼：</label> <input type="text"
-						name="phoneNumber" required />
+					<label for="phoneNumber">電話號碼：</label> <input type="text" name="phoneNumber" required />
 				</div>
 				<div class="form-group">
-					<label for="address">收貨地址：</label> <input type="text"
-						name="address" required />
+					<label for="address">收貨地址：</label> <input type="text" name="address" required />
 				</div>
 				<div class="form-group">
-					<label for="orderStatus">訂單狀態：</label> <select name="orderStatus"
-						multiple size="1" required>
+					<label for="orderStatus">訂單狀態：</label> <select name="orderStatus" multiple size="1" required>
 						<option value="處理中">處理中</option>
 						<option value="已出貨">已出貨</option>
 						<option value="已到貨">已到貨</option>
@@ -159,8 +173,7 @@
 					</select>
 				</div>
 				<div class="form-group">
-					<label for="paymentMethod">付款方式：</label> <select
-						name="paymentMethod" multiple size="1" required>
+					<label for="paymentMethod">付款方式：</label> <select name="paymentMethod" multiple size="1" required>
 						<option value="信用卡">信用卡</option>
 						<option value="Line_Pay">Line_Pay</option>
 						<option value="悠遊付">悠遊付</option>
@@ -168,20 +181,16 @@
 					</select>
 				</div>
 				<div class="form-group">
-					<label for="totalAmount">總金額：</label> <input type="text"
-						name="totalAmount" required />
+					<label for="totalAmount">總金額：</label> <input type="text" name="totalAmount" required />
 				</div>
 				<div class="form-group">
-					<label for="pointsDiscount">點數折抵：</label> <input type="text"
-						name="pointsDiscount" required />
+					<label for="pointsDiscount">點數折抵：</label> <input type="text" name="pointsDiscount" required />
 				</div>
 				<div class="form-group">
-					<label for="discountAmount">折扣金額：</label> <input type="text"
-						name="discountAmount" required />
+					<label for="discountAmount">折扣金額：</label> <input type="text" name="discountAmount" required />
 				</div>
 				<div class="form-group">
-					<label for="finalAmount">最終金額：</label> <input type="text"
-						name="finalAmount" required />
+					<label for="finalAmount">最終金額：</label> <input type="text" name="finalAmount" required />
 				</div>
 			</fieldset>
 
@@ -191,4 +200,5 @@
 		</form>
 	</div>
 </body>
+
 </html>
