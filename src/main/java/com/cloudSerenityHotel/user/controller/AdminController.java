@@ -72,40 +72,26 @@ public class AdminController {
 			return dataToJson;
 	}
 	
-	@PostMapping("/queryAdminById")
-	public String queryAdminById(@RequestParam int id,HttpSession session,Model model) {
-		User userData = uService.findUserById(id);
-		List<User> data = new ArrayList<User>();
-		if (userData != null) {
-			data.add(userData);
+	@PostMapping("/statusLock") //新增管理員帳號
+	public ResponseEntity<String> StatusLock(@RequestBody User admin) {
+		String status = admin.getUserStatus();
+		if (status.equals("In_use")) {
+			int del = uService.deleteUser(admin.getUserId());
+			if (del != 0) {
+				return ResponseEntity.ok("註銷成功");
+			}else {
+			    String errorMessage = "註銷失敗";
+			    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage);
+			}
+		}else {
+			int rec = uService.recoverUser(admin.getUserId());
+			if (rec != 0) {
+				return ResponseEntity.ok("恢復成功");
+			}else {
+			    String errorMessage = "恢復失敗";
+			    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage);
+			}	
 		}
-		model.addAttribute("userData", data);
-		return "/user/protected/queryResultsAdmin.jsp";
-	}
-	
-	@PostMapping("/queryAdminByName")
-	public String queryAdminByName(@RequestParam String name,HttpSession session,Model model) {
-		List<User> dataList = uService.findUserByName(name);
-		model.addAttribute("userData", dataList);
-		return "/user/protected/queryResultsAdmin.jsp";
-	}
-	
-	@PostMapping("/queryMemberById")
-	public String queryMemberById(@RequestParam int id,HttpSession session,Model model) {
-		User memberData = uService.findMemberById(id);
-		List<User> data = new ArrayList<User>();
-		if (memberData != null) {
-			data.add(memberData);
-		}
-		model.addAttribute("memberData", data);
-		return "/user/protected/queryResultsMember.jsp";
-	}
-	
-	@PostMapping("/queryMemberByName")
-	public String queryMemberByName(@RequestParam String name,HttpSession session,Model model) {
-		List<User> memberDataList = uService.findMemberByName(name);
-		model.addAttribute("memberData", memberDataList);
-		return "/user/protected/queryResultsMember.jsp";
 	}
 	
 	

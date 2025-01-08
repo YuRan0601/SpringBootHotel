@@ -29,6 +29,8 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.5/css/dataTables.bootstrap5.min.css">
     <script src="https://cdn.datatables.net/1.13.5/js/dataTables.bootstrap5.min.js"></script>
 
+    <!-- sweetalert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <link rel="stylesheet" href="../static/common/aside.css" />
     <style>
@@ -88,20 +90,65 @@
                             `;
                         }
                     },
-                    { title: "使用狀態", data: "userStatus" },
+                    {
+                        title: "使用狀態",
+                        data: "userStatus",
+                        render: function (data, type, row) {
+                            let status = data == "In_use" ? "使用中" : "已註銷";
+                            return `${status}`;
+                        }
+                    },
                     { title: "帳號更新時間", data: "accountUpdateTime" },
                     {
                         title: "操作",
-                        data: null,
+                        data: "userStatus",
                         className: 'dt-center',
                         render: function (data, type, row) {
+                            let action = data == "In_use" ? "註銷帳號" : "恢復帳號";
+                            let btn = data == "In_use" ? "danger" : "success";
                             return `
-                                <button class='btn btn-primary btn-sm'>編輯</button>
+                                <button class='btn btn-primary btn-sm' id='edit'>編輯</button>
+                                <button class='btn btn-${btn} btn-sm' id='status'>${action}</button>
                             `;
                         }
                     }
                 ]
             });
+
+            // 更改帳號使用狀態
+            $(document).on('click', '#status', function () {
+                // 獲取該按鈕所在行的資料
+                const rowData = table.row($(this).closest('tr')).data();
+                const requestData = {
+                    userId: rowData.userId,
+                    userStatus: rowData.userStatus
+                }
+
+                // 發送請求給後端
+                axios.post('http://localhost:8080/CloudSerenityHotel/admin/statusLock', requestData)
+                    .then(function (response) {
+                        Swal.fire({
+                            title: '狀態更新成功',
+                            text: '該帳號的狀態已更改',
+                            icon: 'success',
+                            allowOutsideClick: false
+                        });
+                    })
+                    .catch(function (error) {
+                        Swal.fire({
+                            title: '狀態更新失敗',
+                            text: '請稍後再試！',
+                            icon: 'error',
+                            allowOutsideClick: false
+                        });
+                    });
+            }
+            );
+
+
+
+
+
         });
 
         // 按鈕點擊事件：顯示/隱藏密碼
