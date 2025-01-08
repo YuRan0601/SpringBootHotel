@@ -29,6 +29,8 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.5/css/dataTables.bootstrap5.min.css">
     <script src="https://cdn.datatables.net/1.13.5/js/dataTables.bootstrap5.min.js"></script>
 
+    <!-- sweetalert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <link rel="stylesheet" href="../static/common/aside.css" />
     <style>
@@ -88,20 +90,162 @@
                             `;
                         }
                     },
-                    { title: "使用狀態", data: "userStatus" },
+                    {
+                        title: "使用狀態",
+                        data: "userStatus",
+                        render: function (data, type, row) {
+                            let status = data == "In_use" ? "使用中" : "已註銷";
+                            return `${status}`;
+                        }
+                    },
                     { title: "帳號更新時間", data: "accountUpdateTime" },
                     {
                         title: "操作",
-                        data: null,
+                        data: "userStatus",
                         className: 'dt-center',
                         render: function (data, type, row) {
+                            let action = data == "In_use" ? "註銷帳號" : "恢復帳號";
+                            let btn = data == "In_use" ? "danger" : "success";
                             return `
-                                <button class='btn btn-primary btn-sm'>編輯</button>
+                                <button class='btn btn-info btn-sm' id='info'>詳細</button>
+                                <button class='btn btn-primary btn-sm' id='edit'>編輯</button>
+                                <button class='btn btn-${btn} btn-sm' id='status'>${action}</button>
                             `;
                         }
                     }
                 ]
             });
+
+            // 更改帳號使用狀態
+            $(document).on('click', '#status', function () {
+                // 獲取該按鈕所在行的資料
+                const rowData = table.row($(this).closest('tr')).data();
+                const requestData = {
+                    userId: rowData.userId,
+                    userStatus: rowData.userStatus
+                }
+
+                // 發送請求給後端
+                axios.post('http://localhost:8080/CloudSerenityHotel/admin/statusLock', requestData)
+                    .then(function (response) {
+                        Swal.fire({
+                            title: '狀態更新成功',
+                            text: '該帳號的狀態已更改',
+                            icon: 'success',
+                            allowOutsideClick: false
+                        });
+                    })
+                    .catch(function (error) {
+                        Swal.fire({
+                            title: '狀態更新失敗',
+                            text: '請稍後再試！',
+                            icon: 'error',
+                            allowOutsideClick: false
+                        });
+                    });
+            }
+            );
+
+            //編輯帳號資料
+            $(document).on('click', '#edit', function () {
+                const rowData = table.row($(this).closest('tr')).data();
+
+                // 填充基本資料
+                $('#editUserId').val(rowData.userId);
+                $('#editUserName').val(rowData.userName);
+                $('#editEmail').val(rowData.email);
+                $('#editPassword').val(rowData.password);
+
+                // 填充會員詳細資料
+                const member = rowData.member;
+                if (member) {
+                    $('#editGender').val(member.gender);
+                    $('#editBirthday').val(member.birthday);
+                    $('#editPhone').val(member.phone);
+                    $('#editPersonalIdNo').val(member.personalIdNo);
+                    $('#editCountry').val(member.country);
+                    $('#editAddress').val(member.address);
+                    $('#editPassportNo').val(member.passportNo);
+                    $('#editRegisterDate').val(member.registerDate.split('T')[0]);
+                    $('#editDataUpdateTime').val(member.dataUpdateTime.replace('T', ' '));
+                }
+
+                // 打開 Modal
+                $('#editMemberModal').modal('show');
+            });
+
+
+            $('#editMemberForm').on('submit', function (e) {
+                e.preventDefault(); // 防止表單預設提交行為
+
+                // 獲取表單資料
+                const updatedData = {
+                    userId: $('#editUserId').val(),
+                    userName: $('#editUserName').val(),
+                    email: $('#editEmail').val(),
+                    password: $('#editPassword').val(),
+                    member: {
+                        userId: $('#editUserId').val(),
+                        gender: $('#editGender').val(),
+                        birthday: $('#editBirthday').val(),
+                        phone: $('#editPhone').val(),
+                        personalIdNo: $('#editPersonalIdNo').val(),
+                        country: $('#editCountry').val(),
+                        address: $('#editAddress').val(),
+                        passportNo: $('#editPassportNo').val()
+                    }
+                };
+
+                // 發送更新請求給後端
+                axios.post('http://localhost:8080/CloudSerenityHotel/admin/upDateMember', updatedData)
+                    .then(function (response) {
+                        // 關閉 Modal
+                        $('#editMemberModal').modal('hide');
+
+                        // 彈出成功提示
+                        Swal.fire({
+                            title: '更新成功',
+                            text: '會員資料已更新！',
+                            icon: 'success',
+                            allowOutsideClick: false
+                        });
+                    })
+                    .catch(function (error) {
+                        Swal.fire({
+                            title: '更新失敗',
+                            text: '請稍後再試！',
+                            icon: 'error',
+                            allowOutsideClick: false
+                        });
+                    });
+            });
+
+            //顯示會員詳細資料
+            $(document).on('click', '#info', function () {
+                const rowData = table.row($(this).closest('tr')).data();
+
+                // 填充基本資料
+                $('#infoUserName').val(rowData.userName);
+                $('#infoEmail').val(rowData.email);
+
+                // 填充會員詳細資料
+                const member = rowData.member;
+                if (member) {
+                    $('#infoGender').val(member.gender);
+                    $('#infoBirthday').val(member.birthday);
+                    $('#infoPhone').val(member.phone);
+                    $('#infoPersonalIdNo').val(member.personalIdNo);
+                    $('#infoCountry').val(member.country);
+                    $('#infoAddress').val(member.address);
+                    $('#infoeditPassportNo').val(member.passportNo);
+                    $('#infoRegisterDate').val(member.registerDate.split('T')[0]);
+                    $('#infoDataUpdateTime').val(member.dataUpdateTime.replace('T', ' '));
+                }
+
+                // 打開 Modal
+                $('#infoMemberModal').modal('show');
+            });
+
         });
 
         // 按鈕點擊事件：顯示/隱藏密碼
@@ -130,6 +274,180 @@
         <div class="container mt-4">
             <h1 class="mb-4">會員列表</h1>
             <table id="adminTable" class="table table-striped table-bordered dt-responsive nowrap "></table>
+
+            <!-- 編輯會員 modal -->
+            <div class="modal fade" id="editMemberModal" tabindex="-1" aria-labelledby="editMemberModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog modal-lg"> <!-- 調整大小為大型 -->
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="editMemberModalLabel">編輯會員</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="editMemberForm">
+                                <input type="hidden" id="editUserId" name="userId">
+
+                                <!-- 使用者基本資料 -->
+                                <h5 class="mb-3">基本資料</h5>
+                                <div class="mb-3">
+                                    <label for="editUserName" class="form-label">使用者姓名</label>
+                                    <input type="text" class="form-control" id="editUserName" name="userName" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="editEmail" class="form-label">電子郵件</label>
+                                    <input type="email" class="form-control" id="editEmail" name="email" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="editPassword" class="form-label">密碼</label>
+                                    <input type="password" class="form-control" id="editPassword" name="password"
+                                        required>
+                                </div>
+
+                                <!-- 會員詳細資料 -->
+                                <h5 class="mt-4 mb-3">會員詳細資料</h5>
+                                <div class="mb-3">
+                                    <label for="editGender" class="form-label">性別</label>
+                                    <select class="form-select" id="editGender" name="gender" required>
+                                        <option value="Male">男性</option>
+                                        <option value="Female">女性</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="editBirthday" class="form-label">生日</label>
+                                    <input type="date" class="form-control" id="editBirthday" name="birthday" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="editPhone" class="form-label">電話</label>
+                                    <input type="text" class="form-control" id="editPhone" name="phone" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="editPersonalIdNo" class="form-label">身分證字號</label>
+                                    <input type="text" class="form-control" id="editPersonalIdNo" name="personalIdNo">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="editCountry" class="form-label">國籍</label>
+                                    <input type="text" class="form-control" id="editCountry" name="country" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="editAddress" class="form-label">地址</label>
+                                    <textarea class="form-control" id="editAddress" name="address" rows="2"></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="editPassportNo" class="form-label">護照號碼</label>
+                                    <input type="text" class="form-control" id="editPassportNo" name="passportNo">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="editRegisterDate" class="form-label">註冊日期</label>
+                                    <input type="date" class="form-control" id="editRegisterDate" name="registerDate"
+                                        disabled>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="editDataUpdateTime" class="form-label">資料更新時間</label>
+                                    <input type="datetime-local" class="form-control" id="editDataUpdateTime"
+                                        name="dataUpdateTime" disabled>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary">保存變更</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 顯示會員詳細資料 Modal -->
+            <div class="modal fade" id="infoMemberModal" tabindex="-1" aria-labelledby="infoMemberModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog modal-lg"> <!-- 大型 Modal -->
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="infoMemberModalLabel">會員詳細資料</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <!-- 基本資料 -->
+                            <h5 class="mb-3">基本資料</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="infoUserName" class="form-label">使用者姓名</label>
+                                        <input type="text" class="form-control" id="infoUserName" readonly>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="infoEmail" class="form-label">電子郵件</label>
+                                        <input type="email" class="form-control" id="infoEmail" readonly>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 會員詳細資料 -->
+                            <h5 class="mt-4 mb-3">會員詳細資料</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="infoGender" class="form-label">性別</label>
+                                        <input type="text" class="form-control" id="infoGender" readonly>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="infoBirthday" class="form-label">生日</label>
+                                        <input type="text" class="form-control" id="infoBirthday" readonly>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="infoPhone" class="form-label">電話</label>
+                                        <input type="text" class="form-control" id="infoPhone" readonly>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="infoPersonalIdNo" class="form-label">身分證字號</label>
+                                        <input type="text" class="form-control" id="infoPersonalIdNo" readonly>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="infoCountry" class="form-label">國籍</label>
+                                        <input type="text" class="form-control" id="infoCountry" readonly>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="infoAddress" class="form-label">地址</label>
+                                        <textarea class="form-control" id="infoAddress" rows="2" readonly></textarea>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="infoeditPassportNo" class="form-label">護照號碼</label>
+                                        <input type="text" class="form-control" id="infoeditPassportNo" readonly>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="infoRegisterDate" class="form-label">註冊日期</label>
+                                        <input type="text" class="form-control" id="infoRegisterDate" readonly>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="infoDataUpdateTime" class="form-label">資料更新時間</label>
+                                        <input type="text" class="form-control" id="infoDataUpdateTime" readonly>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
 
         </div>
     </div>

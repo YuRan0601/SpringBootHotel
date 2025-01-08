@@ -8,6 +8,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -71,6 +72,18 @@ public class LoginSystemController {
 		}
 		// 重定向到登入頁面
 		return "redirect:/user/login";
+	}
+	
+	@PostMapping("/checkEmail")
+	@ResponseBody
+	public String checkEmail(@RequestBody String email){
+		int checkStatus = uService.checkEmail(email);
+		
+		if (checkStatus != 0) {
+			return "ok";
+		}else {
+			return "used";
+		}
 	}
 
 	@GetMapping("/getUserInfo")
