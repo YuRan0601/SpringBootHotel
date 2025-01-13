@@ -29,9 +29,6 @@ public class Room implements Serializable {
 	@Column(name = "room_id")
 	private Integer roomId;
 	
-//	@Column(name = "room_type_id")
-//	private Integer roomTypeId;
-	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "room_type_id")
 	private RoomType roomType;

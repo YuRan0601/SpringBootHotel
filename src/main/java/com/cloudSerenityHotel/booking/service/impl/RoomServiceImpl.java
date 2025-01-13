@@ -91,7 +91,9 @@ public class RoomServiceImpl implements RoomService {
 		List<Map<String, Object>> res = new ArrayList<>();
 		
 		for (RoomType roomType : roomTypes) {
-			res.add(roomTypeToMap(roomType));
+			Map<String, Object> roomTypeMap = roomTypeToMap(roomType);
+			roomTypeMap.put("imgs", roomTypeImgToMapList(roomType.getImgs()));
+			res.add(roomTypeMap);
 		}
 		
 		return res;
