@@ -31,7 +31,6 @@
             }
 
             #errorMessage {
-                padding: 10px 0;
                 margin: 0;
                 color: #c70000;
                 font-weight: bold;
@@ -57,11 +56,21 @@
                 <label for="password" class="form-label fs-5">密碼</label>
                 <input type="password" class="form-control" id="password" name="password" placeholder="請輸入密碼"
                     minlength="8" maxlength="64" required />
+                <input type="checkbox" class="my-3" id="pass-hidden"> 顯示密碼</input>
                 <br>
                 <div class="d-grid gap-2 mx-auto">
                     <button type="submit" class="btn btn-primary">登入</button>
                 </div>
-                <p id="errorMessage">
+                <div class="row mt-2">
+                    <!-- 一鍵登入 -->
+                    <div class="col-2"><button id="admin" class="btn btn-outline-dark bg-white text-dark"><i
+                                class="fa-solid fa-user-tie"></i></button>
+                    </div>
+                    <div class="col-2"><button id="member" class="btn btn-outline-dark bg-white text-dark"><i
+                                class="fa-solid fa-user"></i></button>
+                    </div>
+                </div>
+                <p id="errorMessage" class="pt-2">
                     <i class="fa-solid fa-circle-xmark"></i>
                     <% String errorMessage=(String) request.getAttribute("errorMessage"); if (errorMessage !=null) {
                         out.print(errorMessage); } %>
@@ -91,6 +100,28 @@
                     $('#errorMessage').css('visibility', 'hidden');
                 }
             }
+
+            //password 顯示開關
+            $("#pass-hidden").on("change", function () {
+                if (this.checked) {
+                    $("#password").attr('type', 'text');
+                } else {
+                    $("#password").attr('type', 'password');
+                }
+            });
+
+            //一鍵登入
+            $('#admin').on("click", (e) => {
+                e.preventDefault();
+                $("#email").val("CSH_AD@mail.com")
+                $("#password").val("aDmin@01")
+            })
+            $('#member').on("click", (e) => {
+                e.preventDefault();
+                $("#email").val("Linsansan@mail.com")
+                $("#password").val("Lin33#033")
+            })
+
         </script>
     </body>
 

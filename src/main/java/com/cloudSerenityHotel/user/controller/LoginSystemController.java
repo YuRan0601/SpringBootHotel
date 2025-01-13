@@ -76,10 +76,10 @@ public class LoginSystemController {
 	
 	@PostMapping("/checkEmail")
 	@ResponseBody
-	public String checkEmail(@RequestBody String email){
-		int checkStatus = uService.checkEmail(email);
-		
-		if (checkStatus != 0) {
+	public String checkEmail(@RequestBody Map<String, String> email){
+		String emailStr = email.get("email");
+		int checkStatus = uService.checkEmail(emailStr);
+		if (checkStatus != 0) {//沒有人使用回傳1
 			return "ok";
 		}else {
 			return "used";

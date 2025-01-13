@@ -8,6 +8,7 @@
     <!-- bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
+
     <!-- font-awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/css/all.min.css" />
 
@@ -36,6 +37,12 @@
             visibility: hidden;
             text-align: center;
         }
+
+        #checkEye {
+            position: relative;
+            top: 20%;
+            right: 10px;
+        }
     </style>
 </head>
 
@@ -55,51 +62,94 @@
             <option value="foreigner">外國人</option>
         </select>
         <br />
-        <form method="post" id="register">
-            <label for="email" class="form-label fs-5">電子信箱</label>
-            <input type="email" class="form-control w-25" id="email" name="email" placeholder="請輸入電子信箱" required />
-            <span id="EmailMsg" style="visibility: hidden"><i class="fa-solid fa-circle-xmark"></i></span>
-            <br />
-            <label for="password" class="form-label fs-5">密碼</label>
-            <input type="password" class="form-control w-25" id="password" name="password" placeholder="請輸入密碼"
-                minlength="8" maxlength="64" required />
-            <span id="passwordMsg" style="visibility: hidden"><i class="fa-solid fa-circle-xmark"></i>
-            </span>
-            <br />
-            <label for="name" class="form-label fs-5">姓名</label>
-            <input type="text" class="form-control w-25" id="name" name="name" placeholder="請輸入姓名" required />
-            <br />
-            <label for="gender" class="form-label fs-5">性別</label>
-            <select class="form-select w-25" id="gender" name="gender" required>
-                <option value="Male">男</option>
-                <option value="Female">女</option>
-                <option value="Other">其他</option>
-            </select>
-            <br />
-            <label for="birthday" class="form-label fs-5">生日</label>
-            <input type="date" class="form-control w-25" id="birthday" name="birthday" required />
-            <br />
-            <label for="phone" class="form-label fs-5">行動電話</label>
-            <input type="tel" class="form-control w-25" id="phone" name="phone" placeholder="請輸入行動電話" required />
-            <br />
-            <label for="personal-id-no" class="form-label fs-5">身分證字號</label>
-            <input type="text" class="form-control w-25" id="personal-id-no" name="personal_id_no"
-                placeholder="請輸入身分證字號" required />
-            <span id="twIdMsg" style="visibility: hidden"><i class="fa-solid fa-circle-xmark"></i> 身分證字號錯誤</span>
-            <br />
-            <label for="country" class="form-label fs-5">國家</label>
-            <select class="form-select w-25" id="country" name="country" required></select>
-            <br />
-            <div class="form-group"></div>
-            <label for="address" class="form-label fs-5">聯絡地址</label>
-            <input type="text" class="form-control w-50" id="address" name="address" minlength="10" placeholder="請輸入地址"
-                required />
-            <br />
-            <label for="passport-no" class="form-label fs-5">護照號碼</label>
-            <input type="text" class="form-control w-25" id="passport-no" name="passport_no" placeholder="請輸入護照號碼"
-                required />
-            <br />
-            <button type="submit" class="btn btn-primary">註冊</button>
+        <h4 style="color: red; font-weight: bold;">標示 * 為必填欄位，本國人需必填 身分證字號 ，護照號碼則選填，外國人必填護照號碼!</h4>
+        <form method="post" id="register" class="row">
+            <!-- 左欄 -->
+            <div class="col-md-6">
+                <label for="email" class="form-label fs-5">電子信箱<span
+                        style="color: red; font-weight: bold;">*</span></label>
+                <input type="email" class="form-control" id="email" name="email" placeholder="請輸入電子信箱" required />
+                <span id="EmailMsg" style="visibility: hidden"><i class="fa-solid fa-circle-xmark"></i></span>
+                <br />
+
+                <label for="password" class="form-label fs-5">密碼<span style="color: red; font-weight: bold;">*</span>
+                    <button type="button" class="btn btn-warning mx-2" data-bs-container="body" data-bs-toggle="popover"
+                        data-bs-placement="right" data-bs-content="至少8字,上限為64字,需有大小寫英文,數字,特殊字元!@#$%^*">
+                        密碼規則
+                    </button></label>
+                <div class="row">
+                    <div class="col">
+                        <input type="password" class="form-control" id="password" name="password" placeholder="請輸入密碼"
+                            minlength="8" maxlength="64" required />
+                    </div>
+                    <div class="col-1">
+                        <i id="checkEye" class="fa-solid fa-eye fa-lg"></i>
+                    </div>
+                </div>
+
+                <span id="passwordMsg" style="visibility: hidden"><i class="fa-solid fa-circle-xmark"></i></span>
+                <br />
+
+                <label for="name" class="form-label fs-5">姓名<span
+                        style="color: red; font-weight: bold;">*</span></label>
+                <input type="text" class="form-control" id="name" name="name" placeholder="請輸入姓名" required />
+                <br />
+
+                <label for="gender" class="form-label fs-5">性別<span
+                        style="color: red; font-weight: bold;">*</span></label>
+                <select class="form-select" id="gender" name="gender" required>
+                    <option value="Male">男</option>
+                    <option value="Female">女</option>
+                    <option value="Other">其他</option>
+                </select>
+                <br />
+
+                <label for="birthday" class="form-label fs-5">生日<span
+                        style="color: red; font-weight: bold;">*</span></label>
+                <input type="date" class="form-control" id="birthday" name="birthday" required />
+                <br />
+            </div>
+
+            <!-- 右欄 -->
+            <div class="col-md-6">
+                <label for="phone" class="form-label fs-5">行動電話<span
+                        style="color: red; font-weight: bold;">*</span></label>
+                <input type="tel" class="form-control" id="phone" name="phone" placeholder="請輸入行動電話" required />
+                <br />
+
+                <label for="personal-id-no" class="form-label fs-5">身分證字號<span class="per-sp"
+                        style="font-weight: bold;"></span></label>
+                <input type="text" class="form-control" id="personal-id-no" name="personal_id_no" placeholder="請輸入身分證字號"
+                    required />
+                <span id="twIdMsg" style="visibility: hidden"><i class="fa-solid fa-circle-xmark"></i> 身分證字號錯誤</span>
+                <br />
+
+                <label for="country" class="form-label fs-5">國家<span
+                        style="color: red; font-weight: bold;">*</span></label>
+                <select class="form-select" id="country" name="country" required></select>
+                <br />
+
+                <label for="passport-no" class="form-label fs-5">護照號碼<span class="pass-sp"
+                        style="font-weight: bold;"></span></label>
+                <input type="text" class="form-control" id="passport-no" name="passport_no" placeholder="請輸入護照號碼"
+                    required />
+                <br />
+            </div>
+
+            <!-- 地址獨立一行 -->
+            <div class="col-12">
+                <label for="address" class="form-label fs-5">聯絡地址<span
+                        style="color: blue; font-weight: bold;">(選填)</span></label>
+                <input type="text" class="form-control" id="address" name="address" minlength="10"
+                    placeholder="請輸入地址" />
+                <br />
+            </div>
+
+            <!-- 按鈕 -->
+            <div class="col-12 text-center">
+                <button type="submit" class="btn btn-primary btn-lg px-5">註冊</button>
+                <button id="auto-keyin" class="btn btn-primary btn-lg px-5 mx-2">一鍵帶入</button>
+            </div>
         </form>
     </div>
 
@@ -108,6 +158,15 @@
         </script>
     <script src="https://code.jquery.com/jquery-3.7.1.js"
         integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+
+
+    <!-- popover -->
+    <script>
+        const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]')
+        const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl))
+    </script>
+
+
     <script>
         //國家列表api
         fetch("https://restcountries.com/v3.1/all")
@@ -177,7 +236,20 @@
                 });
         });
 
-
+        //一鍵帶入
+        $('#auto-keyin').on("click", (e) => {
+            e.preventDefault();
+            $('#name').val("王小明")
+            $("#email").val("WangXiaoMing@mail.com")
+            $("#password").val("J$6vul3au!6")
+            $('#gender').val("Male")
+            $('#birthday').val("1988-01-08")
+            $('#phone').val("0911123245")
+            $('#personal-id-no').val("A123456789")
+            $('#country').val("TWN")
+            $('#address').val("")
+            $('#passport-no').val("")
+        })
 
         //判斷身分別 移除必填屬性
         addEventListener("load", (e) => {
@@ -187,10 +259,14 @@
                 //本國人無須護照號碼也可訂房入住
                 $("#passport-no").removeAttr("required");
                 $("#personal-id-no").attr("required", true);
+                $(".per-sp").css("color", "red").text("*");
+                $(".pass-sp").text("");
             } else {
                 //外國人沒有身分證字號
                 $("#personal-id-no").removeAttr("required");
                 $("#passport-no").attr("required", true);
+                $(".pass-sp").css("color", "red").text("*");
+                $(".per-sp").text("");
             }
         });
         $("#identity").change((e) => {
@@ -199,33 +275,54 @@
                 //本國人無須護照號碼也可訂房入住
                 $("#passport-no").removeAttr("required");
                 $("#personal-id-no").attr("required", true);
+                $(".per-sp").css("color", "red").text("*");
+                $(".pass-sp").text("");
             } else {
                 //外國人沒有身分證字號
                 $("#personal-id-no").removeAttr("required");
                 $("#passport-no").attr("required", true);
+                $(".pass-sp").css("color", "red").text("*");
+                $(".per-sp").text("");
             }
         });
 
         //email
         $("#email").blur(function () {
             let email = $(this).val();
-            axios.post('http://localhost:8080/CloudSerenityHotel/user/checkEmail', email)
-                .then(function (response) {
-                    console.log(response.data);
 
-                    if (response.data == "ok") {
-                        $("#EmailMsg").html('<i class="fa-solid fa-circle-check"></i> 此Email可以使用').css("color", "green")
-                    } else {
-                        $("#EmailMsg").html('<i class="fa-solid fa-circle-xmark"></i> 此Email已被使用')
-                    }
-                    $("#EmailMsg").css("visibility", "visible");
-                })
-                .catch(function (error) {
-                    console.log(error);
-                })
+            if (email.length != 0) {
+                axios.post('http://localhost:8080/CloudSerenityHotel/user/checkEmail', { email })
+                    .then(function (response) {
+                        console.log(response.data);
+
+                        if (response.data == "ok") {
+                            $("#EmailMsg").html('<i class="fa-solid fa-circle-check"></i> 此Email可以使用').css("color", "green")
+                        } else {
+                            $("#EmailMsg").html('<i class="fa-solid fa-circle-xmark"></i> 此Email已被使用').css("color", "#c70000")
+                        }
+                        $("#EmailMsg").css("visibility", "visible");
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    })
+            } else {
+                $("#EmailMsg").html('<i class="fa-solid fa-circle-xmark"></i> Email不可為空白').css("color", "#c70000")
+                $("#EmailMsg").css("visibility", "visible");
+            }
+
         });
 
-        //password
+        //password 顯示開關
+        $("#checkEye").click(function () {
+            if ($(this).hasClass('fa-eye')) {
+                $("#password").attr('type', 'text');
+            } else {
+                $("#password").attr('type', 'password');
+            }
+            $(this).toggleClass('fa-eye').toggleClass('fa-eye-slash');
+        });
+
+        //password 檢查
         $("#password").blur(function () {
             let content = $(this).val();
             let contentLength = $(this).val().length;

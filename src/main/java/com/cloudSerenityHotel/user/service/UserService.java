@@ -38,7 +38,7 @@ public class UserService implements UserServiceInterface {
 	@Override
 	public int checkEmail(String email) {
 		User checkResult = uRepository.findByEmail(email).orElse(null);
-		if (checkResult == null) {
+		if (checkResult == null) {//沒有人使用
 			return 1;
 		}
 		return 0;
