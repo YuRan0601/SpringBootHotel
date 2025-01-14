@@ -121,7 +121,7 @@ public class RoomServiceImpl implements RoomService {
 	private List<RoomTypeImg> uploadImgs(MultipartFile typePrimaryImg, MultipartFile[] typeImg) {
 		List<RoomTypeImg> imgs = new ArrayList<>();
 		
-		if(!typePrimaryImg.isEmpty()) {
+		if(typeImg != null) {
 			String originalFilename = typePrimaryImg.getOriginalFilename();
 			String fileName =  UUID.randomUUID() + originalFilename.substring(originalFilename.lastIndexOf("."), originalFilename.length());
 			File file = new File(uploadPath + fileName);
@@ -136,24 +136,25 @@ public class RoomServiceImpl implements RoomService {
 			imgs.add(new RoomTypeImg(null, null, imgUrl, true, null, null));
 		}
 		
-		
-		for (MultipartFile img : typeImg) {
-			if(img.isEmpty()) {
-				continue;
-			}
-			String originalFilename = img.getOriginalFilename();
-			String fileName =  UUID.randomUUID() + originalFilename.substring(originalFilename.lastIndexOf("."), originalFilename.length());
-			File file = new File(uploadPath + fileName);
-			try {
-				img.transferTo(file.getAbsoluteFile());
-			} catch (IllegalStateException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			String imgUrl = imgUrlPrefix + fileName;
-			imgs.add(new RoomTypeImg(null, null, imgUrl, false, null, null));
-		}	
+		if(typeImg != null && typeImg.length != 0) {
+			for (MultipartFile img : typeImg) {
+				if(img.isEmpty()) {
+					continue;
+				}
+				String originalFilename = img.getOriginalFilename();
+				String fileName =  UUID.randomUUID() + originalFilename.substring(originalFilename.lastIndexOf("."), originalFilename.length());
+				File file = new File(uploadPath + fileName);
+				try {
+					img.transferTo(file.getAbsoluteFile());
+				} catch (IllegalStateException e) {
+					e.printStackTrace();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				String imgUrl = imgUrlPrefix + fileName;
+				imgs.add(new RoomTypeImg(null, null, imgUrl, false, null, null));
+			}	
+		}
 		
 		
 		return imgs;
