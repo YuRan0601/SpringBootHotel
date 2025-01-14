@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
@@ -41,7 +42,7 @@ import jakarta.servlet.http.Part;
 @RestController
 @RequestMapping("/room")
 @MultipartConfig
-@CrossOrigin
+@CrossOrigin(origins = {"http://localhost:5173"}, methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
 public class RoomController {
 	@Autowired
 	private RoomService roomService;
@@ -60,9 +61,9 @@ public class RoomController {
 	}
 
 	@PostMapping(path = "/type", consumes = "multipart/form-data")
-	public Integer insertRoomType(@RequestPart String roomTypeJson,
-			@RequestPart(required = false) MultipartFile typePrimaryImg,
-			@RequestPart(required = false) MultipartFile[] typeImg
+	public Integer insertRoomType(@RequestParam String roomTypeJson,
+			@RequestParam(required = false) MultipartFile typePrimaryImg,
+			@RequestParam(required = false) MultipartFile[] typeImg
 			)
 	{
 		
@@ -73,7 +74,6 @@ public class RoomController {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-			
 		return roomService.insertRoomTypeAndImg(roomType, typePrimaryImg, typeImg);	
 	}
 
