@@ -154,8 +154,9 @@ public class UserService implements UserServiceInterface {
 			result.put("code", 505); // 505 顯示未登入
 			return result;
 		}
-
-		User user = userDao.findAdminById(userId);
+		
+		Optional<User> opUser = uRepository.findById(userId);
+		User user = opUser.get();
 
 		if (user == null) {
 			result.put("code", 404); // 404 沒有找到user
