@@ -21,7 +21,7 @@ import com.cloudSerenityHotel.base.BaseController;
 import com.cloudSerenityHotel.order.model.OrderBean;
 import com.cloudSerenityHotel.order.model.OrderItemsBean;
 import com.cloudSerenityHotel.order.service.impl.OrderServiceImpl;
-
+// 測試
 @Controller
 @RequestMapping("/Order") // 設定這個 Controller 處理 /Order 開頭的請求
 // 進入點URL -> http://localhost:8080/CloudSerenityHotel/Order/findAllOrders
