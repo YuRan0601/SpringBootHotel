@@ -92,13 +92,19 @@ public class RoomController {
 
 	@PutMapping(path = "/type", consumes = "multipart/form-data")
 	public Integer updateRoomType(
-			@RequestPart String roomTypeJson,
-			@RequestPart MultipartFile typePrimaryImg,
-			@RequestPart MultipartFile[] typeImg,
+			@RequestParam String roomTypeJson,
+			@RequestParam(required = false) MultipartFile typePrimaryImg,
+			@RequestParam(required = false) MultipartFile[] typeImg,
 			@RequestParam(required = false) String deletePrImgIdAndUrl,
 			@RequestParam(required = false, defaultValue = "") String[] deleteOtherImgsIdAndUrl)
 	{
 		RoomType roomType = null;
+		
+		System.out.println(roomTypeJson);
+		System.out.println(typePrimaryImg);
+		System.out.println(typeImg);
+		System.out.println(deletePrImgIdAndUrl);
+		System.out.println(deleteOtherImgsIdAndUrl);
 		
 		try {
 			roomType = objectMapper.readValue(roomTypeJson, RoomType.class);

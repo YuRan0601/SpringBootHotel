@@ -92,7 +92,24 @@ public class RoomServiceImpl implements RoomService {
 		
 		for (RoomType roomType : roomTypes) {
 			Map<String, Object> roomTypeMap = roomTypeToMap(roomType);
-			roomTypeMap.put("imgs", roomTypeImgToMapList(roomType.getImgs()));
+			
+			List<Map<String, Object>> imgMapList = roomTypeImgToMapList(roomType.getImgs());
+			
+			for (Map<String, Object> map : imgMapList) {
+				if((boolean)map.get("isPrimary")) {
+					//主圖片裝入prImg
+					roomTypeMap.put("prImg", map);
+				} else {
+					//其他圖片裝入imgs
+					if(!roomTypeMap.containsKey("imgs")) {
+						roomTypeMap.put("imgs", new ArrayList<Map<String, Object>>());
+					}
+					
+					ArrayList list = (ArrayList)roomTypeMap.get("imgs");
+					list.add(map);
+				}
+			}
+
 			res.add(roomTypeMap);
 		}
 		
@@ -176,7 +193,17 @@ public class RoomServiceImpl implements RoomService {
 		Map<String, Object> roomTypeMap = roomTypeToMap(roomType);
 		
 		res.put("roomType", roomTypeMap);
-		res.put("imgs", roomTypeImgToMapList(roomType.getImgs()));
+		
+		List<Map<String, Object>> imgMapList = roomTypeImgToMapList(roomType.getImgs());
+		
+		for (Map<String, Object> map : imgMapList) {
+			if((boolean)map.get("isPrimary")) {
+				res.put("prImg", map);
+				imgMapList.remove(map);
+			}
+		}
+		
+		res.put("imgs", imgMapList);
 		
 		return res;
 	}
