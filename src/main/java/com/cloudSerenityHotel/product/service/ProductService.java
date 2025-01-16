@@ -15,4 +15,8 @@ public interface ProductService {
 	int uploadImage(Products products,ProductImages Images);
 	int deleteProduct(Integer productId);
 	int updateProduct(Products products,Categories categories);
+	
+// 有關訂單方法
+	// 多商品查詢
+	List<Products> findProductsById(List<Integer> productIds);
 }

@@ -8,6 +8,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -21,7 +22,10 @@ import com.cloudSerenityHotel.base.BaseController;
 import com.cloudSerenityHotel.order.model.OrderBean;
 import com.cloudSerenityHotel.order.model.OrderItemsBean;
 import com.cloudSerenityHotel.order.service.impl.OrderServiceImpl;
+import com.cloudSerenityHotel.product.model.Products;
+import com.cloudSerenityHotel.product.service.impl.ProductServiceImpl;
 // 測試
+@CrossOrigin
 @Controller
 @RequestMapping("/Order") // 設定這個 Controller 處理 /Order 開頭的請求
 // 進入點URL -> http://localhost:8080/CloudSerenityHotel/Order/findAllOrders
@@ -30,6 +34,9 @@ public class OrderController extends BaseController {
 
 	@Autowired
 	private OrderServiceImpl orderServiceImpl;
+	
+	@Autowired
+	private ProductServiceImpl productServiceImpl;
 
 	// 查詢所有訂單_這是傳統的 Spring MVC 用法，返回 JSP 頁面
 	@GetMapping("/findAllOrders")
@@ -84,12 +91,15 @@ public class OrderController extends BaseController {
 		// 封裝訂單
 		@PostMapping("/add")
 		public String createOrder(@ModelAttribute OrderBean order,
-		                          @RequestParam List<Integer> productId,
+		                          @RequestParam List<Integer> productId, // 商品 ID 列表
 		                          @RequestParam List<Integer> quantity,
 		                          @RequestParam List<String> unitPrice,
 		                          @RequestParam List<String> discount) {
+			// 從數據庫加載商品實體
+			List<Products> products = productServiceImpl.findProductsById(productId);
+			
 		    // 使用封裝好的方法來創建訂單細項
-		    List<OrderItemsBean> orderItems = createOrderItems(productId, quantity, unitPrice, discount);
+		    List<OrderItemsBean> orderItems = createOrderItems(products, quantity, unitPrice, discount);
 	
 		    // 插入訂單和訂單細項
 		    orderServiceImpl.insertOrderWithItems(order, orderItems);
@@ -99,14 +109,18 @@ public class OrderController extends BaseController {
 		}
 	
 		// 封裝訂單細項的創建邏輯，使用 BigDecimal
-		private List<OrderItemsBean> createOrderItems(List<Integer> productId,
+		private List<OrderItemsBean> createOrderItems(List<Products> products,
 		                                              List<Integer> quantity,
 		                                              List<String> unitPrice,
 		                                              List<String> discount) {
 		    List<OrderItemsBean> orderItems = new ArrayList<>();
-		    for (int i = 0; i < productId.size(); i++) {
+		    for (int i = 0; i < products.size(); i++) {
 		        OrderItemsBean item = new OrderItemsBean();
-		        item.setProductId(productId.get(i));
+		        
+		        // 設置關聯的商品
+		        item.setProducts(products.get(i));
+		        
+		     // 設置數量
 		        item.setQuantity(quantity.get(i));
 	
 		        // 使用 BigDecimal 來處理價格和折扣
@@ -119,6 +133,9 @@ public class OrderController extends BaseController {
 		        // 計算 subtotal (單價 - 折扣) * 數量
 		        BigDecimal subtotal = unitPriceValue.subtract(discountValue).multiply(BigDecimal.valueOf(quantity.get(i)));
 		        item.setSubtotal(subtotal);  // 設定小計
+		        
+		        // 小計的計算交由 Service 處理
+		        //orderItemService.calculateAndSetSubtotal(item);
 	
 		        orderItems.add(item);
 		    }

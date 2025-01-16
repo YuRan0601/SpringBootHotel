@@ -1,5 +1,6 @@
 package com.cloudSerenityHotel.order.model;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.Set; // 使用 Java 的 Set
@@ -26,7 +27,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Entity
 @Table(name = "Orders")
-public class OrderBean implements java.io.Serializable {
+public class OrderBean implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id

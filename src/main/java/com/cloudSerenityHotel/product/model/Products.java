@@ -64,8 +64,7 @@ public class Products implements Serializable{
 
 //	@OneToMany(fetch = FetchType.LAZY, mappedBy = "products",cascade = CascadeType.ALL)
 //	private Set<ProductImages> productImages = new LinkedHashSet<ProductImages>();
-//	
-//	
+
 //	@ManyToMany(mappedBy = "products",cascade = {CascadeType.MERGE,CascadeType.PERSIST})
 //	private Set<Categories> categories = new HashSet<Categories>();
 	
