@@ -80,6 +80,7 @@ public class RoomServiceImpl implements RoomService {
 			map.put("typeDesc", roomType.getTypeDesc());
 		}
 		
+		map.put("price", roomType.getPrice());
 		map.put("maxCapacity", roomType.getMaxCapacity());
 		map.put("createdDate", sdf.format(roomType.getCreatedDate()));
 		map.put("updatedDate", sdf.format(roomType.getUpdatedDate()));
@@ -271,7 +272,6 @@ public class RoomServiceImpl implements RoomService {
 		map.put("roomTypeName", room.getRoomType().getTypeName());
 		map.put("roomName", room.getRoomName());
 		map.put("roomDescription", room.getRoomDescription());
-		map.put("price", room.getPrice());
 		
 		if(room.getStatus().equals("available")) {
 			map.put("status", "空閒中");
@@ -298,7 +298,6 @@ public class RoomServiceImpl implements RoomService {
 			map.put("roomTypeName", room.getRoomType().getTypeName());
 			map.put("roomName", room.getRoomName());
 			map.put("roomDescription", room.getRoomDescription());
-			map.put("price", room.getPrice());
 			
 			if(room.getStatus().equals("available")) {
 				map.put("status", "空閒中");

@@ -39,8 +39,6 @@ public class Room implements Serializable {
 	@Column(name = "room_description")
 	private String roomDescription;
 	
-	@Column(name = "price")
-	private BigDecimal price;
 	
 	@Column(name = "status")
 	private String status;

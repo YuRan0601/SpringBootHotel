@@ -1,6 +1,7 @@
 package com.cloudSerenityHotel.booking.model;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -44,6 +45,9 @@ public class RoomType implements Serializable{
 	
 	@Column(name = "type_desc")
 	private String typeDesc;
+	
+	@Column(name = "price")
+	private BigDecimal price;
 	
 	@Column(name = "max_capacity")
 	private Integer maxCapacity;
