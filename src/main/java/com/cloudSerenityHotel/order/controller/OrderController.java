@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.cloudSerenityHotel.base.BaseController;
@@ -26,7 +27,7 @@ import com.cloudSerenityHotel.product.model.Products;
 import com.cloudSerenityHotel.product.service.impl.ProductServiceImpl;
 // 測試
 @CrossOrigin
-@Controller
+@RestController // 變為JSON格式
 @RequestMapping("/Order") // 設定這個 Controller 處理 /Order 開頭的請求
 // 進入點URL -> http://localhost:8080/CloudSerenityHotel/Order/findAllOrders
 public class OrderController extends BaseController {
@@ -101,6 +102,10 @@ public class OrderController extends BaseController {
 		    // 使用封裝好的方法來創建訂單細項
 		    List<OrderItemsBean> orderItems = createOrderItems(products, quantity, unitPrice, discount);
 	
+		    // 計算訂單的總金額，並設置到訂單對象
+		    BigDecimal finalAmount = orderServiceImpl.calculateOrderFinalAmount(orderItems);
+		    order.setFinalAmount(finalAmount);
+		    
 		    // 插入訂單和訂單細項
 		    orderServiceImpl.insertOrderWithItems(order, orderItems);
 	
@@ -120,22 +125,13 @@ public class OrderController extends BaseController {
 		        // 設置關聯的商品
 		        item.setProducts(products.get(i));
 		        
-		     // 設置數量
+		        // 設置數量、單價和折扣
 		        item.setQuantity(quantity.get(i));
+		        item.setUnitPrice(new BigDecimal(unitPrice.get(i)));  
+		        item.setDiscount(new BigDecimal(discount.get(i)));    
 	
-		        // 使用 BigDecimal 來處理價格和折扣
-		        BigDecimal unitPriceValue = new BigDecimal(unitPrice.get(i));
-		        BigDecimal discountValue = new BigDecimal(discount.get(i));
-	
-		        item.setUnitPrice(unitPriceValue);  // 設定單價
-		        item.setDiscount(discountValue);    // 設定折扣
-	
-		        // 計算 subtotal (單價 - 折扣) * 數量
-		        BigDecimal subtotal = unitPriceValue.subtract(discountValue).multiply(BigDecimal.valueOf(quantity.get(i)));
-		        item.setSubtotal(subtotal);  // 設定小計
-		        
-		        // 小計的計算交由 Service 處理
-		        //orderItemService.calculateAndSetSubtotal(item);
+		        // 調用 Service 計算小計
+		        orderServiceImpl.calculateSubTotal(item);
 	
 		        orderItems.add(item);
 		    }

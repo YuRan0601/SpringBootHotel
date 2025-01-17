@@ -151,18 +151,44 @@ public class OrderServiceImpl implements OrderService{
 		// 小計屬於商品邏輯，由 OrderItemsBean 負責
 		@Override
 		public OrderItemsBean calculateSubTotal(OrderItemsBean orderItems) {
-			// TODO Auto-generated method stub
-			return null;
+			// 確保單價和數量不為 null
+			if (orderItems.getUnitPrice() != null && orderItems.getQuantity() != null) {
+				// 獲取單價
+				BigDecimal unitPrice = orderItems.getUnitPrice();
+				// 如果折扣為 null，默認設置為 0
+				BigDecimal discount = orderItems.getDiscount() != null ? orderItems.getDiscount() : BigDecimal.ZERO;
+				// 獲取購買數量
+				int quantity = orderItems.getQuantity();
+				
+				// 計算小計: (單價 - 折扣) * 數量
+				BigDecimal subtotal = unitPrice.subtract(discount).multiply(BigDecimal.valueOf(quantity));
+				// 更新小計屬性
+				orderItems.setSubtotal(subtotal);
+				
+			} else {
+				// 如果數據不完整（例如單價或數量為 null），設置小計為 0
+				orderItems.setSubtotal(BigDecimal.ZERO);
+			}
+			// 返回更新後的對象
+			return orderItems;
 		}
-		
-		//未來有折扣需求
-		
 		
 		// 總金額屬於訂單邏輯，由 List<OrderItemsBean> 負責
 		@Override
 		public BigDecimal calculateOrderFinalAmount(List<OrderItemsBean> items) {
-			// TODO Auto-generated method stub
-			return null;
+			// 初始化總金額為 0
+			BigDecimal finalAmount = BigDecimal.ZERO;
+			// 遍歷所有訂單項
+			for (OrderItemsBean item : items) {
+				// 如果小計不為 null，累加到總金額
+				if (item.getSubtotal() != null) {
+					finalAmount = finalAmount.add(item.getSubtotal());
+				}
+			}
+			// 返回計算出的總金額
+			return finalAmount;
 		}
+		
+		//未來有折扣需求
 	
 }
