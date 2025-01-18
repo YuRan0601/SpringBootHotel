@@ -1,33 +1,25 @@
 package com.cloudSerenityHotel.product.controller;
 
-import jakarta.persistence.PostLoad;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.MultipartConfig;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.Part;
-
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.cloudSerenityHotel.base.BaseController;
 import com.cloudSerenityHotel.product.model.Categories;
 import com.cloudSerenityHotel.product.model.ProductImages;
 import com.cloudSerenityHotel.product.model.Products;
-import com.cloudSerenityHotel.product.service.ProductService;
 import com.cloudSerenityHotel.product.service.impl.ProductServiceImpl;
 
 @Controller
@@ -133,5 +125,19 @@ public class ProductController {
 		m.addAttribute("allProducts", productService.selectAllProduct());
 		return "redirect:/selectAll";
 	}
+	
+	// for 訂單新增
+	@GetMapping("/getProductById")
+    @ResponseBody
+    public Map<String, Object> getProductById(@RequestParam Integer productId) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            Products product = productService.findProductsById(List.of(productId)).get(0);
+            response.put("price", product.getPrice());
+        } catch (Exception e) {
+            response.put("error", "Product not found");
+        }
+        return response;
+    }
 	
 }

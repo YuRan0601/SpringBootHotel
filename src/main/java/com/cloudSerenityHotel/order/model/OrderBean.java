@@ -5,6 +5,9 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.Set; // 使用 Java 的 Set
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -77,6 +80,7 @@ public class OrderBean implements Serializable {
 
 	// 訂單與訂單細項的雙向關聯
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "order", cascade = CascadeType.ALL)
+	@JsonIgnoreProperties({"order"}) // 忽略 OrderItemsBean 中的 order，避免循環依賴
 	private Set<OrderItemsBean> orderItemsBeans; // 關聯的訂單細項
 
 	// update 所需之 constructor

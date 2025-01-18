@@ -3,21 +3,24 @@ package com.cloudSerenityHotel.order.controller;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.cloudSerenityHotel.base.BaseController;
 import com.cloudSerenityHotel.order.model.OrderBean;
@@ -25,8 +28,11 @@ import com.cloudSerenityHotel.order.model.OrderItemsBean;
 import com.cloudSerenityHotel.order.service.impl.OrderServiceImpl;
 import com.cloudSerenityHotel.product.model.Products;
 import com.cloudSerenityHotel.product.service.impl.ProductServiceImpl;
-// 測試
-@CrossOrigin
+
+@CrossOrigin(
+	    origins = {"http://localhost:5173"}, // Vue 的本地開發環境域名
+	    methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE} // 明確允許的請求方法
+	)
 @RestController // 變為JSON格式
 @RequestMapping("/Order") // 設定這個 Controller 處理 /Order 開頭的請求
 // 進入點URL -> http://localhost:8080/CloudSerenityHotel/Order/findAllOrders
@@ -41,23 +47,32 @@ public class OrderController extends BaseController {
 
 	// 查詢所有訂單_這是傳統的 Spring MVC 用法，返回 JSP 頁面
 	@GetMapping("/findAllOrders")
-	public String findAllOrders(Model model) {
+	public List<OrderBean> findAllOrders() {
+        return orderServiceImpl.selectAll();
+    }
+	/*public String findAllOrders(Model model) {
 		List<OrderBean> orders = orderServiceImpl.selectAll();
 		model.addAttribute("orders", orders);
-		return "/order/jsp/OrderList.jsp"; // 返回 JSP 頁面
-	}
-
-	// 查詢所有訂單_這是 RESTful API 用法，返回 JSON 資料
-	/*
-	 * @GetMapping("/findAllOrders") public ResponseEntity<List<OrderBean>>
-	 * findAllOrders(){ List<OrderBean> orders = orderServiceImpl.selectAll(); if
-	 * (orders.isEmpty()) { return
-	 * ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // 沒有訂單的情況下，返回 404 }
-	 * return ResponseEntity.ok(orders); // 返回 200 OK 和訂單列表 }
-	 */
+		return "/order/jsp/OrderList.jsp";  //返回 JSP 頁面
+	}*/
 
 	// 查詢單筆訂單
-	@GetMapping("/findOrderById")
+	@GetMapping("/findOrderById/{orderId}")
+	public ResponseEntity<OrderBean> findOrderById(@PathVariable int orderId) {
+	    try {
+	        OrderBean order = orderServiceImpl.selectOrderById(orderId);
+
+	        // 獲取並設置訂單細項
+	        List<OrderItemsBean> orderItems = orderServiceImpl.findOrderItemsByOrderId(orderId);
+	        order.setOrderItemsBeans(new HashSet<>(orderItems));
+
+	        return ResponseEntity.ok(order);
+	    } catch (Exception e) {
+	        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+	    }
+	}
+
+	/*@GetMapping("/findOrderById")
 	public String findOrderById(@RequestParam int orderId, Model m) {
 		// 查詢訂單
 		OrderBean order = orderServiceImpl.selectOrderById(orderId);
@@ -72,10 +87,17 @@ public class OrderController extends BaseController {
 		
 		return "/order/jsp/OrderDetail.jsp";
 		//return "redirect:/CloudSerenityHotel/Order/findAllOrders";
-	}
+	}*/
 	
 	// 刪除單筆訂單
-	@DeleteMapping("/{orderId}")
+	@DeleteMapping("/delete/{orderId}")
+    public ResponseEntity<String> deleteOrder(@PathVariable int orderId) {
+        boolean isDeleted = orderServiceImpl.deleteOrderById(orderId);
+        return isDeleted
+                ? ResponseEntity.ok("刪除成功")
+                : ResponseEntity.status(HttpStatus.NOT_FOUND).body("刪除失敗：訂單不存在");
+    }
+	/*@DeleteMapping("/{orderId}")
 	public String deleteOrder(@PathVariable int orderId, RedirectAttributes redirectAttributes) {
 	    boolean isDeleted = orderServiceImpl.deleteOrderById(orderId);
 	    
@@ -86,9 +108,39 @@ public class OrderController extends BaseController {
 	    }
 
 	    return "redirect:/Order/findAllOrders"; // 刪除後返回訂單列表頁面
-	}
+	}*/
 	
 	// 新增訂單
+	@PostMapping("/add")
+	public ResponseEntity<Map<String, Object>> createOrder(@RequestBody OrderBean order) {
+		try {
+			List<OrderItemsBean> orderItems = new ArrayList<>(order.getOrderItemsBeans());
+			for (OrderItemsBean item : orderItems) {
+				Products product = productServiceImpl.findProductsById(List.of(item.getProducts().getProductId()))
+						.get(0);
+				item.setProducts(product);
+				orderServiceImpl.calculateSubTotal(item);
+			}
+
+			BigDecimal finalAmount = orderServiceImpl.calculateOrderFinalAmount(orderItems);
+			order.setFinalAmount(finalAmount);
+			order.setOrderItemsBeans(new HashSet<>(orderItems));
+			orderServiceImpl.insertOrderWithItems(order, orderItems);
+
+			Map<String, Object> response = new HashMap<>();
+			response.put("success", true);
+			response.put("message", "訂單新增成功");
+			response.put("orderId", order.getOrderId());
+
+			return ResponseEntity.ok(response);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body(Map.of("success", false, "message", "訂單新增失敗：" + e.getMessage()));
+		}
+	}
+
+	 	/*
 		// 封裝訂單
 		@PostMapping("/add")
 		public String createOrder(@ModelAttribute OrderBean order,
@@ -137,26 +189,41 @@ public class OrderController extends BaseController {
 		    }
 		    return orderItems;
 		}
+		*/
 
-		// 修改訂單
-		@PostMapping("/update")
-		public String updateOrder(@RequestParam int orderId,
-		                          @ModelAttribute OrderBean order,
-		                          Model model) {
-		    // 確保傳回正確的訂單ID
-		    order.setOrderId(orderId);  
-		    
-		    // 只有在更新時才設置修改日期，不修改創建日期
-		    OrderBean existingOrder = orderServiceImpl.selectOrderById(orderId);
-		    order.setOrderDate(existingOrder.getOrderDate());  // 保持創建日期不變
-		    order.setUpdatedAt(new Timestamp(System.currentTimeMillis()));  // 更新修改日期
+	// 修改訂單 
+	@PutMapping("/update/{orderId}")
+	public ResponseEntity<String> updateOrder(@PathVariable int orderId, @RequestBody OrderBean order) {
+		try {
+			order.setOrderId(orderId);
+			OrderBean existingOrder = orderServiceImpl.selectOrderById(orderId);
+			if (existingOrder == null) {
+				return ResponseEntity.status(HttpStatus.NOT_FOUND).body("修改失敗：訂單不存在");
+			}
+			order.setOrderDate(existingOrder.getOrderDate());
+			order.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
+			orderServiceImpl.updateOrderById(order);
 
-		    // 調用服務層進行保存
-		    orderServiceImpl.updateOrderById(order);
-
-		    // 重新導向到訂單詳情頁
-		    return "redirect:/Order/findOrderById?orderId=" + orderId;
+			return ResponseEntity.ok("修改訂單成功");
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("修改訂單失敗：" + e.getMessage());
 		}
+	}
+	/*
+	@PostMapping("/update")
+	public String updateOrder(@PathVariable int orderId, @RequestBody OrderBean order) {
+	    // 確保傳回正確的訂單ID
+	    order.setOrderId(orderId);  
+	    
+	    // 只有在更新時才設置修改日期，不修改創建日期
+	    OrderBean existingOrder = orderServiceImpl.selectOrderById(orderId);
+	    order.setOrderDate(existingOrder.getOrderDate());  // 保持創建日期不變
+	    order.setUpdatedAt(new Timestamp(System.currentTimeMillis()));  // 更新修改日期
 
+	    // 調用服務層進行保存
+	    orderServiceImpl.updateOrderById(order);
 
+	    return "修改訂單成功";
+	}*/
 }
