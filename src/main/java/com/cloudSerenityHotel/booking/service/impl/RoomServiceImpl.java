@@ -199,12 +199,18 @@ public class RoomServiceImpl implements RoomService {
 		
 		for (Map<String, Object> map : imgMapList) {
 			if((boolean)map.get("isPrimary")) {
-				res.put("prImg", map);
-				imgMapList.remove(map);
+				//主圖片裝入prImg
+				roomTypeMap.put("prImg", map);
+			} else {
+				//其他圖片裝入imgs
+				if(!roomTypeMap.containsKey("imgs")) {
+					roomTypeMap.put("imgs", new ArrayList<Map<String, Object>>());
+				}
+				
+				ArrayList list = (ArrayList)roomTypeMap.get("imgs");
+				list.add(map);
 			}
 		}
-		
-		res.put("imgs", imgMapList);
 		
 		return res;
 	}
