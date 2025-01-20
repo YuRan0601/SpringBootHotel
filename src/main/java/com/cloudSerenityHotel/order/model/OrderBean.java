@@ -5,8 +5,8 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.Set; // 使用 Java 的 Set
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -80,26 +80,8 @@ public class OrderBean implements Serializable {
 
 	// 訂單與訂單細項的雙向關聯
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "order", cascade = CascadeType.ALL)
-	@JsonIgnoreProperties({"order"}) // 忽略 OrderItemsBean 中的 order，避免循環依賴
+	@JsonIgnoreProperties({"order"}) // 只忽略 `order`，保留 `products`
+	//@JsonIgnoreProperties({"order"}) // 忽略 OrderItemsBean 中的 order，避免循環依賴
 	private Set<OrderItemsBean> orderItemsBeans; // 關聯的訂單細項
 
-	// update 所需之 constructor
-	public OrderBean(Integer orderId, Integer userId, String receiveName, String email, String phoneNumber,
-			String address, String orderStatus, String paymentMethod, BigDecimal totalAmount, int pointsDiscount,
-			BigDecimal discountAmount, BigDecimal finalAmount, Timestamp orderDate, Timestamp updatedAt) {
-		this.orderId = orderId;
-		this.userId = userId;
-		this.receiveName = receiveName;
-		this.email = email;
-		this.phoneNumber = phoneNumber;
-		this.address = address;
-		this.orderStatus = orderStatus;
-		this.paymentMethod = paymentMethod;
-		this.totalAmount = totalAmount;
-		this.pointsDiscount = pointsDiscount;
-		this.discountAmount = discountAmount;
-		this.finalAmount = finalAmount;
-		this.orderDate = orderDate; // 保持原創建時間
-		this.updatedAt = updatedAt; // 更新時間
-	}
 }

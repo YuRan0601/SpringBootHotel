@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -67,6 +68,20 @@ public class OrderServiceImpl implements OrderService{
 		}
 	
 //單純訂單細項
+		
+		// 刪除單一訂單細項
+		@Override
+		public boolean deleteOrderItemById(Integer orderItemId) {
+			try {
+				orderItemsDao.deleteById(orderItemId);
+				return true;
+			} catch (Exception e) {
+				e.printStackTrace();
+				return false;
+			}
+			// return orderItemsDao.deleteOne(orderItemId); // 舊Hibernate&自定義方法
+		}
+		
 		// 為已存在訂單新增訂單細項
 		@Override
 		public List<OrderItemsBean> insertItemsToExistingOrder(Integer orderId, List<OrderItemsBean> items) {
@@ -86,28 +101,48 @@ public class OrderServiceImpl implements OrderService{
 			// 如果找不到對應的訂單，則返回空的列表
 			return new ArrayList<>();
 		}
-	
-		// 修改單一訂單細項
-		/*@Override
-		public OrderItemsBean updateOrderItem(OrderItemsBean orderItem) {
-			// TODO Auto-generated method stub
-			return null;
-		}*/
 		
-		// 刪除單一訂單細項
-		@Override
-		public boolean deleteOrderItemById(Integer orderItemId) {
-			try {
-				orderItemsDao.deleteById(orderItemId);
-				return true;
-			} catch (Exception e) {
-				e.printStackTrace();
-				return false;
+		// 修改訂單
+			//單筆更新
+			@Override
+			public OrderItemsBean updateOrderItem(OrderItemsBean orderItem) {
+				// 單筆細項更新，直接調用 JPA save 方法
+			    return orderItemsDao.save(orderItem); // JPA 的 save 方法
 			}
-			//return orderItemsDao.deleteOne(orderItemId); // 舊Hibernate&自定義方法
-		}
+			
+			//用於批量更新多筆訂單細項
+			@Override
+			public void updateOrderItems(int orderId, List<OrderItemsBean> orderItems) {
+			    // 查詢關聯的 OrderBean
+			    OrderBean order = orderDao.findById(orderId)
+			            .orElseThrow(() -> new RuntimeException("訂單不存在，ID: " + orderId));
+			    // 更新每個訂單細項
+			    for (OrderItemsBean item : orderItems) {
+			        item.setOrder(order); // 設置關聯的 OrderBean
+			        updateOrderItem(item); // 單筆更新
+			    }
+			}
 
 //訂單&訂單細項 
+			
+	//返回的是完整的 OrderBean
+		//包括訂單的主表數據、細項，以及細項中關聯的產品（Products）
+		@Override
+		public OrderBean getOrderDetails(Integer orderId) {
+		    OrderBean order = orderDao.findById(orderId)
+		            .orElseThrow(() -> new RuntimeException("訂單不存在，ID: " + orderId));
+
+		    // 初始化訂單細項
+		    Hibernate.initialize(order.getOrderItemsBeans());
+		    for (OrderItemsBean item : order.getOrderItemsBeans()) {
+		        Hibernate.initialize(item.getProducts()); // 初始化產品屬性
+		        System.out.println("產品名稱：" + item.getProducts().getName()); // 檢查商品名稱是否正確
+		    }
+
+		    return order;
+		}
+	
+	//返回的是 OrderItemsBean 的列表
 		// find_查詢訂單&訂單細項
 		@Override
 		public List<OrderItemsBean> findOrderItemsByOrderId(Integer orderId) {
@@ -117,78 +152,39 @@ public class OrderServiceImpl implements OrderService{
 		// insert_新增訂單&訂單細項
 		@Override
 		public OrderBean insertOrderWithItems(OrderBean orderBean, List<OrderItemsBean> items) {
-			// 插入訂單，並返回已設定的 orderId
-			// 使用 save 插入訂單，會自動生成 orderId
-			orderBean = orderDao.save(orderBean);
-			
-			// 為每個訂單細項設置 orderId 並一次性插入所有細項
-			for (OrderItemsBean oneItem : items) {
-				// 設置 order 實體
-				// 設置 OrderBean 實體
-				oneItem.setOrder(orderBean);
-			}
-			
-			// 使用 saveAll 一次插入所有訂單細項
-			orderItemsDao.saveAll(items);
-			//System.out.println("Inserted OrderId: " + orderBean.getOrderId());
-			
-			// 返回插入後的訂單資料，包含所有訂單細項
-			return orderBean;
+		    // 插入訂單主檔
+		    orderBean = orderDao.save(orderBean);
+
+		    // 插入訂單細項
+		    for (OrderItemsBean oneItem : items) {
+		        oneItem.setOrder(orderBean); // 關聯主檔
+		    }
+		    orderItemsDao.saveAll(items);
+
+		    // 計算總金額並更新訂單主檔
+		    calculateOrderTotal(orderBean, items);
+		    orderDao.save(orderBean); // 更新主檔總金額
+
+		    return orderBean;
 		}
-	
-		// update_更新訂單和訂單細項_待處理
-		/*@Override
-		public OrderBean updateOrderWithItems(OrderBean orderBean, List<OrderItemsBean> items) {
-			orderDaoImpl.updateOne(orderBean);
-			
-			for (OrderItemsBean oneItem : items) {
-				orderItemsDaoImpl.
-			}
-			return null;
-		}*/
 	
 //較複雜邏輯運算
-		// 小計屬於商品邏輯，由 OrderItemsBean 負責
-		@Override
-		public OrderItemsBean calculateSubTotal(OrderItemsBean orderItems) {
-			// 確保單價和數量不為 null
-			if (orderItems.getUnitPrice() != null && orderItems.getQuantity() != null) {
-				// 獲取單價
-				BigDecimal unitPrice = orderItems.getUnitPrice();
-				// 如果折扣為 null，默認設置為 0
-				BigDecimal discount = orderItems.getDiscount() != null ? orderItems.getDiscount() : BigDecimal.ZERO;
-				// 獲取購買數量
-				int quantity = orderItems.getQuantity();
-				
-				// 計算小計: (單價 - 折扣) * 數量
-				BigDecimal subtotal = unitPrice.subtract(discount).multiply(BigDecimal.valueOf(quantity));
-				// 更新小計屬性
-				orderItems.setSubtotal(subtotal);
-				
-			} else {
-				// 如果數據不完整（例如單價或數量為 null），設置小計為 0
-				orderItems.setSubtotal(BigDecimal.ZERO);
-			}
-			// 返回更新後的對象
-			return orderItems;
-		}
-		
-		// 總金額屬於訂單邏輯，由 List<OrderItemsBean> 負責
-		@Override
-		public BigDecimal calculateOrderFinalAmount(List<OrderItemsBean> items) {
-			// 初始化總金額為 0
-			BigDecimal finalAmount = BigDecimal.ZERO;
-			// 遍歷所有訂單項
-			for (OrderItemsBean item : items) {
-				// 如果小計不為 null，累加到總金額
-				if (item.getSubtotal() != null) {
-					finalAmount = finalAmount.add(item.getSubtotal());
-				}
-			}
-			// 返回計算出的總金額
-			return finalAmount;
-		}
-		
-		//未來有折扣需求
+		// 計算訂單總金額
+	    public void calculateOrderTotal(OrderBean order, List<OrderItemsBean> items) {
+	        BigDecimal totalAmount = BigDecimal.ZERO;
+	        BigDecimal discountAmount = BigDecimal.ZERO;
+
+	        for (OrderItemsBean item : items) {
+	            BigDecimal itemSubtotal = item.getUnitPrice()
+	                    .subtract(item.getDiscount()) // 單價減折扣
+	                    .multiply(BigDecimal.valueOf(item.getQuantity())); // 乘以數量
+	            totalAmount = totalAmount.add(itemSubtotal); // 累計總金額
+	            discountAmount = discountAmount.add(item.getDiscount().multiply(BigDecimal.valueOf(item.getQuantity())));
+	        }
+
+	        order.setTotalAmount(totalAmount);
+	        order.setDiscountAmount(discountAmount);
+	        order.setFinalAmount(totalAmount.subtract(discountAmount)); // 計算最終金額
+	    }
 	
 }

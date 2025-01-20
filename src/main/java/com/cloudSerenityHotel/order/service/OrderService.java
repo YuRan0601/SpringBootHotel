@@ -1,6 +1,5 @@
 package com.cloudSerenityHotel.order.service;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 import com.cloudSerenityHotel.order.model.OrderBean;
@@ -31,7 +30,7 @@ public interface OrderService {
 			List<OrderItemsBean> insertItemsToExistingOrder(Integer orderId, List<OrderItemsBean> items);
 		    
 		    // 修改單一訂單細項
-		    //OrderItemsBean updateOrderItem(OrderItemsBean orderItems);
+		    OrderItemsBean updateOrderItem(OrderItemsBean orderItem);
 		    
 		    // 刪除單一訂單細項
 		    boolean deleteOrderItemById(Integer orderItemId);
@@ -44,24 +43,25 @@ public interface OrderService {
 		     * 3.) 它的責任是「提供給 Controller 符合業務需求的功能」，會基於 DAO 做更多的邏輯處理（如額外計算或驗證等）。 
 		     */
 		    
+		    //包括訂單的主表數據、細項，以及細項中關聯的產品（Products）
+		    OrderBean getOrderDetails(Integer orderId);
+		    
 			// find_查詢訂單&訂單細項_OrderItemsDao(interface)有相同名稱的方法
 			List<OrderItemsBean> findOrderItemsByOrderId(Integer orderId);
 			
 			// insert_新增訂單&訂單細項
 			OrderBean insertOrderWithItems(OrderBean orderBean, List<OrderItemsBean> items);
+
+			void updateOrderItems(int orderId, List<OrderItemsBean> orderItems);
 			
 			// update_更新訂單和訂單細項
 			//OrderBean updateOrderWithItems(OrderBean orderBean, List<OrderItemsBean> items);
 			
 			
-    //較複雜邏輯運算			
-			// 小計屬於商品邏輯，由 OrderItemsBean 負責
-			OrderItemsBean calculateSubTotal(OrderItemsBean orderItems); // 計算商品小計
+    //較複雜邏輯運算
+			void calculateOrderTotal(OrderBean order, List<OrderItemsBean> items);
+
 			
-			//未來有折扣需求
-			//int calculateOrderFinalAmountWithDiscount(List<OrderItemsBean> items, Integer discountAmount);
 			
-			// 總金額屬於訂單邏輯，由 List<OrderItemsBean> 負責
-			BigDecimal calculateOrderFinalAmount(List<OrderItemsBean> items); // 計算訂單總金額
 		    
 }
