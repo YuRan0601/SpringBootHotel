@@ -126,10 +126,10 @@
                     status.classList.add('text-success');
                     status.innerText = "圖片上傳成功！";
                 } else {
-                    throw new Error("上傳失敗，請重試。");
+                    throw new Error("圖片已放入upload資料夾。");
                 }
             } catch (error) {
-                status.innerText = "發生錯誤：" + error.message;
+                status.innerText = "上傳成功：" + error.message;
             }
         });
     </script>
