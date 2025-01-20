@@ -1,10 +1,13 @@
 package com.cloudSerenityHotel.booking.controller;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -145,5 +148,13 @@ public class RoomController {
 	@PutMapping("")
 	public Integer updateRoom(@RequestBody Room room) {
 		return roomService.updateRoom(room);
+	}
+	
+	@GetMapping("/{checkInDate}/{checkOutDate}")
+	public List<Map<String, Object>> getAwailableRoomTypesAndRoomCountWithinDates
+		(@PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate checkInDate,
+		@PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate checkOutDate) 
+	{		
+		return roomService.getAwailableRoomTypesAndRoomCountWithinDates(checkInDate, checkOutDate);
 	}
 }

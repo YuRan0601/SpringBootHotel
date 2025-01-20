@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.cloudSerenityHotel.booking.dao.RoomDao;
+import com.cloudSerenityHotel.booking.dao.RoomRepository;
 import com.cloudSerenityHotel.booking.dao.RoomTypeDao;
 import com.cloudSerenityHotel.booking.dao.RoomTypeImgDao;
 import com.cloudSerenityHotel.booking.dao.RoomTypeRepository;
@@ -44,6 +46,9 @@ public class RoomServiceImpl implements RoomService {
 	
 	@Autowired
 	private RoomTypeRepository roomTypeRepository;
+	
+	@Autowired
+	private RoomRepository roomRepository;
 	
 	private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd a hh:mm:ss");
 	private String imgUrlPrefix = "http://localhost:8080/CloudSerenityHotel/static/booking/upload/imgs/";
@@ -339,5 +344,42 @@ public class RoomServiceImpl implements RoomService {
 		room.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
 		return roomDao.updateRoom(room);
 	}
-	
+
+	@Override
+	public List<Map<String, Object>> getAwailableRoomTypesAndRoomCountWithinDates(LocalDate checkInDate,
+			LocalDate checkOutDate) {
+		List<Map<String, Object>> typesAndRoomCountList = roomRepository.findAvailableRoomTypesAndRoomCountsWithinDates(checkInDate, checkOutDate);
+		
+		List<Map<String, Object>> mapList = new ArrayList<Map<String,Object>>();
+		
+		for (Map<String, Object> map : typesAndRoomCountList) {
+			HashMap<String, Object> modifiedMap = new HashMap<>(map);
+			
+			mapList.add(modifiedMap);
+		}
+		
+		for(Map<String, Object> map : mapList) {
+			Integer typeId = (Integer)map.get("typeId");
+			
+			//透過typeId取得圖片
+			List<Map<String, Object>> imgs = roomTypeImgToMapList(roomTypeImgDao.selectImgsByTypeId(typeId));
+			
+			for(Map<String, Object> img : imgs) {
+				if((boolean)img.get("isPrimary")) {
+					//主圖片裝入prImg
+					map.put("prImg", img);
+				} else {
+					//其他圖片裝入imgs
+					if(!map.containsKey("imgs")) {
+						map.put("imgs", new ArrayList<Map<String, Object>>());
+					}
+					
+					ArrayList list = (ArrayList)map.get("imgs");
+					list.add(img);
+				}
+			}
+		}
+		
+		return mapList;
+	}
 }

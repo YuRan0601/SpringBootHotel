@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -44,9 +46,11 @@ public class Room implements Serializable {
 	private String status;
 	
 	@Column(name = "created_date", insertable = false, updatable = false)
+	@JsonFormat(pattern = "yyyy-MM-dd a hh:mm:ss")
 	private Timestamp createdDate;
 	
 	@Column(name = "updated_date", insertable = false)
+	@JsonFormat(pattern = "yyyy-MM-dd a hh:mm:ss")
 	private Timestamp updatedDate;
 	
 }

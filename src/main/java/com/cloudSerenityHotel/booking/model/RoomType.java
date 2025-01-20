@@ -8,6 +8,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -53,9 +54,11 @@ public class RoomType implements Serializable{
 	private Integer maxCapacity;
 	
 	@Column(name = "created_date", insertable = false, updatable = false)
+	@JsonFormat(pattern = "yyyy-MM-dd a hh:mm:ss")
 	private Timestamp createdDate;
 	
 	@Column(name = "updated_date", insertable = false)
+	@JsonFormat(pattern = "yyyy-MM-dd a hh:mm:ss")
 	private Timestamp updatedDate;
 	
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "roomType", cascade = {CascadeType.PERSIST})
