@@ -172,6 +172,7 @@ public class ProductServiceImpl implements ProductService{
 		return 0;
 	}
 
+	//修改上架、下架
 	@Override
 	public int updateStatus(Products products) {
 		Optional<Products> getOne = productDao.findById(products.getProductId());

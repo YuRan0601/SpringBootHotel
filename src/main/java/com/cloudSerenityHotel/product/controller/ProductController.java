@@ -110,11 +110,12 @@ public class ProductController {
 		return productService.updateProduct(products,categories);
 	}
 	
+	//修改上架、下架
 	@PutMapping("/updateStatus/{productId}")
 	public int updateStatus(@PathVariable int productId, @RequestParam int status) {
 	    Products product = new Products();
 	    product.setProductId(productId);
-	    product.setStatus(status); // 上架或下架状态，0表示下架，1表示上架
+	    product.setStatus(status); // 上架或下架狀態，0表示下架，1表示上架
 	    
 	    return productService.updateStatus(product);
 	}
