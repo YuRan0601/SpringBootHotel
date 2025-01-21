@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 
 import com.cloudSerenityHotel.product.model.Products;
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -55,9 +54,8 @@ public class OrderItemsBean implements Serializable {
 	
 	// 多對一的關聯：一個訂單細項對應一個訂單
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "order_id") // , nullable = false
+	@JoinColumn(name = "order_id", nullable = false) // 
 	@JsonIgnore // 不序列化 `OrderBean`，避免循環
-	//@JsonIgnore // 忽略序列化時的 order，避免循環依賴
 	private OrderBean order; // 這樣做會將 `order_id` 映射到 `Order` 實體
 	
 	// 多對一：商品

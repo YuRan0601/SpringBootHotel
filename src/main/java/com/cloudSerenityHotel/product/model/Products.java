@@ -54,13 +54,9 @@ public class Products implements Serializable{
 	private Timestamp updatedAt;
 	
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "products",cascade = CascadeType.ALL)
-// order 需要
-//	@JsonIgnore // 不序列化 `ProductImages`，避免無限嵌套 
 	private List<ProductImages> productImages = new ArrayList<ProductImages>();
 	
 	@ManyToMany(mappedBy = "products",cascade = {CascadeType.MERGE,CascadeType.PERSIST})
-// order 需要
-//	@JsonIgnore // 不序列化 Categories，避免無限嵌套 
 	private List<Categories> categories = new ArrayList<Categories>();
 
 //	@OneToMany(fetch = FetchType.LAZY, mappedBy = "products",cascade = CascadeType.ALL)

@@ -1,9 +1,11 @@
 package com.cloudSerenityHotel.order.controller;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,6 +25,7 @@ import com.cloudSerenityHotel.base.BaseController;
 import com.cloudSerenityHotel.order.model.OrderBean;
 import com.cloudSerenityHotel.order.model.OrderItemsBean;
 import com.cloudSerenityHotel.order.service.impl.OrderServiceImpl;
+import com.cloudSerenityHotel.product.model.Products;
 import com.cloudSerenityHotel.product.service.impl.ProductServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -125,75 +129,36 @@ public class OrderController extends BaseController {
 	 */
 
 	// 新增訂單
-	// @PostMapping("/add") // 待改
-	/*
-	 * public ResponseEntity<Map<String, Object>> createOrder(@RequestBody OrderBean
-	 * order) { try { List<OrderItemsBean> orderItems = new
-	 * ArrayList<>(order.getOrderItemsBeans()); for (OrderItemsBean item :
-	 * orderItems) { Products product =
-	 * productServiceImpl.findProductsById(List.of(item.getProducts().getProductId()
-	 * )) .get(0); item.setProducts(product);
-	 * orderServiceImpl.calculateSubTotal(item); }
-	 * 
-	 * BigDecimal finalAmount =
-	 * orderServiceImpl.calculateOrderFinalAmount(orderItems);
-	 * order.setFinalAmount(finalAmount); order.setOrderItemsBeans(new
-	 * HashSet<>(orderItems)); orderServiceImpl.insertOrderWithItems(order,
-	 * orderItems);
-	 * 
-	 * Map<String, Object> response = new HashMap<>(); response.put("success",
-	 * true); response.put("message", "訂單新增成功"); response.put("orderId",
-	 * order.getOrderId());
-	 * 
-	 * return ResponseEntity.ok(response); } catch (Exception e) {
-	 * e.printStackTrace(); return
-	 * ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-	 * .body(Map.of("success", false, "message", "訂單新增失敗：" + e.getMessage())); } }
-	 */
+	@PostMapping("/add")
+	public ResponseEntity<Map<String, Object>> createOrder(@RequestBody OrderBean order) {
+	    try {
+	        // 設置訂單細項的關聯
+	        for (OrderItemsBean item : order.getOrderItemsBeans()) {
+	            item.setOrder(order); // 設置關聯
+	            Products product = productServiceImpl.findProductsById(List.of(item.getProducts().getProductId())).get(0);
+	            item.setProducts(product); // 加載產品信息
+	            item.setSubtotal(item.getUnitPrice().subtract(item.getDiscount())
+	                    .multiply(BigDecimal.valueOf(item.getQuantity()))); // 計算小計
+	        }
 
-	/*
-	 * // 封裝訂單
-	 * 
-	 * @PostMapping("/add") public String createOrder(@ModelAttribute OrderBean
-	 * order,
-	 * 
-	 * @RequestParam List<Integer> productId, // 商品 ID 列表
-	 * 
-	 * @RequestParam List<Integer> quantity,
-	 * 
-	 * @RequestParam List<String> unitPrice,
-	 * 
-	 * @RequestParam List<String> discount) { // 從數據庫加載商品實體 List<Products> products
-	 * = productServiceImpl.findProductsById(productId);
-	 * 
-	 * // 使用封裝好的方法來創建訂單細項 List<OrderItemsBean> orderItems =
-	 * createOrderItems(products, quantity, unitPrice, discount);
-	 * 
-	 * // 計算訂單的總金額，並設置到訂單對象 BigDecimal finalAmount =
-	 * orderServiceImpl.calculateOrderFinalAmount(orderItems);
-	 * order.setFinalAmount(finalAmount);
-	 * 
-	 * // 插入訂單和訂單細項 orderServiceImpl.insertOrderWithItems(order, orderItems);
-	 * 
-	 * // 重定向到訂單詳情頁，並將訂單 ID 加入到 URL return "redirect:/Order/findOrderById?orderId="
-	 * + order.getOrderId(); }
-	 * 
-	 * // 封裝訂單細項的創建邏輯，使用 BigDecimal private List<OrderItemsBean>
-	 * createOrderItems(List<Products> products, List<Integer> quantity,
-	 * List<String> unitPrice, List<String> discount) { List<OrderItemsBean>
-	 * orderItems = new ArrayList<>(); for (int i = 0; i < products.size(); i++) {
-	 * OrderItemsBean item = new OrderItemsBean();
-	 * 
-	 * // 設置關聯的商品 item.setProducts(products.get(i));
-	 * 
-	 * // 設置數量、單價和折扣 item.setQuantity(quantity.get(i)); item.setUnitPrice(new
-	 * BigDecimal(unitPrice.get(i))); item.setDiscount(new
-	 * BigDecimal(discount.get(i)));
-	 * 
-	 * // 調用 Service 計算小計 orderServiceImpl.calculateSubTotal(item);
-	 * 
-	 * orderItems.add(item); } return orderItems; }
-	 */
+	        // 計算訂單總金額、折扣金額和最終金額
+	        orderServiceImpl.calculateOrderTotal(order, new ArrayList<>(order.getOrderItemsBeans()));
+
+	        // 保存訂單以及關聯的訂單細項
+	        orderServiceImpl.insertOrderWithItems(order, new ArrayList<>(order.getOrderItemsBeans()));
+
+	        return ResponseEntity.ok(Map.of(
+	            "success", true,
+	            "message", "訂單新增成功",
+	            "orderId", order.getOrderId()
+	        ));
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                .body(Map.of("success", false, "message", "訂單新增失敗：" + e.getMessage()));
+	    }
+	}
+
 
 	// 查詢修改訂單
 	@GetMapping("/getUpdateOrderById/{orderId}")
