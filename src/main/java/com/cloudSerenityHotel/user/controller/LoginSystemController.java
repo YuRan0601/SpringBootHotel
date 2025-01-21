@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -20,7 +21,7 @@ import com.cloudSerenityHotel.user.service.UserService;
 
 import jakarta.servlet.http.HttpSession;
 
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = {"http://localhost:5173"}, methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
 @Controller
 @RequestMapping("/user")
 public class LoginSystemController {
@@ -32,12 +33,22 @@ public class LoginSystemController {
 	public String login() {
 		return "/user/login.html"; //登入頁面 進入點
 	}
+	
+    @GetMapping("/getUser")
+    public ResponseEntity<?> getUser(HttpSession session) {
+        Object user = session.getAttribute("user");
+        if (user != null) {
+            return ResponseEntity.ok(user);
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No user logged in");
+    }
 
 	@PostMapping("/checklogin")
 	@ResponseBody
 	public ResponseEntity<String> checklogin(@RequestBody Map<String, String> loginData, HttpSession session) {
 		String email = loginData.get("email");
 		String password = loginData.get("password");
+//		System.out.println(loginData);
 		
 		User user = uService.login(email, password);
 		if (user != null) { // 判斷帳號是否存在
@@ -48,9 +59,11 @@ public class LoginSystemController {
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage);
 			} else if (status.equals("In_use")) { // 狀態使用中 檢查身分組轉發到符合身分組的頁面
 				String identity = user.getUserIdentity();
-				session.setAttribute("identity", identity);
-				session.setAttribute("userName", user.getUserName());
-				session.setAttribute("userId", user.getUserId());
+				User userInfo = new User();
+				userInfo.setUserId(user.getUserId());
+				userInfo.setUserName(user.getUserName());
+				userInfo.setUserIdentity(identity);
+				session.setAttribute("user",userInfo);
 				
 				// 檢查身分組
 				if (identity.equals("admin")) { //管理員
@@ -73,12 +86,10 @@ public class LoginSystemController {
 	}
 
 	@GetMapping("/logout")
-	public String logout(HttpSession session) {
+	public void logout(HttpSession session) {
 		if (session != null) {
 			session.invalidate(); // 使當前 Session 無效化
 		}
-		// 重定向到登入頁面
-		return "redirect:/user/login";
 	}
 	
 	@PostMapping("/checkEmail")
