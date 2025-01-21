@@ -1,8 +1,14 @@
 package com.cloudSerenityHotel.product.service.impl;
 
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +29,7 @@ import jakarta.transaction.Transactional;
 @Service
 @Transactional
 public class ProductServiceImpl implements ProductService{
-//
+	
 	@Autowired
 	private ProductRepository productDao;
 	
@@ -33,22 +39,79 @@ public class ProductServiceImpl implements ProductService{
 	@Autowired
 	private CategoriesRepository categoriesDao;
 	
+	private List<Map<String, Object>> productToMapList(List<Products> products){
+		
+		List<Map<String, Object>> mapList = new ArrayList<Map<String, Object>>();
+		
+		for (Products bean : products) {
+			HashMap<String, Object> map = new HashMap<String, Object>();
+			SimpleDateFormat date = new SimpleDateFormat("yyyy-MM-dd a hh:mm:ss");
+			
+			map.put("productId", bean.getProductId());
+			map.put("productName", bean.getName());
+			map.put("price", bean.getPrice());
+			map.put("specialPrice", bean.getSpecialPrice());
+			map.put("createdAt", date.format(bean.getCreatedAt()));
+			map.put("updatedAt", date.format(bean.getUpdatedAt()));
+			map.put("description", bean.getDescription());
+			map.put("status", bean.getStatus());
+			
+			map.put("OneToManyProductImages", productImagesToMapList(bean.getProductImages()));
+			map.put("ManyToManyCategories", categoriesToMapList(bean.getCategories()));
+			
+			mapList.add(map);
+		}
+		return mapList;
+	}
+	
+	private List<Map<String, Object>> productImagesToMapList(List<ProductImages> image){
+		
+		List<Map<String, Object>> mapList = new ArrayList<Map<String, Object>>();
+		
+		for (ProductImages bean : image) {
+			HashMap<String, Object> map = new HashMap<String, Object>();
+			map.put("imageId", bean.getImageId());
+			map.put("imageUrl", bean.getImageUrl());
+			map.put("isPrimary", bean.getIsPrimary());
+			map.put("createdAt", bean.getCreatedAt());
+			
+			mapList.add(map);
+			
+		}
+		return mapList;
+	}
+	
+	private List<Map<String, Object>> categoriesToMapList(List<Categories> categories){
+		
+		List<Map<String, Object>> mapList = new ArrayList<Map<String, Object>>();
+		
+		for (Categories bean : categories) {
+			HashMap<String, Object> map = new HashMap<String, Object>();
+			map.put("categoryId", bean.getCategoryId());
+			map.put("name", bean.getName());
+			
+			mapList.add(map);
+		}
+		return mapList;
+	}
 	
 	@Override
-	public Products selectProduct(Integer productId) {
+	public List<Map<String, Object>> selectAllProduct() {
+		List<Products> getAll = productDao.findAll();
+		return productToMapList(getAll);
+	}
+	
+	@Override
+	public List<Map<String, Object>> selectProduct(Integer productId) {
 		Optional<Products> product = productDao.findById(productId);
 		
 		if (product.isPresent()) {
-			return product.get();
+			return productToMapList(Arrays.asList(product.get()));
 		}
 		return null;
 	}
 	
-	@Override
-	public List<Products> selectAllProduct() {
-		return productDao.findAll();
-	}
-	
+
 
 	@Override
 	public int insertProduct(Products products,Categories categories) {
@@ -66,17 +129,17 @@ public class ProductServiceImpl implements ProductService{
 	public int uploadImage(Products products,ProductImages Images) {
 		// 因為前端還沒用，可以顯示多張圖片，然後設定哪個是主圖片(封面)，所以暫時先設定最新上傳的圖片設為封面
 		// 查詢該產品是否已有主圖片
-		ProductImages currentPrimaryImage = productImagesDao.findByProductsAndIsprimaryTrue(products);
+		ProductImages currentPrimaryImage = productImagesDao.findByProductsAndIsPrimaryTrue(products);
 		
         // 如果已有主圖片，設為非主圖片
         if (currentPrimaryImage != null) {
-            currentPrimaryImage.setIsprimary(false);
+            currentPrimaryImage.setIsPrimary(false);
             productImagesDao.save(currentPrimaryImage);
         }
         
         // 設定新圖片為主圖片並與產品關聯
         Images.setProducts(products);
-        Images.setIsprimary(true);
+        Images.setIsPrimary(true);
         productImagesDao.save(Images);
 		
 		return 0;
@@ -106,6 +169,16 @@ public class ProductServiceImpl implements ProductService{
 		
 		productDao.save(productId);
 //		categoriesDao.save(categories);
+		return 0;
+	}
+
+	@Override
+	public int updateStatus(Products products) {
+		Optional<Products> getOne = productDao.findById(products.getProductId());
+		Products productId = getOne.get();
+		
+		productId.setStatus(products.getStatus());
+		productDao.save(productId);
 		return 0;
 	}
 
