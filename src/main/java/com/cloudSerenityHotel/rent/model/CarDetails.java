@@ -34,11 +34,11 @@ public class CarDetails {
 	private String status; //車輛狀態
 	
 	@Column(name = "created_at")
-	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX", timezone = "GMT+8")
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm")
 	private Date createdAt; //創建時間
 	
 	@Column(name = "updated_at")
-	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX", timezone = "GMT+8")
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm")
 	private Date updatedAt; //更新時間
 	
 	public CarDetails() {

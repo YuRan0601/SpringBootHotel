@@ -9,12 +9,12 @@ import org.hibernate.query.Query;
 import com.cloudSerenityHotel.rent.model.ImagesBean;
 import com.cloudSerenityHotel.utils.HibernateUtil;
 
-public class ImagesDao {
+public class ImagesDao2 {
 
 	private SessionFactory factory;
 	private Session session;
 
-	public ImagesDao() {
+	public ImagesDao2() {
 		this.factory = HibernateUtil.getSessionFactory();
 	}
 

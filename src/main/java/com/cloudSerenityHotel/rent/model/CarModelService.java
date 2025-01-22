@@ -8,6 +8,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.cloudSerenityHotel.rent.dao.CarModelRepository;
+
 import jakarta.transaction.Transactional;
 
 @Service

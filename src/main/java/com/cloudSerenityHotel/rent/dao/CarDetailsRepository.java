@@ -1,10 +1,12 @@
-package com.cloudSerenityHotel.rent.model;
+package com.cloudSerenityHotel.rent.dao;
 
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+
+import com.cloudSerenityHotel.rent.model.CarDetails;
 
 @Repository
 public interface CarDetailsRepository extends JpaRepository<CarDetails, String> {

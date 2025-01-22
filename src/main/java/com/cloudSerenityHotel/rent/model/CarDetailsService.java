@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import com.cloudSerenityHotel.rent.dao.CarDetailsRepository;
 import com.cloudSerenityHotel.rent.model.api.ResponseModel;
 import com.cloudSerenityHotel.rent.model.api.StatusEnum;
 
