@@ -113,17 +113,17 @@ public class ProductServiceImpl implements ProductService{
 	
 
 
-	@Override
-	public int insertProduct(Products products,Categories categories) {
-		
-	    products.getCategories().add(categories);
-	    categories.getProducts().add(products);
-		
-		productDao.save(products);
-		categoriesDao.save(categories);
-		
-		return 0;
-	}
+	 @Override
+	 public int insertProduct(Products products,Categories categories) {
+	  
+	     products.getCategories().add(categories);
+	     categories.getProducts().add(products);
+	  
+	  productDao.save(products);
+	  categoriesDao.save(categories);
+	  
+	  return 0;
+	 }
 
 	@Override
 	public int uploadImage(Products products,ProductImages Images) {
@@ -141,36 +141,15 @@ public class ProductServiceImpl implements ProductService{
         Images.setProducts(products);
         Images.setIsPrimary(true);
         productImagesDao.save(Images);
-		
-		return 0;
-	}
+  
+	  return 0;
+	 }
 
-	@Override
-	public int deleteProduct(Integer productId) {
-		productDao.deleteById(productId);
-		return 0;
-	}
-
-	@Override
-	public int updateProduct(Products products,Categories categories) {
-		Optional<Products> getOne = productDao.findById(products.getProductId());
-		Products productId = getOne.get();
-		
-		productId.setName(products.getName());
-		productId.setDescription(products.getDescription());
-		productId.setPrice(products.getPrice());
-		productId.setSpecialPrice(products.getSpecialPrice());
-		productId.setCategories(products.getCategories());
-		
-		productId.setUpdatedAt(Timestamp.valueOf(LocalDateTime.now()));//修改時間
-		
-		productId.getCategories().add(categories);
-	    categories.getProducts().add(productId);
-		
-		productDao.save(productId);
-//		categoriesDao.save(categories);
-		return 0;
-	}
+	 @Override
+	 public int deleteProduct(Integer productId) {
+	  productDao.deleteById(productId);
+	  return 0;
+	 }
 
 	//修改上架、下架
 	@Override
@@ -183,6 +162,43 @@ public class ProductServiceImpl implements ProductService{
 		return 0;
 	}
 
+	 @Override
+	 public int updateProduct(Products products,Categories categories) {
+	  Optional<Products> getOne = productDao.findById(products.getProductId());
+	  Products productId = getOne.get();
+	  
+	  productId.setName(products.getName());
+	  productId.setDescription(products.getDescription());
+	  productId.setPrice(products.getPrice());
+	  productId.setSpecialPrice(products.getSpecialPrice());
+	  productId.setCategories(products.getCategories());
+	  
+	  productId.setUpdatedAt(Timestamp.valueOf(LocalDateTime.now()));//修改時間
+	  
+	  productId.getCategories().add(categories);
+	     categories.getProducts().add(productId);
+	  
+	  productDao.save(productId);
+	//  categoriesDao.save(categories);
+	  return 0;
+	 }
 
+ // 商品狀態(待改)
+/* @Override
+ public int updateStatus(Products products) {
+  Optional<Products> getOne = productDao.findById(products.getProductId());
+  Products productId = getOne.get();
+  
+  productId.setStatus(products.getStatus());
+  productDao.save(productId);
+  return 0;
+ }*/
+ 
+ //多商品查詢_for Order用
+ @Override
+ public List<Products> findProductsById(List<Integer> productIds) {
+	// 使用 JPA Repository 的 findAllById 方法查詢多個產品
+     return productDao.findAllById(productIds);
+ }
 
 }

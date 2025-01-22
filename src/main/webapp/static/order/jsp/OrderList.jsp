@@ -54,7 +54,7 @@
 					</form>
 					<div class="action-buttons">
 						<!-- 新增訂單按鈕，並與搜尋框有間距 -->
-						<a href="/CloudSerenityHotel/static/order/html/InsertOrder.html" class="button">新增訂單</a>
+						<a href="/CloudSerenityHotel/static/order/jsp/OrderInsert.jsp" class="button">新增訂單</a>
 						<!-- 修改訂單按鈕，並與搜尋框有間距 -->
 						<a href="/CloudSerenityHotel/static/order/html/UpdateOrder.html" class="button">修改訂單</a>
 					</div>

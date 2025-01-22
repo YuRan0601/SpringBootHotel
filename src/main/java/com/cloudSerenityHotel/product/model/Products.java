@@ -3,10 +3,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
@@ -67,8 +64,7 @@ public class Products implements Serializable{
 
 //	@OneToMany(fetch = FetchType.LAZY, mappedBy = "products",cascade = CascadeType.ALL)
 //	private Set<ProductImages> productImages = new LinkedHashSet<ProductImages>();
-//	
-//	
+
 //	@ManyToMany(mappedBy = "products",cascade = {CascadeType.MERGE,CascadeType.PERSIST})
 //	private Set<Categories> categories = new HashSet<Categories>();
 	

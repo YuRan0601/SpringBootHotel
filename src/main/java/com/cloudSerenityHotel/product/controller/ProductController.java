@@ -1,13 +1,5 @@
 package com.cloudSerenityHotel.product.controller;
 
-import jakarta.persistence.PostLoad;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.MultipartConfig;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.Part;
-
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -31,11 +23,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.cloudSerenityHotel.base.BaseController;
 import com.cloudSerenityHotel.product.model.Categories;
 import com.cloudSerenityHotel.product.model.ProductImages;
 import com.cloudSerenityHotel.product.model.Products;
-import com.cloudSerenityHotel.product.service.ProductService;
 import com.cloudSerenityHotel.product.service.impl.ProductServiceImpl;
 
 
@@ -119,5 +109,4 @@ public class ProductController {
 	    
 	    return productService.updateStatus(product);
 	}
-	
 }

@@ -1,8 +1,11 @@
 package com.cloudSerenityHotel.order.model;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.Set; // 使用 Java 的 Set
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -26,7 +29,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Entity
 @Table(name = "Orders")
-public class OrderBean implements java.io.Serializable {
+public class OrderBean implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
@@ -47,14 +50,14 @@ public class OrderBean implements java.io.Serializable {
 	private String orderStatus; // 訂單狀態 V 11/17修改
 	@Column(name = "payment_method")
 	private String paymentMethod; // 付款方式 V 11/17修改
-	@Column(name = "total_amount")
-	private BigDecimal totalAmount; // 訂單總金額
+	@Column(name = "total_amount", nullable = false)
+	private BigDecimal totalAmount = BigDecimal.ZERO; // 預設值確保不為 NULL
 	@Column(name = "points_discount")
 	private int pointsDiscount; // 點數折抵(不確定的功能 先保留) V 11/17修改
 	@Column(name = "discount_amount")
 	private BigDecimal discountAmount; // 訂單總折扣金額
-	@Column(name = "final_amount")
-	private BigDecimal finalAmount; // 訂單最終金額
+	@Column(name = "final_amount", nullable = false)
+	private BigDecimal finalAmount = BigDecimal.ZERO; // 確保有初始值
 	@Column(name = "order_date")
 	private Timestamp orderDate; // 訂單建立日期，改為 Timestamp
 	@Column(name = "updated_at")
@@ -76,25 +79,8 @@ public class OrderBean implements java.io.Serializable {
 
 	// 訂單與訂單細項的雙向關聯
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "order", cascade = CascadeType.ALL)
+	// 改使用DTO
+	//@JsonIgnoreProperties({"order"}) // 只忽略 `order`，保留 `products`
 	private Set<OrderItemsBean> orderItemsBeans; // 關聯的訂單細項
 
-	// update 所需之 constructor
-	public OrderBean(Integer orderId, Integer userId, String receiveName, String email, String phoneNumber,
-			String address, String orderStatus, String paymentMethod, BigDecimal totalAmount, int pointsDiscount,
-			BigDecimal discountAmount, BigDecimal finalAmount, Timestamp orderDate, Timestamp updatedAt) {
-		this.orderId = orderId;
-		this.userId = userId;
-		this.receiveName = receiveName;
-		this.email = email;
-		this.phoneNumber = phoneNumber;
-		this.address = address;
-		this.orderStatus = orderStatus;
-		this.paymentMethod = paymentMethod;
-		this.totalAmount = totalAmount;
-		this.pointsDiscount = pointsDiscount;
-		this.discountAmount = discountAmount;
-		this.finalAmount = finalAmount;
-		this.orderDate = orderDate; // 保持原創建時間
-		this.updatedAt = updatedAt; // 更新時間
-	}
 }
