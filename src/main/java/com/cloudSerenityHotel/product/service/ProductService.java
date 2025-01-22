@@ -18,7 +18,6 @@ public interface ProductService {
 	int updateProduct(Products products,Categories categories);
 //	int updateStatus(Products products);
 	
-// 有關訂單方法
-	// 多商品查詢
-	List<Products> findProductsById(List<Integer> productIds);
+	// 多商品查詢_for Order用
+    List<Products> findProductsById(List<Integer> productIds);
 }

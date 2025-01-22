@@ -4,8 +4,6 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 
 import com.cloudSerenityHotel.product.model.Products;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -54,14 +52,18 @@ public class OrderItemsBean implements Serializable {
 	
 	// 多對一的關聯：一個訂單細項對應一個訂單
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "order_id", nullable = false) // 
-	@JsonIgnore // 不序列化 `OrderBean`，避免循環
+	@JoinColumn(name = "order_id", nullable = false)
+	// 資料庫層面： 它會在資料庫中生成的 order_id 外鍵列上加上 NOT NULL 限制。這表示在對應的數據行中，order_id 的值必須存在，不能為空（NULL）。
+	// 邏輯層面： 強制要求每個 OrderItemsBean 必須關聯到某個 OrderBean，即每個訂單項必須屬於一個訂單。
+	// 改使用DTO
+	//@JsonIgnore // 不序列化 `OrderBean`，避免循環
 	private OrderBean order; // 這樣做會將 `order_id` 映射到 `Order` 實體
 	
 	// 多對一：商品
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "product_id")
-	@JsonIgnoreProperties({"hibernateLazyInitializer", "handler","productImages", "categories"}) // 避免無限嵌套
+	@JoinColumn(name = "product_id", nullable = false)
+	// 改使用DTO
+//	@JsonIgnoreProperties({"hibernateLazyInitializer", "handler","productImages", "categories"}) // 避免無限嵌套
 //	@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"}) // 只忽略代理相關字段_忽略 Hibernate Proxy
 	private Products products; // 與商品實體的關聯
 }

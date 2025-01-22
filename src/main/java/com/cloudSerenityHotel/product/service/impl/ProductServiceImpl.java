@@ -6,7 +6,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -181,15 +180,12 @@ public class ProductServiceImpl implements ProductService{
   productDao.save(productId);
   return 0;
  }*/
-
-// 有關訂單方法
-	// 多商品查詢
-	@Override
-	public List<Products> findProductsById(List<Integer> productIds) {
-		// 使用 JPA 提供的 findAllById 方法，一次性查詢多個商品
-		return productDao.findAllById(productIds);
-	}
-
-
+ 
+ //多商品查詢_for Order用
+ @Override
+ public List<Products> findProductsById(List<Integer> productIds) {
+	// 使用 JPA Repository 的 findAllById 方法查詢多個產品
+     return productDao.findAllById(productIds);
+ }
 
 }

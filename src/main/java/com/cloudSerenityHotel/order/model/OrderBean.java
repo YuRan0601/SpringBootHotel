@@ -50,14 +50,14 @@ public class OrderBean implements Serializable {
 	private String orderStatus; // 訂單狀態 V 11/17修改
 	@Column(name = "payment_method")
 	private String paymentMethod; // 付款方式 V 11/17修改
-	@Column(name = "total_amount")
-	private BigDecimal totalAmount; // 訂單總金額
+	@Column(name = "total_amount", nullable = false)
+	private BigDecimal totalAmount = BigDecimal.ZERO; // 預設值確保不為 NULL
 	@Column(name = "points_discount")
 	private int pointsDiscount; // 點數折抵(不確定的功能 先保留) V 11/17修改
 	@Column(name = "discount_amount")
 	private BigDecimal discountAmount; // 訂單總折扣金額
-	@Column(name = "final_amount")
-	private BigDecimal finalAmount; // 訂單最終金額
+	@Column(name = "final_amount", nullable = false)
+	private BigDecimal finalAmount = BigDecimal.ZERO; // 確保有初始值
 	@Column(name = "order_date")
 	private Timestamp orderDate; // 訂單建立日期，改為 Timestamp
 	@Column(name = "updated_at")
@@ -79,7 +79,8 @@ public class OrderBean implements Serializable {
 
 	// 訂單與訂單細項的雙向關聯
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "order", cascade = CascadeType.ALL)
-	@JsonIgnoreProperties({"order"}) // 只忽略 `order`，保留 `products`
+	// 改使用DTO
+	//@JsonIgnoreProperties({"order"}) // 只忽略 `order`，保留 `products`
 	private Set<OrderItemsBean> orderItemsBeans; // 關聯的訂單細項
 
 }
