@@ -1,10 +1,10 @@
 package com.cloudSerenityHotel.order.service.impl;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -182,62 +182,26 @@ public class OrderServiceImpl implements OrderService {
 
 	}
 
-	// 更新訂單
-	/*@Override
-	public OrderDTO updateOrderById(Integer orderId, OrderDTO updatedOrderDTO) {
-	    // 查詢原始訂單
+	@Override
+	public OrderDTO updateOrder(Integer orderId, OrderBean updatedOrder) {
+	    // 查詢舊訂單
 	    OrderBean existingOrder = orderDao.findById(orderId)
 	            .orElseThrow(() -> new RuntimeException("訂單不存在，ID: " + orderId));
-	    System.out.println("查詢到的訂單：" + existingOrder);
-	    // 將 DTO 轉換為 Entity
-	    OrderBean updatedOrder = convertToEntity(updatedOrderDTO);
 
-	    // 保留不可更動的訂單細項
-	    updatedOrder.setOrderItemsBeans(existingOrder.getOrderItemsBeans());
+	    // 僅更新允許變動的欄位
+	    existingOrder.setOrderStatus(updatedOrder.getOrderStatus());
+	    existingOrder.setReceiveName(updatedOrder.getReceiveName());
+	    existingOrder.setEmail(updatedOrder.getEmail());
+	    existingOrder.setPhoneNumber(updatedOrder.getPhoneNumber());
+	    existingOrder.setAddress(updatedOrder.getAddress());
+	    existingOrder.setUpdatedAt(new Timestamp(System.currentTimeMillis())); // 更新時間戳
 
-	    // 更新主檔字段
-	    updatedOrder.setOrderId(orderId);
-	    updatedOrder.setOrderDate(existingOrder.getOrderDate()); // 保留創建日期
+	    // 保存更新後的訂單
+	    orderDao.save(existingOrder);
 
-	    // 計算訂單總金額（如有需要）
-	    calculateOrderTotal(updatedOrder, new ArrayList<>(existingOrder.getOrderItemsBeans()));
-
-	    // 保存更新後的訂單主檔
-	    OrderBean savedOrder = orderDao.save(updatedOrder);
-
-	    // 返回更新後的 DTO
-	    return convertToDTO(savedOrder);
-	}*/
-
-	/*public OrderBean convertToEntity(OrderDTO orderDTO) {
-	    OrderBean orderBean = new OrderBean();
-	    orderBean.setUserId(orderDTO.getUserId());
-	    orderBean.setReceiveName(orderDTO.getReceiveName());
-	    orderBean.setEmail(orderDTO.getEmail());
-	    orderBean.setPhoneNumber(orderDTO.getPhoneNumber());
-	    orderBean.setAddress(orderDTO.getAddress());
-	    orderBean.setOrderStatus(orderDTO.getOrderStatus());
-	    orderBean.setPaymentMethod(orderDTO.getPaymentMethod());
-	    orderBean.setTotalAmount(new BigDecimal(orderDTO.getTotalAmount()));
-	    orderBean.setDiscountAmount(new BigDecimal(orderDTO.getDiscountAmount()));
-	    orderBean.setFinalAmount(new BigDecimal(orderDTO.getFinalAmount()));
-
-	    // 處理 OrderItemsDtos
-	    Set<OrderItemsBean> orderItemsBeans = orderDTO.getOrderItemsDtos().stream().map(itemDto -> {
-	        OrderItemsBean itemBean = new OrderItemsBean();
-	        itemBean.setOrderitemId(itemDto.getOrderitemId());
-	        itemBean.setQuantity(itemDto.getQuantity());
-	        itemBean.setUnitPrice(new BigDecimal(itemDto.getUnitPrice()));
-	        itemBean.setDiscount(new BigDecimal(itemDto.getDiscount()));
-	        itemBean.setSubtotal(new BigDecimal(itemDto.getSubtotal()));
-	        return itemBean;
-	    }).collect(Collectors.toSet());
-	    orderBean.setOrderItemsBeans(orderItemsBeans);
-
-	    return orderBean;
-	}*/
-
-
+	    // 將更新後的訂單轉換為 DTO 並返回
+	    return convertToDTO(existingOrder);
+	}
 
 	// 計算訂單總金額
 	@Override

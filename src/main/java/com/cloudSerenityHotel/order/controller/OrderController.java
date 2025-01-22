@@ -144,19 +144,34 @@ public class OrderController extends BaseController {
 		}
 	}
 
-	// 修改訂單
-	/*@PutMapping("/update/{orderId}")
-	public ResponseEntity<String> updateOrder(@PathVariable int orderId, @RequestBody OrderDTO updatedOrderDTO) {
-	    try {
-	        System.out.println("接收到的更新資料：" + updatedOrderDTO); // 打印接收的 DTO
-	        OrderDTO updatedOrder = orderServiceImpl.updateOrderById(orderId, updatedOrderDTO);
-	        return ResponseEntity.ok("修改訂單成功，訂單資訊：" + updatedOrder);
-	    } catch (RuntimeException e) {
-	        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("修改失敗：訂單不存在");
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("修改失敗：" + e.getMessage());
-	    }
-	}*/
+	// 更新訂單
+    @PutMapping("/update/{orderId}")
+    public ResponseEntity<OrderDTO> updateOrder(
+            @PathVariable Integer orderId, 
+            @RequestBody OrderDTO updatedOrderDTO) {
+        try {
+            // 轉換 DTO 為實體，並更新訂單
+            OrderBean updatedOrder = convertToEntity(updatedOrderDTO);
+            OrderDTO result = orderServiceImpl.updateOrder(orderId, updatedOrder);
+
+            // 返回更新後的訂單資料
+            return ResponseEntity.ok(result);
+        } catch (RuntimeException e) {
+            // 處理異常情況
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+    }
+
+    // 將 DTO 轉換為實體的方法
+    private OrderBean convertToEntity(OrderDTO dto) {
+        OrderBean order = new OrderBean();
+        order.setOrderStatus(dto.getOrderStatus());
+        order.setReceiveName(dto.getReceiveName());
+        order.setEmail(dto.getEmail());
+        order.setPhoneNumber(dto.getPhoneNumber());
+        order.setAddress(dto.getAddress());
+        // 其他不能修改的欄位不設置
+        return order;
+    }
 
 }

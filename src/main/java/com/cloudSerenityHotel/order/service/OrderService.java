@@ -29,12 +29,12 @@ public interface OrderService {
 	// 訂單 & 訂單細項
 	OrderDTO insertOrderWithItems(OrderBean orderBean, List<OrderItemsBean> items);
 	void updateOrderItems(int orderId, List<OrderItemsBean> orderItems);
-	//OrderDTO updateOrderById(Integer orderId, OrderDTO updatedOrderDTO);
-		//將 OrderDTO 轉換為 OrderBean
-		//OrderBean convertToEntity(OrderDTO orderDTO);
+	OrderDTO updateOrder(Integer orderId, OrderBean updatedOrder);
 
 	// 較複雜邏輯運算
 	void calculateOrderTotal(OrderBean order, List<OrderItemsBean> items);
+
+
 
 
 
