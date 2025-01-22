@@ -30,15 +30,6 @@ public class Picture {
     public Picture() {
     }
 
-    // 全參數建構子
-    public Picture(Integer referenceId, String referenceType, String imageUrl, LocalDateTime createAt, LocalDateTime updateAt) {
-        this.referenceId = referenceId;
-        this.referenceType = referenceType;
-        this.imageUrl = imageUrl;
-        this.createAt = createAt;
-        this.updateAt = updateAt;
-    }
-    
     private String fileName;
     private String filePath;
     private long size;
@@ -53,6 +44,14 @@ public class Picture {
     public long getSize() { return size; }
     public void setSize(long size) { this.size = size; }
 
+    // 全參數建構子
+    public Picture(Integer referenceId, String referenceType, String imageUrl, LocalDateTime createAt, LocalDateTime updateAt) {
+        this.referenceId = referenceId;
+        this.referenceType = referenceType;
+        this.imageUrl = imageUrl;
+        this.createAt = createAt;
+        this.updateAt = updateAt;
+    }
 
     // Getters and Setters
     public Integer getImageId() {
