@@ -1,9 +1,6 @@
 package com.cloudSerenityHotel.rent.model;
 
 import java.util.Date;
-
-import org.springframework.stereotype.Component;
-
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import jakarta.persistence.Column;
@@ -12,7 +9,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import jakarta.persistence.Version;
 
 @Entity 
 @Table(name = "cars_model")
@@ -39,11 +35,11 @@ public class CarModel {
 	private int seatingCapacity;	//座位數量
 	
 	@Column(name = "created_at")
-	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX", timezone = "GMT+8")
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm")
 	private Date createdAt;		//創建時間
 	
 	@Column(name = "updated_at")
-	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX", timezone = "GMT+8")
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm")
 	private Date updatedAt;		//修改時間
 	
 	@Column(name = "car_type")
