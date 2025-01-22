@@ -21,7 +21,7 @@ import com.cloudSerenityHotel.user.service.UserService;
 
 import jakarta.servlet.http.HttpSession;
 
-@CrossOrigin(origins = {"http://localhost:5173"}, methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
+@CrossOrigin(origins = {"http://localhost:5173"}, methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE}, allowCredentials = "true")
 @Controller
 @RequestMapping("/user")
 public class LoginSystemController {
