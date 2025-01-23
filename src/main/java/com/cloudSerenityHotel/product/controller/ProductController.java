@@ -52,7 +52,7 @@ public class ProductController {
 	
 	//新增
 	@PostMapping("/insert")
-	public int insert(@RequestBody Products products, @RequestBody Categories categories, @RequestBody ProductImages image, @RequestPart MultipartFile mf) throws IllegalStateException, IOException {
+	public int insert(@RequestPart Products products, @RequestPart Categories categories, @RequestPart ProductImages image, @RequestPart MultipartFile mf) throws IllegalStateException, IOException {
 		
 		//上傳圖片
 		String fileName = mf.getOriginalFilename();
@@ -62,7 +62,7 @@ public class ProductController {
 		mf.transferTo(saveFilePath.getAbsoluteFile());
 		
         //把圖片路徑存到資料庫表格裡
-        image.setImageUrl("/CloudSerenityHotel/static/product/uploadImage/" + fileName);
+        image.setImageUrl("static/product/uploadImage/" + fileName);
         productService.uploadImage(products,image);
 		
 	

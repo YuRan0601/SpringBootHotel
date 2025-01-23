@@ -50,7 +50,7 @@ public class Products implements Serializable{
 	@Column(name = "created_at", insertable = false, updatable =  false)//hibernate新增修改時關掉 防止null
 	private Timestamp createdAt;
 	
-	@Column(name = "updated_at", insertable =  false)//修改時間用了，修改會沒變化，在DAO那邊另外處理
+	@Column(name = "updated_at", insertable =  false)
 	private Timestamp updatedAt;
 	
     @Column(name = "status")

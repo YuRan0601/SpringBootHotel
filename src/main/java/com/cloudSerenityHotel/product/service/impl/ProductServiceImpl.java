@@ -88,7 +88,7 @@ public class ProductServiceImpl implements ProductService{
 		for (Categories bean : categories) {
 			HashMap<String, Object> map = new HashMap<String, Object>();
 			map.put("categoryId", bean.getCategoryId());
-			map.put("name", bean.getName());
+			map.put("categoriesName", bean.getName());
 			
 			mapList.add(map);
 		}
