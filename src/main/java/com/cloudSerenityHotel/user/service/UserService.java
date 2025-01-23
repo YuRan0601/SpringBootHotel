@@ -38,7 +38,7 @@ public class UserService implements UserServiceInterface {
 	@Override
 	public int checkEmail(String email) {
 		User checkResult = uRepository.findByEmail(email).orElse(null);
-		if (checkResult == null) {
+		if (checkResult == null) {//沒有人使用
 			return 1;
 		}
 		return 0;
@@ -154,8 +154,9 @@ public class UserService implements UserServiceInterface {
 			result.put("code", 505); // 505 顯示未登入
 			return result;
 		}
-
-		User user = userDao.findAdminById(userId);
+		
+		Optional<User> opUser = uRepository.findById(userId);
+		User user = opUser.get();
 
 		if (user == null) {
 			result.put("code", 404); // 404 沒有找到user

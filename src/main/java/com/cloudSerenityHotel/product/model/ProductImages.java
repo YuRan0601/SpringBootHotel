@@ -39,7 +39,7 @@ public class ProductImages implements Serializable{
 	private String imageUrl;
 	
 	@Column(name = "is_primary")
-	private boolean isprimary;
+	private Boolean isPrimary;
 //	private boolean is_primary; 不能用這個會報錯，一定要isIs開頭
 	
 	@Column(name = "created_at", insertable = false, updatable =  false)

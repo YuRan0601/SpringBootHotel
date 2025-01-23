@@ -86,15 +86,17 @@
             });
 
             // 從後端獲取資料並渲染到 DataTable
-            axios.get('http://localhost:8080/CloudSerenityHotel/admin/queryAllMemberTojson')
-                .then(function (response) {
-                    // 使用後端返回的資料填充 DataTable
-                    table.clear().rows.add(response.data).draw();
-                })
-                .catch(function (error) {
-                    console.error("資料加載失敗", error);
-                });
-
+            function getDataToTable() {
+                axios.get('http://localhost:8080/CloudSerenityHotel/admin/queryAllMemberTojson')
+                    .then(function (response) {
+                        // 使用後端返回的資料填充 DataTable
+                        table.clear().rows.add(response.data).draw();
+                    })
+                    .catch(function (error) {
+                        console.error("資料加載失敗", error);
+                    });
+            }
+            getDataToTable()
 
             // 初始化 DataTable
             const table = $('#adminTable').DataTable({
@@ -160,6 +162,7 @@
                             icon: 'success',
                             allowOutsideClick: false
                         });
+                        getDataToTable()
                     })
                     .catch(function (error) {
                         Swal.fire({
@@ -168,9 +171,9 @@
                             icon: 'error',
                             allowOutsideClick: false
                         });
+                        getDataToTable()
                     });
-            }
-            );
+            });
 
             //編輯帳號資料
             $(document).on('click', '#edit', function () {
@@ -235,6 +238,7 @@
                             icon: 'success',
                             allowOutsideClick: false
                         });
+                        getDataToTable()
                     })
                     .catch(function (error) {
                         Swal.fire({
@@ -243,6 +247,7 @@
                             icon: 'error',
                             allowOutsideClick: false
                         });
+                        getDataToTable()
                     });
             });
 

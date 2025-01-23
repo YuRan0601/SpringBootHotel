@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.cloudSerenityHotel.booking.dao.RoomDao;
+import com.cloudSerenityHotel.booking.dao.RoomRepository;
 import com.cloudSerenityHotel.booking.dao.RoomTypeDao;
 import com.cloudSerenityHotel.booking.dao.RoomTypeImgDao;
 import com.cloudSerenityHotel.booking.dao.RoomTypeRepository;
@@ -44,6 +46,9 @@ public class RoomServiceImpl implements RoomService {
 	
 	@Autowired
 	private RoomTypeRepository roomTypeRepository;
+	
+	@Autowired
+	private RoomRepository roomRepository;
 	
 	private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd a hh:mm:ss");
 	private String imgUrlPrefix = "http://localhost:8080/CloudSerenityHotel/static/booking/upload/imgs/";
@@ -80,6 +85,7 @@ public class RoomServiceImpl implements RoomService {
 			map.put("typeDesc", roomType.getTypeDesc());
 		}
 		
+		map.put("price", roomType.getPrice());
 		map.put("maxCapacity", roomType.getMaxCapacity());
 		map.put("createdDate", sdf.format(roomType.getCreatedDate()));
 		map.put("updatedDate", sdf.format(roomType.getUpdatedDate()));
@@ -91,7 +97,26 @@ public class RoomServiceImpl implements RoomService {
 		List<Map<String, Object>> res = new ArrayList<>();
 		
 		for (RoomType roomType : roomTypes) {
-			res.add(roomTypeToMap(roomType));
+			Map<String, Object> roomTypeMap = roomTypeToMap(roomType);
+			
+			List<Map<String, Object>> imgMapList = roomTypeImgToMapList(roomType.getImgs());
+			
+			for (Map<String, Object> map : imgMapList) {
+				if((boolean)map.get("isPrimary")) {
+					//主圖片裝入prImg
+					roomTypeMap.put("prImg", map);
+				} else {
+					//其他圖片裝入imgs
+					if(!roomTypeMap.containsKey("imgs")) {
+						roomTypeMap.put("imgs", new ArrayList<Map<String, Object>>());
+					}
+					
+					ArrayList list = (ArrayList)roomTypeMap.get("imgs");
+					list.add(map);
+				}
+			}
+
+			res.add(roomTypeMap);
 		}
 		
 		return res;
@@ -119,7 +144,7 @@ public class RoomServiceImpl implements RoomService {
 	private List<RoomTypeImg> uploadImgs(MultipartFile typePrimaryImg, MultipartFile[] typeImg) {
 		List<RoomTypeImg> imgs = new ArrayList<>();
 		
-		if(!typePrimaryImg.isEmpty()) {
+		if(typeImg != null) {
 			String originalFilename = typePrimaryImg.getOriginalFilename();
 			String fileName =  UUID.randomUUID() + originalFilename.substring(originalFilename.lastIndexOf("."), originalFilename.length());
 			File file = new File(uploadPath + fileName);
@@ -134,24 +159,25 @@ public class RoomServiceImpl implements RoomService {
 			imgs.add(new RoomTypeImg(null, null, imgUrl, true, null, null));
 		}
 		
-		
-		for (MultipartFile img : typeImg) {
-			if(img.isEmpty()) {
-				continue;
-			}
-			String originalFilename = img.getOriginalFilename();
-			String fileName =  UUID.randomUUID() + originalFilename.substring(originalFilename.lastIndexOf("."), originalFilename.length());
-			File file = new File(uploadPath + fileName);
-			try {
-				img.transferTo(file.getAbsoluteFile());
-			} catch (IllegalStateException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			String imgUrl = imgUrlPrefix + fileName;
-			imgs.add(new RoomTypeImg(null, null, imgUrl, false, null, null));
-		}	
+		if(typeImg != null && typeImg.length != 0) {
+			for (MultipartFile img : typeImg) {
+				if(img.isEmpty()) {
+					continue;
+				}
+				String originalFilename = img.getOriginalFilename();
+				String fileName =  UUID.randomUUID() + originalFilename.substring(originalFilename.lastIndexOf("."), originalFilename.length());
+				File file = new File(uploadPath + fileName);
+				try {
+					img.transferTo(file.getAbsoluteFile());
+				} catch (IllegalStateException e) {
+					e.printStackTrace();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				String imgUrl = imgUrlPrefix + fileName;
+				imgs.add(new RoomTypeImg(null, null, imgUrl, false, null, null));
+			}	
+		}
 		
 		
 		return imgs;
@@ -173,7 +199,23 @@ public class RoomServiceImpl implements RoomService {
 		Map<String, Object> roomTypeMap = roomTypeToMap(roomType);
 		
 		res.put("roomType", roomTypeMap);
-		res.put("imgs", roomTypeImgToMapList(roomType.getImgs()));
+		
+		List<Map<String, Object>> imgMapList = roomTypeImgToMapList(roomType.getImgs());
+		
+		for (Map<String, Object> map : imgMapList) {
+			if((boolean)map.get("isPrimary")) {
+				//主圖片裝入prImg
+				roomTypeMap.put("prImg", map);
+			} else {
+				//其他圖片裝入imgs
+				if(!roomTypeMap.containsKey("imgs")) {
+					roomTypeMap.put("imgs", new ArrayList<Map<String, Object>>());
+				}
+				
+				ArrayList list = (ArrayList)roomTypeMap.get("imgs");
+				list.add(map);
+			}
+		}
 		
 		return res;
 	}
@@ -241,7 +283,6 @@ public class RoomServiceImpl implements RoomService {
 		map.put("roomTypeName", room.getRoomType().getTypeName());
 		map.put("roomName", room.getRoomName());
 		map.put("roomDescription", room.getRoomDescription());
-		map.put("price", room.getPrice());
 		
 		if(room.getStatus().equals("available")) {
 			map.put("status", "空閒中");
@@ -268,7 +309,6 @@ public class RoomServiceImpl implements RoomService {
 			map.put("roomTypeName", room.getRoomType().getTypeName());
 			map.put("roomName", room.getRoomName());
 			map.put("roomDescription", room.getRoomDescription());
-			map.put("price", room.getPrice());
 			
 			if(room.getStatus().equals("available")) {
 				map.put("status", "空閒中");
@@ -304,5 +344,42 @@ public class RoomServiceImpl implements RoomService {
 		room.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
 		return roomDao.updateRoom(room);
 	}
-	
+
+	@Override
+	public List<Map<String, Object>> getAwailableRoomTypesAndRoomCountWithinDates(LocalDate checkInDate,
+			LocalDate checkOutDate) {
+		List<Map<String, Object>> typesAndRoomCountList = roomRepository.findAvailableRoomTypesAndRoomCountsWithinDates(checkInDate, checkOutDate);
+		
+		List<Map<String, Object>> mapList = new ArrayList<Map<String,Object>>();
+		
+		for (Map<String, Object> map : typesAndRoomCountList) {
+			HashMap<String, Object> modifiedMap = new HashMap<>(map);
+			
+			mapList.add(modifiedMap);
+		}
+		
+		for(Map<String, Object> map : mapList) {
+			Integer typeId = (Integer)map.get("typeId");
+			
+			//透過typeId取得圖片
+			List<Map<String, Object>> imgs = roomTypeImgToMapList(roomTypeImgDao.selectImgsByTypeId(typeId));
+			
+			for(Map<String, Object> img : imgs) {
+				if((boolean)img.get("isPrimary")) {
+					//主圖片裝入prImg
+					map.put("prImg", img);
+				} else {
+					//其他圖片裝入imgs
+					if(!map.containsKey("imgs")) {
+						map.put("imgs", new ArrayList<Map<String, Object>>());
+					}
+					
+					ArrayList list = (ArrayList)map.get("imgs");
+					list.add(img);
+				}
+			}
+		}
+		
+		return mapList;
+	}
 }

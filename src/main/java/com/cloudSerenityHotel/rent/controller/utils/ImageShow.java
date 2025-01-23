@@ -8,15 +8,15 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 
-import com.cloudSerenityHotel.rent.dao.ImagesDao;
+import com.cloudSerenityHotel.rent.dao.ImagesDao2;
 import com.cloudSerenityHotel.rent.model.ImagesBean;
 
 public class ImageShow {
 
-	private ImagesDao imagesDao;
+	private ImagesDao2 imagesDao;
 
 	public ImageShow() {
-		this.imagesDao = new ImagesDao();
+		this.imagesDao = new ImagesDao2();
 	}
 
 	public ImagesBean insert(ImagesBean imageBean) {

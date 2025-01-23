@@ -53,6 +53,9 @@ public class Products implements Serializable{
 	@Column(name = "updated_at", insertable =  false)//修改時間用了，修改會沒變化，在DAO那邊另外處理
 	private Timestamp updatedAt;
 	
+    @Column(name = "status")
+    private int status;
+	
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "products",cascade = CascadeType.ALL)
 	private List<ProductImages> productImages = new ArrayList<ProductImages>();
 	

@@ -1,48 +1,42 @@
 package com.cloudSerenityHotel.booking.controller;
 
 import java.io.IOException;
-import java.math.BigDecimal;
-import java.sql.Timestamp;
-import java.util.Collection;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.cloudSerenityHotel.base.BaseController;
 import com.cloudSerenityHotel.booking.model.Room;
 import com.cloudSerenityHotel.booking.model.RoomType;
 import com.cloudSerenityHotel.booking.service.RoomService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.Part;
+
 
 @RestController
 @RequestMapping("/room")
 @MultipartConfig
-public class RoomController extends BaseController {
-	private static final long serialVersionUID = 1L;
-	
+@CrossOrigin(origins = {"http://localhost:5173"}, methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
+public class RoomController {
 	@Autowired
 	private RoomService roomService;
 	
@@ -60,9 +54,9 @@ public class RoomController extends BaseController {
 	}
 
 	@PostMapping(path = "/type", consumes = "multipart/form-data")
-	public Integer insertRoomType(@RequestPart String roomTypeJson,
-			@RequestPart(required = false) MultipartFile typePrimaryImg,
-			@RequestPart(required = false) MultipartFile[] typeImg
+	public Integer insertRoomType(@RequestParam String roomTypeJson,
+			@RequestParam(required = false) MultipartFile typePrimaryImg,
+			@RequestParam(required = false) MultipartFile[] typeImg
 			)
 	{
 		
@@ -73,7 +67,6 @@ public class RoomController extends BaseController {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-			
 		return roomService.insertRoomTypeAndImg(roomType, typePrimaryImg, typeImg);	
 	}
 
@@ -92,13 +85,19 @@ public class RoomController extends BaseController {
 
 	@PutMapping(path = "/type", consumes = "multipart/form-data")
 	public Integer updateRoomType(
-			@RequestPart String roomTypeJson,
-			@RequestPart MultipartFile typePrimaryImg,
-			@RequestPart MultipartFile[] typeImg,
+			@RequestParam String roomTypeJson,
+			@RequestParam(required = false) MultipartFile typePrimaryImg,
+			@RequestParam(required = false) MultipartFile[] typeImg,
 			@RequestParam(required = false) String deletePrImgIdAndUrl,
 			@RequestParam(required = false, defaultValue = "") String[] deleteOtherImgsIdAndUrl)
 	{
 		RoomType roomType = null;
+		
+		System.out.println(roomTypeJson);
+		System.out.println(typePrimaryImg);
+		System.out.println(typeImg);
+		System.out.println(deletePrImgIdAndUrl);
+		System.out.println(deleteOtherImgsIdAndUrl);
 		
 		try {
 			roomType = objectMapper.readValue(roomTypeJson, RoomType.class);
@@ -149,5 +148,13 @@ public class RoomController extends BaseController {
 	@PutMapping("")
 	public Integer updateRoom(@RequestBody Room room) {
 		return roomService.updateRoom(room);
+	}
+	
+	@GetMapping("/{checkInDate}/{checkOutDate}")
+	public List<Map<String, Object>> getAwailableRoomTypesAndRoomCountWithinDates
+		(@PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate checkInDate,
+		@PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate checkOutDate) 
+	{		
+		return roomService.getAwailableRoomTypesAndRoomCountWithinDates(checkInDate, checkOutDate);
 	}
 }

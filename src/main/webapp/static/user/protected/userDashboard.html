@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>會員功能總管</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        .menu {
+            margin: 10px 0;
+        }
+
+        .menu a {
+            text-decoration: none;
+            margin-right: 15px;
+            color: #007BFF;
+        }
+
+        .menu a:hover {
+            text-decoration: underline;
+        }
+    </style>
+    <!-- 引入 jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.js"
+        integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+    <!-- axios -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+
+<body>
+    <h1>會員功能總管</h1>
+    <div class="menu">
+        <a href="#">個人資料</a>
+        <a href="#">訂房查詢</a>
+        <a href="#">訂單查詢</a>
+        <a href="http://localhost:8080/CloudSerenityHotel/user/logout">登出</a>
+    </div>
+    <hr>
+    <div>
+        <p id="username"></p>
+        <p>請選擇您需要的功能。</p>
+    </div>
+    <script>
+        axios.get('http://localhost:8080/CloudSerenityHotel/user/getUserInfo')
+            .then(function (response) {
+                let code = response.data.code;
+                let data = response.data.data;
+
+                if (code === 505) {
+                    alert("請先登入!");
+                    window.location.href =
+                        "http://localhost:8080/CloudSerenityHotel/static/user/login.jsp";
+                } else if (code === 404) {
+                    alert("找不到此帳號!");
+                    window.location.href =
+                        "http://localhost:8080/CloudSerenityHotel/static/user/login.jsp";
+                } else {
+                    if (data.userIdentity != "user") {
+                        alert("你不是會員，無權使用此介面");
+                        window.location.href =
+                            "http://localhost:8080/CloudSerenityHotel/user/logout";
+                        return;
+                    }
+                }
+                $("#username").text(`歡迎 ${data.userName} 會員`);
+            })
+            .catch(function (error) {
+                console.log(error);
+
+            });
+
+    </script>
+</body>
+
+</html>
