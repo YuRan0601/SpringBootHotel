@@ -58,7 +58,7 @@ public class OrderController extends BaseController {
 	@GetMapping("/findOrderDetails/{orderId}")
 	public ResponseEntity<OrderDTO> findOrderDetails(@PathVariable Integer orderId) {
 	    try {
-	        OrderDTO orderDTO = orderServiceImpl.findOrderDetails(orderId);
+	        OrderDTO orderDTO = orderServiceImpl.getOrderDetailsAsDTO(orderId);
 	        return ResponseEntity.ok(orderDTO);
 	    } catch (RuntimeException e) {
 	        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
@@ -137,7 +137,7 @@ public class OrderController extends BaseController {
 	@GetMapping("/getUpdateOrderById/{orderId}")
 	public ResponseEntity<OrderDTO> getUpdateOrderById(@PathVariable Integer orderId) {
 		try {
-			OrderDTO orderDTO = orderServiceImpl.findOrderDetails(orderId);
+			OrderDTO orderDTO = orderServiceImpl.getOrderDetailsAsDTO(orderId);
 			return ResponseEntity.ok(orderDTO);
 		} catch (RuntimeException e) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);

@@ -79,16 +79,11 @@ public class OrderServiceImpl implements OrderService {
 
 	// 查詢單筆訂單
 	@Override
-	public OrderDTO findOrderDetails(Integer orderId) {
-		OrderBean order = orderDao.findById(orderId).orElseThrow(() -> new RuntimeException("訂單不存在，ID: " + orderId));
-		return convertToDTO(order);
-	}
-
-	// 疑問??
-	// 查詢單筆訂單，返回 DTO（重複方法，已合併至 findOrderDetails）
-	@Override
 	public OrderDTO getOrderDetailsAsDTO(Integer orderId) {
-		return findOrderDetails(orderId);
+		// 查詢訂單，若不存在則拋出異常
+		OrderBean order = orderDao.findById(orderId).orElseThrow(() -> new RuntimeException("訂單不存在，ID: " + orderId));
+		// 將訂單實體轉換為 DTO
+		return convertToDTO(order);
 	}
 
 	// 刪除訂單
@@ -137,13 +132,6 @@ public class OrderServiceImpl implements OrderService {
 		orderDao.save(order); // 保存更新後的訂單主檔
 
 		return existingItem;
-	}
-
-	// 刪除單一訂單細項_好像不用?
-	@Override
-	public boolean deleteOrderItemById(Integer orderItemId) {
-		// TODO Auto-generated method stub
-		return false;
 	}
 
 	// 插入訂單與訂單細項
