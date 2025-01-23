@@ -53,6 +53,8 @@ public class OrderItemsBean implements Serializable {
 	// 多對一的關聯：一個訂單細項對應一個訂單
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "order_id", nullable = false)
+	// nullable = false => 
+	// 如果欄位有設定預設值（例如 BigDecimal.ZERO），則即使沒有賦值也不會是 NULL，這與 nullable = false 的效果互補。
 	// 資料庫層面： 它會在資料庫中生成的 order_id 外鍵列上加上 NOT NULL 限制。這表示在對應的數據行中，order_id 的值必須存在，不能為空（NULL）。
 	// 邏輯層面： 強制要求每個 OrderItemsBean 必須關聯到某個 OrderBean，即每個訂單項必須屬於一個訂單。
 	// 改使用DTO
