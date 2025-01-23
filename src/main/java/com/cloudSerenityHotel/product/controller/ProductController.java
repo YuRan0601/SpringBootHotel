@@ -72,7 +72,7 @@ public class ProductController {
 		mf.transferTo(saveFilePath);
 		
         //把圖片路徑存到資料庫表格裡
-        image.setImageUrl("/CloudSerenityHotel/static/product/uploadImage/" + fileName);
+        image.setImageUrl("static/product/uploadImage/" + fileName);
         productService.uploadImage(products,image);
 		
 		
