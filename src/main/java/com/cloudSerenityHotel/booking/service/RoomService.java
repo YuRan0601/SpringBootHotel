@@ -1,5 +1,6 @@
 package com.cloudSerenityHotel.booking.service;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -41,5 +42,8 @@ public interface RoomService {
 	int updateRoom(Room room);
 
 	int insertRoomTypeAndImg(RoomType roomType, MultipartFile typePrimaryImg, MultipartFile[] typeImg);
+
+	List<Map<String, Object>> getAwailableRoomTypesAndRoomCountWithinDates(LocalDate checkInDate,
+			LocalDate checkOutDate);
 	
 }

@@ -7,5 +7,5 @@ import com.cloudSerenityHotel.product.model.Products;
 
 public interface ProductImagesRepository extends JpaRepository<ProductImages, Integer> {
 
-	ProductImages findByProductsAndIsprimaryTrue(Products products);
+	ProductImages findByProductsAndIsPrimaryTrue(Products products);
 }

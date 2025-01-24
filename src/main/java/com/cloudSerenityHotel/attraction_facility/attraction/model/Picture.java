@@ -38,6 +38,21 @@ public class Picture {
         this.createAt = createAt;
         this.updateAt = updateAt;
     }
+    
+    private String fileName;
+    private String filePath;
+    private long size;
+
+
+    public String getFileName() { return fileName; }
+    public void setFileName(String fileName) { this.fileName = fileName; }
+
+    public String getFilePath() { return filePath; }
+    public void setFilePath(String filePath) { this.filePath = filePath; }
+
+    public long getSize() { return size; }
+    public void setSize(long size) { this.size = size; }
+
 
     // Getters and Setters
     public Integer getImageId() {

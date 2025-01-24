@@ -85,7 +85,6 @@ public class RoomDaoImpl implements RoomDao {
 					roomType = :roomType,
 					roomName = :roomName,
 					roomDescription = :roomDesc,
-					price = :price,
 					status = :status,
 					updatedDate = :updatedDate
 				WHERE roomId = :roomId
@@ -93,7 +92,6 @@ public class RoomDaoImpl implements RoomDao {
 		.setParameter("roomType", roomType)
 		.setParameter("roomName", room.getRoomName())
 		.setParameter("roomDesc", room.getRoomDescription())
-		.setParameter("price", room.getPrice())
 		.setParameter("status", room.getStatus())
 		.setParameter("updatedDate", new Timestamp(new Date().getTime()))
 		.setParameter("roomId", room.getRoomId())

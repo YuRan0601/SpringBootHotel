@@ -140,6 +140,32 @@
 			color: #ffffff;
 		}
 	</style>
+	<script>
+		$(document).ready(function () {
+			// 當商品下拉選單改變時，根據選擇的商品 ID 獲取單價
+			$('#productSelect').change(function () {
+				const productId = $(this).val();
+				if (productId) {
+					// 發送 Ajax 請求到後端 API 獲取商品單價
+					$.ajax({
+						url: '/Product/getProductById',
+						type: 'GET',
+						data: { productId: productId },
+						success: function (response) {
+							if (response.price) {
+								$('#unitPrice').val(response.price); // 填充單價欄位
+							} else {
+								alert('無法獲取商品價格');
+							}
+						},
+						error: function () {
+							alert('獲取商品資訊時發生錯誤');
+						}
+					});
+				}
+			});
+		});
+	</script>
 </head>
 
 <body>

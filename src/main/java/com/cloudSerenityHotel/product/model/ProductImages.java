@@ -5,10 +5,8 @@ import java.sql.Timestamp;
 
 import org.springframework.stereotype.Component;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -41,7 +39,7 @@ public class ProductImages implements Serializable{
 	private String imageUrl;
 	
 	@Column(name = "is_primary")
-	private boolean isprimary;
+	private Boolean isPrimary;
 //	private boolean is_primary; 不能用這個會報錯，一定要isIs開頭
 	
 	@Column(name = "created_at", insertable = false, updatable =  false)

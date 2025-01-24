@@ -3,10 +3,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
@@ -53,8 +50,11 @@ public class Products implements Serializable{
 	@Column(name = "created_at", insertable = false, updatable =  false)//hibernate新增修改時關掉 防止null
 	private Timestamp createdAt;
 	
-	@Column(name = "updated_at", insertable =  false)//修改時間用了，修改會沒變化，在DAO那邊另外處理
+	@Column(name = "updated_at", insertable =  false)
 	private Timestamp updatedAt;
+	
+    @Column(name = "status")
+    private int status;
 	
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "products",cascade = CascadeType.ALL)
 	private List<ProductImages> productImages = new ArrayList<ProductImages>();
@@ -64,8 +64,7 @@ public class Products implements Serializable{
 
 //	@OneToMany(fetch = FetchType.LAZY, mappedBy = "products",cascade = CascadeType.ALL)
 //	private Set<ProductImages> productImages = new LinkedHashSet<ProductImages>();
-//	
-//	
+
 //	@ManyToMany(mappedBy = "products",cascade = {CascadeType.MERGE,CascadeType.PERSIST})
 //	private Set<Categories> categories = new HashSet<Categories>();
 	

@@ -87,12 +87,14 @@ public class RoomTypeDaoImpl implements RoomTypeDao {
 				SET
 					typeName = :tName,
 					typeDesc = :tDesc,
+					price = :price,
 					maxCapacity = :maxCapacity,
 					updatedDate = :updatedDate
 				WHERE typeId = :tId
 				""")
 		.setParameter("tName", roomType.getTypeName())
 		.setParameter("tDesc", roomType.getTypeDesc())
+		.setParameter("price", roomType.getPrice())
 		.setParameter("maxCapacity", roomType.getMaxCapacity())
 		.setParameter("updatedDate", roomType.getUpdatedDate())
 		.setParameter("tId", roomType.getTypeId())

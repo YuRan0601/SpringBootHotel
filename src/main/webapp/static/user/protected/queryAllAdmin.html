@@ -85,15 +85,19 @@
                 });
             });
 
-            // 從後端獲取資料並渲染到 DataTable
-            axios.get('http://localhost:8080/CloudSerenityHotel/admin/queryAllAdminTojson')
-                .then(function (response) {
-                    // 使用後端返回的資料填充 DataTable
-                    table.clear().rows.add(response.data).draw();
-                })
-                .catch(function (error) {
-                    console.error("資料加載失敗", error);
-                });
+            // 從後端獲取資料
+            function getDataToTable() {
+                axios.get('http://localhost:8080/CloudSerenityHotel/admin/queryAllAdminTojson')
+                    .then(function (response) {
+                        // 使用後端返回的資料填充 DataTable
+                        table.clear().rows.add(response.data).draw();
+                    })
+                    .catch(function (error) {
+                        console.error("資料加載失敗", error);
+                    });
+
+            }
+            getDataToTable();
 
             // 打開 Modal
             $('#addAdminBtn').on('click', function () {
@@ -158,6 +162,7 @@
                 ]
             });
 
+
             // 表單提交
             $('#addAdminForm').on('submit', function (e) {
                 e.preventDefault(); // 阻止預設表單提交
@@ -176,10 +181,10 @@
                         $('#addAdminForm')[0].reset(); // 清空表單
                         swal.fire({
                             title: "新增管理員成功",
-                            text: "請重新整理頁面!",
                             icon: "success",
                             allowOutsideClick: false
                         });
+                        getDataToTable();
                     })
                     .catch(function (error) {
                         swal.fire({
@@ -188,7 +193,7 @@
                             icon: "error",
                             allowOutsideClick: false
                         });
-
+                        getDataToTable();
                     });
             });
 
@@ -210,6 +215,7 @@
                             icon: 'success',
                             allowOutsideClick: false
                         });
+                        getDataToTable();
                     })
                     .catch(function (error) {
                         Swal.fire({
@@ -218,6 +224,7 @@
                             icon: 'error',
                             allowOutsideClick: false
                         });
+                        getDataToTable();
                     });
             }
             );
@@ -261,6 +268,7 @@
                             icon: 'success',
                             allowOutsideClick: false
                         });
+                        getDataToTable();
                     })
                     .catch(function (error) {
                         Swal.fire({
@@ -269,10 +277,9 @@
                             icon: 'error',
                             allowOutsideClick: false
                         });
+                        getDataToTable();
                     });
             });
-
-
         });
 
         // 按鈕點擊事件：顯示/隱藏密碼

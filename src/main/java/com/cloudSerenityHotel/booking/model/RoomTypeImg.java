@@ -7,6 +7,7 @@ import java.util.List;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -41,9 +42,6 @@ public class RoomTypeImg implements Serializable{
 	@Column(name = "img_id")
 	private Integer imgId;
 	
-//	@Column(name = "room_type_id")
-//	private Integer roomTypeId;
-	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "room_type_id")
 	private RoomType roomType;
@@ -55,8 +53,10 @@ public class RoomTypeImg implements Serializable{
 	private Boolean isPrimary;
 	
 	@Column(name = "created_date", insertable = false, updatable = false)
+	@JsonFormat(pattern = "yyyy-MM-dd a hh:mm:ss")
 	private Timestamp createdDate;
 	
 	@Column(name = "updated_date", insertable = false)
+	@JsonFormat(pattern = "yyyy-MM-dd a hh:mm:ss")
 	private Timestamp updatedDate;
 }
