@@ -1,5 +1,6 @@
 package com.cloudSerenityHotel.rent.controller;
 
+import java.util.List;
 import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
@@ -21,9 +22,9 @@ import com.cloudSerenityHotel.rent.model.CarDetailsService;
 import com.cloudSerenityHotel.rent.model.api.ResponseModel;
 import com.cloudSerenityHotel.rent.model.api.StatusEnum;
 
-
 @Controller
-@CrossOrigin(origins = {"http://localhost:5173"}, methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
+@CrossOrigin(origins = { "http://localhost:5173" }, methods = { RequestMethod.GET, RequestMethod.POST,
+		RequestMethod.PUT, RequestMethod.DELETE })
 @RequestMapping(path = "/CarDetails")
 public class CarDetailsController {
 
@@ -70,7 +71,7 @@ public class CarDetailsController {
 		carDetailsService.deleteCarDetails(carDetails);
 	}
 
-	@PostMapping(path = "/queryAll")
+	@GetMapping(path = "/queryAll")
 	@ResponseBody
 	public ResponseEntity<?> carDetailsActionAll() {
 		ResponseModel resp = carDetailsService.findAll();
@@ -78,4 +79,21 @@ public class CarDetailsController {
 				: ResponseEntity.status(HttpStatus.NOT_FOUND).body(resp.getData());
 	}
 
+	@GetMapping("/available-vehicles")
+	@ResponseBody
+	public ResponseEntity<?> getAvailableVehicles() {
+		// 調用服務層來查詢可租用的車輛
+		ResponseModel<List<CarDetails>> response = carDetailsService.findAvailableVehicles();
+
+		// 檢查查詢結果的狀態
+		if (response != null && response.getStatus() == StatusEnum.SUCCESS) {
+			// 查詢成功，返回車輛列表
+			return ResponseEntity.ok(response.getData());
+		} else {
+			// 查詢失敗，返回錯誤訊息
+			return ResponseEntity.status(HttpStatus.NOT_FOUND)
+					.body(response != null ? response.getData() : "未找到可租用的車輛");
+		}
+
+	}
 }

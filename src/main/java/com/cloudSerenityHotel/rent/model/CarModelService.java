@@ -9,6 +9,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.cloudSerenityHotel.rent.dao.CarModelRepository;
+import com.cloudSerenityHotel.rent.model.api.ResponseModel;
+import com.cloudSerenityHotel.rent.model.api.StatusEnum;
 
 import jakarta.transaction.Transactional;
 
@@ -51,4 +53,15 @@ public class CarModelService {
 	            return false;  // 車型不存在
 	        }
 	}
+	
+	public ResponseModel countByCarModel(String carModel) {
+	    Integer vehicleCount = carModelRepository.countByCarModel(carModel);
+	    
+	    // 如果查詢結果為 null，則將 totalVehicles 設為 0
+	    if (vehicleCount == null) {
+	        vehicleCount = 0;
+	    }
+	    return new ResponseModel<>(StatusEnum.SUCCESS, vehicleCount);
+	}
+	
 }

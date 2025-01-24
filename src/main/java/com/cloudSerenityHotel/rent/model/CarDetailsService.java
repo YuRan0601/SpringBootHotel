@@ -67,4 +67,12 @@ public class CarDetailsService {
 	public void deleteCarDetails(CarDetails carDetails) {
 		carDetailsRepository.delete(carDetails);
 	}
+	
+	public ResponseModel<List<CarDetails>> findAvailableVehicles()  {
+		List<CarDetails> carDetailsResp = carDetailsRepository.findAvailableVehicles();
+		if(carDetailsResp != null && !carDetailsResp.isEmpty()) {
+			return new ResponseModel<>(StatusEnum.SUCCESS, carDetailsResp);
+		}
+		 return new ResponseModel(StatusEnum.FAIL, "未找到可租用的車輛");
+	}
 }
