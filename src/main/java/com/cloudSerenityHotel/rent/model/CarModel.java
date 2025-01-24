@@ -9,9 +9,15 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity 
 @Table(name = "cars_model")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class CarModel {
 	
 	@Id 
@@ -48,135 +54,10 @@ public class CarModel {
 	@Column(name = "car_size")
 	private String carSize;		//汽車大小
 	
+	@Column(name = "total_vehicles")
+	private Integer totalVehicles; //車輛總數
 	
-	public CarModel() {
-	}
-
-
-	public CarModel(int carId, String carModel, String description, String brand, int engineDisplacement,
-			int seatingCapacity, Date createdAt, Date updatedAt, String carType, String carSize) {
-		super();
-		this.carModelId = carId;
-		this.carModel = carModel;
-		this.description = description;
-		this.brand = brand;
-		this.engineDisplacement = engineDisplacement;
-		this.seatingCapacity = seatingCapacity;
-		this.createdAt = createdAt;
-		this.updatedAt = updatedAt;
-		this.carType = carType;
-		this.carSize = carSize;
-	}
-
-
-	public int getCarId() {
-		return carModelId;
-	}
-
-
-	public void setCarId(int carId) {
-		this.carModelId = carId;
-	}
-
-
-	public String getCarModel() {
-		return carModel;
-	}
-
-
-	public void setCarModel(String carModel) {
-		this.carModel = carModel;
-	}
-
-
-	public String getDescription() {
-		return description;
-	}
-
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
-
-	public String getBrand() {
-		return brand;
-	}
-
-
-	public void setBrand(String brand) {
-		this.brand = brand;
-	}
-
-
-	public int getEngineDisplacement() {
-		return engineDisplacement;
-	}
-
-
-	public void setEngineDisplacement(int engineDisplacement) {
-		this.engineDisplacement = engineDisplacement;
-	}
-
-
-	public int getSeatingCapacity() {
-		return seatingCapacity;
-	}
-
-
-	public void setSeatingCapacity(int seatingCapacity) {
-		this.seatingCapacity = seatingCapacity;
-	}
-
-
-	public Date getCreatedAt() {
-		return createdAt;
-	}
-
-
-	public void setCreatedAt(Date createdAt) {
-		this.createdAt = createdAt;
-	}
-
-
-	public Date getUpdatedAt() {
-		return updatedAt;
-	}
-
-
-	public void setUpdatedAt(Date updatedAt) {
-		this.updatedAt = updatedAt;
-	}
-
-
-	public String getCarType() {
-		return carType;
-	}
-
-
-	public void setCarType(String carType) {
-		this.carType = carType;
-	}
-
-
-	public String getCarSize() {
-		return carSize;
-	}
-
-
-	public void setCarSize(String carSize) {
-		this.carSize = carSize;
-	}
-
-
-	@Override
-	public String toString() {
-		return "CarModel [carId=" + carModelId + ", carModel=" + carModel + ", description=" + description + ", brand="
-				+ brand + ", engineDisplacement=" + engineDisplacement + ", seatingCapacity=" + seatingCapacity
-				+ ", createdAt=" + createdAt + ", updatedAt=" + updatedAt + ", carType=" + carType + ", carSize="
-				+ carSize + "]";
-	}
-	
-	
+	@Column(name = "available_vehicles")
+	private Integer availableVehicles; //可使用數輛
 
 }
