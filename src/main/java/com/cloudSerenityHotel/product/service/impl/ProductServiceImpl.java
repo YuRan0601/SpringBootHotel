@@ -48,7 +48,7 @@ public class ProductServiceImpl implements ProductService{
 			SimpleDateFormat date = new SimpleDateFormat("yyyy-MM-dd a hh:mm:ss");
 			
 			map.put("productId", bean.getProductId());
-			map.put("productName", bean.getName());
+			map.put("productName", bean.getProductName());
 			map.put("price", bean.getPrice());
 			map.put("specialPrice", bean.getSpecialPrice());
 			map.put("createdAt", date.format(bean.getCreatedAt()));
@@ -88,7 +88,7 @@ public class ProductServiceImpl implements ProductService{
 		for (Categories bean : categories) {
 			HashMap<String, Object> map = new HashMap<String, Object>();
 			map.put("categoryId", bean.getCategoryId());
-			map.put("categoriesName", bean.getName());
+			map.put("categoriesName", bean.getCategoriesName());
 			
 			mapList.add(map);
 		}
@@ -114,16 +114,44 @@ public class ProductServiceImpl implements ProductService{
 
 
 	 @Override
-	 public int insertProduct(Products products,Categories categories) {
+	 public int insertProductAndCategories(Products products,Categories categories) {
+		 insertProduct(products);
+		 insertCategories(categories);
 	  
 	     products.getCategories().add(categories);
 	     categories.getProducts().add(products);
 	  
-	  productDao.save(products);
-	  categoriesDao.save(categories);
+	     productDao.save(products);
+	     categoriesDao.save(categories);
+	     
 	  
 	  return 0;
 	 }
+	 
+	 @Override
+	 public int insertCategories(Categories categories) {
+		categoriesDao.save(categories);
+	 	return 0;
+	 }
+	 
+	 @Override
+	 public int insertProduct(Products products) {
+	     // 儲存分類
+	     for (Categories category : products.getCategories()) {
+	         Categories existingCategory = categoriesDao.findByCategoriesName(category.getCategoriesName())
+	                                       .orElse(category);
+	         existingCategory.getProducts().add(products);
+	     }
+
+	     // 儲存商品與圖片
+	     productDao.save(products);
+	     for (ProductImages image : products.getProductImages()) {
+	         productImagesDao.save(image);
+	     }
+	     return 1;
+	 }
+
+
 
 	@Override
 	public int uploadImage(Products products,ProductImages Images) {
@@ -167,7 +195,7 @@ public class ProductServiceImpl implements ProductService{
 	  Optional<Products> getOne = productDao.findById(products.getProductId());
 	  Products productId = getOne.get();
 	  
-	  productId.setName(products.getName());
+	  productId.setProductName(products.getProductName());
 	  productId.setDescription(products.getDescription());
 	  productId.setPrice(products.getPrice());
 	  productId.setSpecialPrice(products.getSpecialPrice());
@@ -200,5 +228,8 @@ public class ProductServiceImpl implements ProductService{
 	// 使用 JPA Repository 的 findAllById 方法查詢多個產品
      return productDao.findAllById(productIds);
  }
+
+
+
 
 }

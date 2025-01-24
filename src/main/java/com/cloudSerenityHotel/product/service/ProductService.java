@@ -12,7 +12,9 @@ public interface ProductService {
 
 	List<Map<String, Object>> selectProduct(Integer productId);
 	List<Map<String, Object>> selectAllProduct();
-	int insertProduct(Products products,Categories categories);
+	int insertProductAndCategories(Products products,Categories categories);
+	int insertProduct(Products products);
+	int insertCategories(Categories categories);
 	int uploadImage(Products products,ProductImages Images);
 	int deleteProduct(Integer productId);
 	int updateProduct(Products products,Categories categories);

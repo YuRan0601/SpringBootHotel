@@ -7,6 +7,7 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -38,7 +39,7 @@ public class Categories implements Serializable{
 	private Integer categoryId;
 	
 	@Column(name = "name")
-	private String name;
+	private String categoriesName;
 	
 	@ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE,CascadeType.PERSIST})
 	@JoinTable(name = "ProductCategories",

@@ -3,6 +3,7 @@ package com.cloudSerenityHotel.product.controller;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -19,10 +20,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.cloudSerenityHotel.product.dao.CategoriesRepository;
 import com.cloudSerenityHotel.product.model.Categories;
 import com.cloudSerenityHotel.product.model.ProductImages;
 import com.cloudSerenityHotel.product.model.Products;
@@ -38,6 +41,10 @@ public class ProductController {
 	@Autowired
 	private ProductServiceImpl productService;
 	
+	@Autowired
+	private CategoriesRepository categoriesDao;
+
+	
 //	//側邊選單(套版用)
 //	@GetMapping("/aside")
 //	public String productHome() {
@@ -51,23 +58,50 @@ public class ProductController {
 	}
 	
 	//新增
-	@PostMapping("/insert")
-	public int insert(@RequestPart Products products, @RequestPart Categories categories, @RequestPart ProductImages image, @RequestPart MultipartFile mf) throws IllegalStateException, IOException {
-		
-		//上傳圖片
-		String fileName = mf.getOriginalFilename();
-		String saveFileDir = "src/main/webapp/static/product/uploadImage/";
-		
-		File saveFilePath = new File(saveFileDir, fileName);
-		mf.transferTo(saveFilePath.getAbsoluteFile());
-		
-        //把圖片路徑存到資料庫表格裡
-        image.setImageUrl("static/product/uploadImage/" + fileName);
-        productService.uploadImage(products,image);
-		
-	
-		return productService.insertProduct(products,categories);
+	@PostMapping("/insertProducts")
+	public int insertProducts(@RequestBody Products products) throws IllegalStateException, IOException {
+		return productService.insertProduct(products);
 	}
+	
+	@PostMapping("/insertCategories")
+	public int insertCategories(@RequestBody Categories categories) {
+		return productService.insertCategories(categories);
+	}
+	
+	
+	@PostMapping(value = "/insertProductWithImagesAndCategories", consumes = {"multipart/form-data"})
+	public int insertProductWithImagesAndCategories(@RequestPart("product") Products products,@RequestPart("images") List<MultipartFile> images) throws IllegalStateException, IOException {
+	    // 暫存更新後的分類
+	    List<Categories> updatedCategories = new ArrayList<>();
+	    for (Categories category : products.getCategories()) {
+	        Categories existingCategory = categoriesDao.findByCategoriesName(category.getCategoriesName()).orElse(null);
+	        if (existingCategory == null) {
+	            existingCategory = new Categories();
+	            existingCategory.setCategoriesName(category.getCategoriesName());
+	            categoriesDao.save(existingCategory);
+	        }
+	        updatedCategories.add(existingCategory); // 加入暫存清單
+	    }
+	    products.setCategories(updatedCategories); // 將更新後的分類設回產品
+
+	    // 保存圖片
+	    for (int i = 0; i < images.size(); i++) {
+	        MultipartFile file = images.get(i);
+	        String fileName = file.getOriginalFilename();
+	        String saveFileDir = "src/main/webapp/static/product/uploadImage/";
+	        File saveFilePath = new File(saveFileDir, fileName);
+	        file.transferTo(saveFilePath.getAbsoluteFile());
+
+	        ProductImages image = new ProductImages();
+	        image.setImageUrl("/static/product/uploadImage/" + fileName);
+	        image.setIsPrimary(i == 0); // 第一張設為主圖
+	        image.setProducts(products);
+	        products.getProductImages().add(image);
+	    }
+
+	    return productService.insertProduct(products);
+	}
+
 	
 	//刪除
 	@DeleteMapping("/delete/{productId}")

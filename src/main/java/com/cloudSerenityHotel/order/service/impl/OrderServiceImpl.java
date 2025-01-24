@@ -56,7 +56,7 @@ public class OrderServiceImpl implements OrderService {
 			orderItemDTO.setOrderitemId(item.getOrderitemId());
 			orderItemDTO.setOrderId(order.getOrderId()); // 確保 orderId 被設置
 			orderItemDTO.setProductId(item.getProducts().getProductId());
-			orderItemDTO.setProductName(item.getProducts().getName());
+			orderItemDTO.setProductName(item.getProducts().getProductName());//這裡Bean有修改名稱
 			orderItemDTO.setProductPrice(item.getProducts().getPrice());
 			orderItemDTO.setQuantity(item.getQuantity());
 			orderItemDTO.setUnitPrice(item.getUnitPrice());

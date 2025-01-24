@@ -36,7 +36,7 @@ public class Products implements Serializable{
 	private Integer productId;
 	
 	@Column(name = "name")
-	private String name;
+	private String productName;
 	
 	@Column(name = "description")
 	private String description;
