@@ -1,6 +1,6 @@
 package com.cloudSerenityHotel.rent.model;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import jakarta.persistence.Column;
@@ -42,11 +42,11 @@ public class CarModel {
 	
 	@Column(name = "created_at")
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm")
-	private Date createdAt;		//創建時間
+	private LocalDateTime createdAt;		//創建時間
 	
 	@Column(name = "updated_at")
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm")
-	private Date updatedAt;		//修改時間
+	private LocalDateTime updatedAt;		//修改時間
 	
 	@Column(name = "car_type")
 	private String carType;		//汽車類型

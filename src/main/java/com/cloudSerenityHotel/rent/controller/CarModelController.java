@@ -64,11 +64,11 @@ public class CarModelController {
 		return carModelService.findAll();
 	}
 
-	@GetMapping("/countByCarModel")
+	@GetMapping("/countByCarModel/{carModelId}")
 	@ResponseBody
-	public ResponseEntity<?> countByCarModel(@RequestParam String carModel) {
-		if (Objects.nonNull(carModel) && !carModel.isEmpty()) {
-			ResponseModel<Long> resp = carModelService.countByCarModel(carModel);
+	public ResponseEntity<?> countByCarModel(@PathVariable("carModelId") Integer carModelId) {
+		if (carModelId > 0) {
+			ResponseModel<Integer> resp = carModelService.countByCarModel(carModelId);
 
 			// 根據查詢結果的狀態返回相應的 HTTP 狀態碼
 			return StatusEnum.SUCCESS.equals(resp.getStatus()) ? ResponseEntity.ok(resp.getData())

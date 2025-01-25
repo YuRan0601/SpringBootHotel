@@ -1,6 +1,6 @@
 package com.cloudSerenityHotel.rent.model;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -9,9 +9,16 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "car_details")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class CarDetails {
 	
 	@Id
@@ -19,7 +26,7 @@ public class CarDetails {
 	private String carId; //汽車ID
 	
 	@Column(name = "carmodel_id")
-	private int carMadelId; //車型ID
+	private int carModelId; //車型ID
 	
 	@Column(name = "license_plate")
 	private String licensePlate; //車牌號碼
@@ -35,98 +42,13 @@ public class CarDetails {
 	
 	@Column(name = "created_at")
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm")
-	private Date createdAt; //創建時間
+	private LocalDateTime createdAt; //創建時間
 	
 	@Column(name = "updated_at")
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm")
-	private Date updatedAt; //更新時間
+	private LocalDateTime updatedAt; //更新時間
 	
-	public CarDetails() {
-	}
-
-	public CarDetails(String carId, int carMadelId, String licensePlate, String colorOptions, int year, String status,
-			Date createdAt, Date updatedAt) {
-		super();
-		this.carId = carId;
-		this.carMadelId = carMadelId;
-		this.licensePlate = licensePlate;
-		this.colorOptions = colorOptions;
-		this.year = year;
-		this.status = status;
-		this.createdAt = createdAt;
-		this.updatedAt = updatedAt;
-	}
-
-	public String getCarId() {
-		return carId;
-	}
-
-	public void setCarId(String carId) {
-		this.carId = carId;
-	}
-
-	public int getCarMadelId() {
-		return carMadelId;
-	}
-
-	public void setCarMadelId(int carMadelId) {
-		this.carMadelId = carMadelId;
-	}
-
-	public String getLicensePlate() {
-		return licensePlate;
-	}
-
-	public void setLicensePlate(String licensePlate) {
-		this.licensePlate = licensePlate;
-	}
-
-	public String getColorOptions() {
-		return colorOptions;
-	}
-
-	public void setColorOptions(String colorOptions) {
-		this.colorOptions = colorOptions;
-	}
-
-	public int getYear() {
-		return year;
-	}
-
-	public void setYear(int year) {
-		this.year = year;
-	}
-
-	public String getStatus() {
-		return status;
-	}
-
-	public void setStatus(String status) {
-		this.status = status;
-	}
-
-	public Date getCreatedAt() {
-		return createdAt;
-	}
-
-	public void setCreatedAt(Date createdAt) {
-		this.createdAt = createdAt;
-	}
-
-	public Date getUpdatedAt() {
-		return updatedAt;
-	}
-
-	public void setUpdatedAt(Date updatedAt) {
-		this.updatedAt = updatedAt;
-	}
-
-	@Override
-	public String toString() {
-		return "CarDetails [carId=" + carId + ", carMadelId=" + carMadelId + ", licensePlate=" + licensePlate
-				+ ", colorOptions=" + colorOptions + ", year=" + year + ", status=" + status + ", createdAt="
-				+ createdAt + ", updatedAt=" + updatedAt + "]";
-	}
-
+	@Column(name = "remarks")
+	private String remarks; //備註
 	
 }

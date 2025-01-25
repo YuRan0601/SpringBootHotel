@@ -10,7 +10,7 @@ import com.cloudSerenityHotel.rent.model.CarModel;
 @Repository
 public interface CarModelRepository extends JpaRepository<CarModel, Integer>{
 
-	 @Query("SELECT c.totalVehicles FROM CarModel c WHERE c.carModel = :carModel")
-	Integer countByCarModel(@Param("carModel") String carModel);
+	@Query("SELECT c.totalVehicles FROM CarModel c WHERE c.carModelId = :carModelId")
+	Integer countByCarModel(@Param("carModelId") Integer carModelId);
 
 }
