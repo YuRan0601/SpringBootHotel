@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cloudSerenityHotel.base.BaseController;
@@ -53,6 +55,15 @@ public class OrderController extends BaseController {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
 		}
 	}
+	
+	// 分頁
+	@GetMapping("/paged")
+    public ResponseEntity<Page<OrderDTO>> getOrdersWithPagination(
+            @RequestParam(defaultValue = "0") int page, 
+            @RequestParam(defaultValue = "10") int size) {
+        Page<OrderDTO> orderPage = orderServiceImpl.findOrdersWithPagination(page, size);
+        return ResponseEntity.ok(orderPage);
+    }
 
 	// 查詢單筆訂單，返回 DTO
 	@GetMapping("/findOrderDetails/{orderId}")
@@ -147,8 +158,8 @@ public class OrderController extends BaseController {
 	// 更新訂單
     @PutMapping("/update/{orderId}")
     public ResponseEntity<OrderDTO> updateOrder(
-            @PathVariable Integer orderId, 
-            @RequestBody OrderDTO updatedOrderDTO) {
+            @PathVariable Integer orderId, // 獲取 orderId
+            @RequestBody OrderDTO updatedOrderDTO) { // 接收前端傳遞的更新數據（OrderDTO）
         try {
             // 轉換 DTO 為實體，並更新訂單
             OrderBean updatedOrder = convertToEntity(updatedOrderDTO);
