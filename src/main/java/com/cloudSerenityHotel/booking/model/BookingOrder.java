@@ -5,6 +5,7 @@ import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.List;
 
+import com.cloudSerenityHotel.user.model.User;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import jakarta.persistence.Column;
@@ -31,6 +32,10 @@ public class BookingOrder {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "order_id")
 	private Integer orderId;
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "userid")
+	private User user;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "room_id")
