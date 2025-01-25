@@ -8,6 +8,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.cloudSerenityHotel.order.dao.OrderDao;
@@ -76,6 +80,18 @@ public class OrderServiceImpl implements OrderService {
 		List<OrderBean> orders = orderDao.findAll();
 		return orders.stream().map(this::convertToDTO).collect(Collectors.toList());
 	}
+	
+	// 分頁
+	@Override
+	public Page<OrderDTO> findOrdersWithPagination(int page, int size) {
+		// 分頁參數：page (從 0 開始)，size (每頁筆數)
+	    Pageable pageable = PageRequest.of(page, size, Sort.by("orderDate").descending());
+	    Page<OrderBean> orderPage = orderDao.findAll(pageable);
+
+	    // 將分頁結果轉換為 DTO
+		return orderPage.map(this::convertToDTO);
+	}
+
 
 	// 查詢單筆訂單
 	@Override
@@ -100,7 +116,7 @@ public class OrderServiceImpl implements OrderService {
 		}
 	}
 
-	// 為已存在的訂單新增訂單細項
+	// 為已存在的訂單新增訂單細項_未使用到
 	@Override
 	public List<OrderItemsBean> insertItemsToExistingOrder(Integer orderId, List<OrderItemsBean> items) {
 		OrderBean order = orderDao.findById(orderId).orElseThrow(() -> new RuntimeException("訂單不存在，ID: " + orderId));
@@ -110,7 +126,7 @@ public class OrderServiceImpl implements OrderService {
 		return orderItemsDao.saveAll(items);
 	}
 
-	// 更新單一訂單細項
+	// 更新單一訂單細項_未使用到
 	@Override
 	public OrderItemsBean updateOrderItem(OrderItemsBean updatedItem) {
 		// 檢查訂單細項是否存在
@@ -165,12 +181,6 @@ public class OrderServiceImpl implements OrderService {
 	}
 
 	@Override
-	public void updateOrderItems(int orderId, List<OrderItemsBean> orderItems) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
 	public OrderDTO updateOrder(Integer orderId, OrderBean updatedOrder) {
 	    // 查詢舊訂單
 	    OrderBean existingOrder = orderDao.findById(orderId)
@@ -208,5 +218,4 @@ public class OrderServiceImpl implements OrderService {
 		order.setDiscountAmount(discountAmount); // 設置折扣金額
 		order.setFinalAmount(totalAmount.subtract(discountAmount)); // 設置最終金額
 	}
-
 }

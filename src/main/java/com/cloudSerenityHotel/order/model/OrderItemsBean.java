@@ -53,10 +53,22 @@ public class OrderItemsBean implements Serializable {
 	// 多對一的關聯：一個訂單細項對應一個訂單
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "order_id", nullable = false)
-	// nullable = false => 
-	// 如果欄位有設定預設值（例如 BigDecimal.ZERO），則即使沒有賦值也不會是 NULL，這與 nullable = false 的效果互補。
-	// 資料庫層面： 它會在資料庫中生成的 order_id 外鍵列上加上 NOT NULL 限制。這表示在對應的數據行中，order_id 的值必須存在，不能為空（NULL）。
-	// 邏輯層面： 強制要求每個 OrderItemsBean 必須關聯到某個 OrderBean，即每個訂單項必須屬於一個訂單。
+	/*
+	 * nullable = false 的功能與作用
+	 * 資料庫層面：
+	 * 在資料庫中，這會在該欄位上加上 NOT NULL 限制。
+	 * 意思是，資料庫不允許插入或更新時該欄位為 NULL。
+	 * 如果嘗試插入或更新一個 NULL 值，資料庫會拋出錯誤。
+	 * 應用層面：
+	 * 確保應用程式邏輯不會存入無效的 NULL 值。
+	 * 提升資料的完整性，避免因為空值導致邏輯錯誤或數據不一致。
+	 */
+	/*
+	 * nullable = false =>
+	 * 如果欄位有設定預設值（例如 BigDecimal.ZERO），則即使沒有賦值也不會是 NULL，這與 nullable = false 的效果互補。
+	 * 資料庫層面： 它會在資料庫中生成的 order_id 外鍵列上加上 NOT NULL 限制。這表示在對應的數據行中，order_id 的值必須存在，不能為空（NULL）。
+	 * 邏輯層面： 強制要求每個 OrderItemsBean 必須關聯到某個 OrderBean，即每個訂單項必須屬於一個訂單。
+	 */
 	// 改使用DTO
 	//@JsonIgnore // 不序列化 `OrderBean`，避免循環
 	private OrderBean order; // 這樣做會將 `order_id` 映射到 `Order` 實體
