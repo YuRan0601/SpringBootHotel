@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,7 +78,7 @@ public class OrderServiceImpl implements OrderService {
 	// 查詢所有訂單
 	@Override
 	public List<OrderDTO> findAllOrders() {
-		List<OrderBean> orders = orderDao.findAll();
+		List<OrderBean> orders = orderDao.findAll(Sort.by(Sort.Direction.ASC, "orderId"));
 		return orders.stream().map(this::convertToDTO).collect(Collectors.toList());
 	}
 	
@@ -96,10 +97,11 @@ public class OrderServiceImpl implements OrderService {
 	// 查詢單筆訂單
 	@Override
 	public OrderDTO getOrderDetailsAsDTO(Integer orderId) {
-		// 查詢訂單，若不存在則拋出異常
-		OrderBean order = orderDao.findById(orderId).orElseThrow(() -> new RuntimeException("訂單不存在，ID: " + orderId));
-		// 將訂單實體轉換為 DTO
-		return convertToDTO(order);
+	    // 查詢訂單，若不存在則拋出 NoSuchElementException
+	    OrderBean order = orderDao.findById(orderId)
+	            .orElseThrow(() -> new NoSuchElementException("訂單不存在，ID: " + orderId));
+	    // 將訂單實體轉換為 DTO
+	    return convertToDTO(order);
 	}
 
 	// 刪除訂單

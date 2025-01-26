@@ -3,6 +3,7 @@ package com.cloudSerenityHotel.order.controller;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cloudSerenityHotel.base.BaseController;
+import com.cloudSerenityHotel.order.dto.ApiResponse;
 import com.cloudSerenityHotel.order.dto.OrderDTO;
 import com.cloudSerenityHotel.order.model.OrderBean;
 import com.cloudSerenityHotel.order.model.OrderItemsBean;
@@ -67,12 +69,26 @@ public class OrderController extends BaseController {
 
 	// 查詢單筆訂單，返回 DTO
 	@GetMapping("/findOrderDetails/{orderId}")
-	public ResponseEntity<OrderDTO> findOrderDetails(@PathVariable Integer orderId) {
+	public ResponseEntity<ApiResponse<OrderDTO>> findOrderDetails(@PathVariable Integer orderId) {
 	    try {
+	        // 查詢訂單並轉換為 DTO
 	        OrderDTO orderDTO = orderServiceImpl.getOrderDetailsAsDTO(orderId);
-	        return ResponseEntity.ok(orderDTO);
-	    } catch (RuntimeException e) {
-	        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+
+	        // 創建成功的 ApiResponse
+	        ApiResponse<OrderDTO> response = new ApiResponse<>(true, "查詢成功", orderDTO);
+
+	        // 返回成功響應
+	        return ResponseEntity.ok(response);
+	    } catch (NoSuchElementException e) {
+	        // 查無此訂單，返回 404 和錯誤訊息
+	        ApiResponse<OrderDTO> errorResponse = new ApiResponse<>(false, "查無 OrderId:" + orderId + " 訂單，請確認後重試！", null);
+
+	        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+	    } catch (Exception e) {
+	        // 其他例外，返回 500 和錯誤訊息
+	        ApiResponse<OrderDTO> errorResponse = new ApiResponse<>(false, "伺服器發生錯誤，請稍後再試！", null);
+
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
 	    }
 	}
 
