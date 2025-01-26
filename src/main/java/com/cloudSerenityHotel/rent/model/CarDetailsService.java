@@ -105,7 +105,28 @@ public class CarDetailsService {
 
 	@Transactional
 	public void deleteCarDetails(CarDetails carDetails) {
-		carDetailsRepository.delete(carDetails);
+	    try {
+	        // 先從資料庫中刪除 carDetails
+	        carDetailsRepository.delete(carDetails);
+	        
+	        // 根據 carModelId 更新對應車型資料中的 totalVehicles
+	        Integer carModelId = carDetails.getCarModelId();
+	        CarModel carModel = carModelRepository.findById(carModelId).orElse(null);
+
+	        if (carModel != null) {
+	            // 進行 totalVehicles 減 1 操作
+	            int newTotalVehicles = (carModel.getTotalVehicles() == null ? 0 : carModel.getTotalVehicles()) - 1;
+	            if (newTotalVehicles < 0) {
+	                newTotalVehicles = 0;
+	            }
+
+	            // 更新 carModel 的 totalVehicles
+	            carModel.setTotalVehicles(newTotalVehicles);
+	            carModelRepository.save(carModel);
+	        }
+	    } catch (Exception e) {
+	        throw new RuntimeException("刪除車輛失敗", e);  // 可以根據需要處理異常
+	    }
 	}
 	
 	public ResponseModel<List<CarDetails>> findAvailableVehicles()  {

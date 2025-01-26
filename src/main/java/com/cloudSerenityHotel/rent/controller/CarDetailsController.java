@@ -65,10 +65,23 @@ public class CarDetailsController {
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("修改失敗，請提供有效的車輛資料");
 	}
 
-	@PostMapping(path = "/deleta")
+	@PostMapping(path = "/delete")
 	@ResponseBody
-	public void carDetailsActionDelete(@RequestBody CarDetails carDetails) {
-		carDetailsService.deleteCarDetails(carDetails);
+	public ResponseEntity<?> carDetailsActionDelete(@RequestBody CarDetails carDetails) {
+	    // 檢查是否提供有效的 carDetails 物件
+	    if (Objects.nonNull(carDetails)) {
+	        try {
+	            // 刪除車輛詳情
+	            carDetailsService.deleteCarDetails(carDetails);
+	            // 刪除成功返回 200 OK 並顯示成功訊息
+	            return ResponseEntity.ok("刪除成功");
+	        } catch (Exception e) {
+	            // 捕獲異常並返回 500 錯誤狀態和錯誤訊息
+	            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("刪除失敗，請稍後再試");
+	        }
+	    }
+	    // 如果提供的 carDetails 無效，返回 400 錯誤狀態和錯誤訊息
+	    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("請提供有效的車輛資料");
 	}
 
 	@GetMapping(path = "/queryAll")
