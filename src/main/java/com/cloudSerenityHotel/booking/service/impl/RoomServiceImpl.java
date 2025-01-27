@@ -382,4 +382,13 @@ public class RoomServiceImpl implements RoomService {
 		
 		return mapList;
 	}
+
+	@Override
+	public List<Map<String, Object>> getRoomsByRoomType(Integer typeId) {
+		List<Room> rooms = roomRepository.findByRoomType_TypeId(typeId);
+		
+		return roomToMapList(rooms);
+	}
+	
+	
 }

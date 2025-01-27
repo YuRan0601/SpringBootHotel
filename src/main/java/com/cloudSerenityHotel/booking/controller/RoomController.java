@@ -157,4 +157,9 @@ public class RoomController {
 	{		
 		return roomService.getAwailableRoomTypesAndRoomCountWithinDates(checkInDate, checkOutDate);
 	}
+	
+	@GetMapping("byType/{typeId}")
+	public List<Map<String, Object>> getRoomsByRoomType(@PathVariable Integer typeId){
+		return roomService.getRoomsByRoomType(typeId);
+	}
 }

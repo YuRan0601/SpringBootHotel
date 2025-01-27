@@ -34,7 +34,7 @@ public class BookingOrder {
 	private Integer orderId;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "userid")
+	@JoinColumn(name = "userid", updatable = false)
 	private User user;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -50,7 +50,7 @@ public class BookingOrder {
 	@Column(name = "total_price")
 	private BigDecimal totalPrice;
 	
-	@Column(name = "status")
+	@Column(name = "status", insertable = false)
 	private String status;
 	
 	@Column(name = "created_date", insertable = false, updatable = false)

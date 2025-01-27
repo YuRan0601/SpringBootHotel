@@ -35,9 +35,11 @@ public class BookingController {
 	}
 	
 	@PostMapping("/order/{roomTypeId}")
-	public void insertOrder(@RequestBody BookingOrder order, @PathVariable Integer roomTypeId) {
+	public Map<String, Object> insertOrder(@RequestBody BookingOrder order, @PathVariable Integer roomTypeId) {
 		System.out.println(order.getUser().getUserId());
 		System.out.println(order.getTotalPrice());
 		System.out.println(roomTypeId);
+		
+		return bService.insertOrder(order, roomTypeId);
 	}
 }

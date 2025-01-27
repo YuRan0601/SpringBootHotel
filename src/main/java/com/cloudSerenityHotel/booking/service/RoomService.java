@@ -45,5 +45,7 @@ public interface RoomService {
 
 	List<Map<String, Object>> getAwailableRoomTypesAndRoomCountWithinDates(LocalDate checkInDate,
 			LocalDate checkOutDate);
+
+	List<Map<String, Object>> getRoomsByRoomType(Integer typeId);
 	
 }
