@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 import com.cloudSerenityHotel.booking.dao.BookingOrderRepository;
@@ -28,6 +30,9 @@ public class BookingServiceImpl implements BookingService {
 	
 	@Autowired
 	private UserRepository uRepository;
+	
+	@Autowired
+	private JavaMailSender mailSender;
 	
 	
 	private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd a hh:mm:ss");
@@ -101,9 +106,16 @@ public class BookingServiceImpl implements BookingService {
 		try {
 			bRepository.save(order);
 			res.put("code", 200); //200新增成功
+			
+			SimpleMailMessage message = new SimpleMailMessage();
+			message.setTo("tp6m4b06to@gmail.com");
+			message.setSubject("測試");
+			message.setText("測試");
+			mailSender.send(message);
 			return res;
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
+			e.printStackTrace();
 			res.put("code", 501); //501新增出錯
 			return res;
 		}
