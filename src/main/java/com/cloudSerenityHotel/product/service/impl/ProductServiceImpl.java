@@ -111,6 +111,28 @@ public class ProductServiceImpl implements ProductService{
 		return null;
 	}
 	
+	@Override
+	public List<Map<String, Object>> selectAllCategories() {
+		List<Categories> getAll = categoriesDao.findAll();
+		return categoriesToMapList(getAll);
+	}
+
+	@Override
+	public List<Map<String, Object>> findCategoryById(Integer categoryId) {
+		Optional<Categories> category = categoriesDao.findById(categoryId);
+		
+		if (category.isPresent()) {
+			return categoriesToMapList(Arrays.asList(category.get()));
+		}
+		return null;
+	}
+
+
+	@Override
+	public List<Map<String, Object>> selectShowHideProducts(Integer status) {
+		List<Products> productsTatus = productDao.findByStatus(status);
+		return productToMapList(productsTatus);
+	}
 
 
 	 @Override
@@ -228,6 +250,8 @@ public class ProductServiceImpl implements ProductService{
 	// 使用 JPA Repository 的 findAllById 方法查詢多個產品
      return productDao.findAllById(productIds);
  }
+
+
 
 
 
