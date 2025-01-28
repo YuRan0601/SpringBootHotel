@@ -1,5 +1,7 @@
 package com.cloudSerenityHotel.order.dao;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -14,4 +16,6 @@ public interface OrderItemsDao extends JpaRepository<OrderItemsBean, Integer> {
 	 * 3.) 它主要的責任是「如何從資料庫拿資料」。
 	 */
 	
+	// 根據訂單編號 (orderId) 查詢訂單細項
+    List<OrderItemsBean> findByOrderOrderId(Integer orderId);
 }

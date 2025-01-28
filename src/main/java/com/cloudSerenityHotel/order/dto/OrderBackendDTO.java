@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Getter @Setter
-public class OrderDTO {
+public class OrderBackendDTO {
 	private Integer orderId; // 訂單唯一編號
 	private Integer userId; // 使用者編號
 	private String receiveName; // 收件人名稱
@@ -24,5 +24,5 @@ public class OrderDTO {
     private String updatedAt; // 格式化的更新日期
 	
 	// 訂單細項列表 
-	private List<OrderItemDTO> orderItemsDtos;
+	private List<OrderItemBackendDTO> orderItemsDtos;
 }

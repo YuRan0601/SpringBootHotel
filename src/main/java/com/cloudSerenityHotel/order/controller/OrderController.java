@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cloudSerenityHotel.base.BaseController;
 import com.cloudSerenityHotel.order.dto.ApiResponse;
-import com.cloudSerenityHotel.order.dto.OrderDTO;
+import com.cloudSerenityHotel.order.dto.OrderBackendDTO;
 import com.cloudSerenityHotel.order.model.OrderBean;
 import com.cloudSerenityHotel.order.model.OrderItemsBean;
 import com.cloudSerenityHotel.order.service.impl.OrderServiceImpl;
@@ -47,10 +47,10 @@ public class OrderController extends BaseController {
 
 	// 查詢所有訂單，返回 DTO 列表
 	@GetMapping("/findAllOrders")
-	public ResponseEntity<List<OrderDTO>> findAllOrders() {
+	public ResponseEntity<List<OrderBackendDTO>> findAllOrders() {
 		try {
 			// 使用 Service 的方法直接返回 DTO
-			List<OrderDTO> orderDTOs = orderServiceImpl.findAllOrders();
+			List<OrderBackendDTO> orderDTOs = orderServiceImpl.findAllOrders();
 			return ResponseEntity.ok(orderDTOs);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -60,34 +60,34 @@ public class OrderController extends BaseController {
 	
 	// 分頁_未使用,交由前端顯示分頁
 	@GetMapping("/paged")
-    public ResponseEntity<Page<OrderDTO>> getOrdersWithPagination(
+    public ResponseEntity<Page<OrderBackendDTO>> getOrdersWithPagination(
             @RequestParam(defaultValue = "0") int page, 
             @RequestParam(defaultValue = "10") int size) {
-        Page<OrderDTO> orderPage = orderServiceImpl.findOrdersWithPagination(page, size);
+        Page<OrderBackendDTO> orderPage = orderServiceImpl.findOrdersWithPagination(page, size);
         System.out.println("分頁內容: " + orderPage.getContent());
         return ResponseEntity.ok(orderPage);
     }
 
 	// 查詢單筆訂單，返回 DTO
 	@GetMapping("/findOrderDetails/{orderId}")
-	public ResponseEntity<ApiResponse<OrderDTO>> findOrderDetails(@PathVariable Integer orderId) {
+	public ResponseEntity<ApiResponse<OrderBackendDTO>> findOrderDetails(@PathVariable Integer orderId) {
 	    try {
 	        // 查詢訂單並轉換為 DTO
-	        OrderDTO orderDTO = orderServiceImpl.getOrderDetailsAsDTO(orderId);
+	    	OrderBackendDTO orderDTO = orderServiceImpl.getOrderDetailsAsDTO(orderId);
 
 	        // 創建成功的 ApiResponse
-	        ApiResponse<OrderDTO> response = new ApiResponse<>(true, "查詢成功", orderDTO);
+	        ApiResponse<OrderBackendDTO> response = new ApiResponse<>(true, "查詢成功", orderDTO);
 
 	        // 返回成功響應
 	        return ResponseEntity.ok(response);
 	    } catch (NoSuchElementException e) {
 	        // 查無此訂單，返回 404 和錯誤訊息
-	        ApiResponse<OrderDTO> errorResponse = new ApiResponse<>(false, "查無 OrderId:" + orderId + " 訂單，請確認後重試！", null);
+	        ApiResponse<OrderBackendDTO> errorResponse = new ApiResponse<>(false, "查無 OrderId:" + orderId + " 訂單，請確認後重試！", null);
 
 	        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
 	    } catch (Exception e) {
 	        // 其他例外，返回 500 和錯誤訊息
-	        ApiResponse<OrderDTO> errorResponse = new ApiResponse<>(false, "伺服器發生錯誤，請稍後再試！", null);
+	        ApiResponse<OrderBackendDTO> errorResponse = new ApiResponse<>(false, "伺服器發生錯誤，請稍後再試！", null);
 
 	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
 	    }
@@ -137,7 +137,7 @@ public class OrderController extends BaseController {
 	        }
 
 	        // 計算總金額，新增訂單和細項
-	        OrderDTO createdOrder = orderServiceImpl.insertOrderWithItems(order,
+	        OrderBackendDTO createdOrder = orderServiceImpl.insertOrderWithItems(order,
 	                new ArrayList<>(order.getOrderItemsBeans()));
 
 	        // 返回成功訊息，包含訂單 ID 和詳細數據
@@ -163,9 +163,9 @@ public class OrderController extends BaseController {
 
 	// 查詢訂單以修改
 	@GetMapping("/getUpdateOrderById/{orderId}")
-	public ResponseEntity<OrderDTO> getUpdateOrderById(@PathVariable Integer orderId) {
+	public ResponseEntity<OrderBackendDTO> getUpdateOrderById(@PathVariable Integer orderId) {
 		try {
-			OrderDTO orderDTO = orderServiceImpl.getOrderDetailsAsDTO(orderId);
+			OrderBackendDTO orderDTO = orderServiceImpl.getOrderDetailsAsDTO(orderId);
 			return ResponseEntity.ok(orderDTO);
 		} catch (RuntimeException e) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
@@ -174,13 +174,13 @@ public class OrderController extends BaseController {
 
 	// 更新訂單
     @PutMapping("/update/{orderId}")
-    public ResponseEntity<OrderDTO> updateOrder(
+    public ResponseEntity<OrderBackendDTO> updateOrder(
             @PathVariable Integer orderId, // 獲取 orderId
-            @RequestBody OrderDTO updatedOrderDTO) { // 接收前端傳遞的更新數據（OrderDTO）
+            @RequestBody OrderBackendDTO updatedOrderDTO) { // 接收前端傳遞的更新數據（OrderDTO）
         try {
             // 轉換 DTO 為實體，並更新訂單
             OrderBean updatedOrder = convertToEntity(updatedOrderDTO);
-            OrderDTO result = orderServiceImpl.updateOrder(orderId, updatedOrder);
+            OrderBackendDTO result = orderServiceImpl.updateOrder(orderId, updatedOrder);
 
             // 返回更新後的訂單資料
             return ResponseEntity.ok(result);
@@ -191,7 +191,7 @@ public class OrderController extends BaseController {
     }
 
     // 將 DTO 轉換為實體的方法
-    private OrderBean convertToEntity(OrderDTO dto) {
+    private OrderBean convertToEntity(OrderBackendDTO dto) {
         OrderBean order = new OrderBean();
         order.setOrderStatus(dto.getOrderStatus());
         order.setReceiveName(dto.getReceiveName());

@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Getter @Setter
-public class OrderItemDTO {
+public class OrderItemBackendDTO {
 	private Integer orderitemId; // 關聯唯一編號，自動增長
 	private Integer orderId; // 所屬訂單ID
 	private Integer productId; // 購買商品的ID
