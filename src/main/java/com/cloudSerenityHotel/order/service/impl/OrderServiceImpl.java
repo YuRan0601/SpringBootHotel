@@ -86,7 +86,7 @@ public class OrderServiceImpl implements OrderService {
 	@Override
 	public Page<OrderDTO> findOrdersWithPagination(int page, int size) {
 		// 分頁參數：page (從 0 開始)，size (每頁筆數)
-	    Pageable pageable = PageRequest.of(page, size, Sort.by("orderDate").descending());
+		Pageable pageable = PageRequest.of(page, size, Sort.by("orderId").ascending());
 	    Page<OrderBean> orderPage = orderDao.findAll(pageable);
 
 	    // 將分頁結果轉換為 DTO

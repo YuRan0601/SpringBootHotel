@@ -58,12 +58,13 @@ public class OrderController extends BaseController {
 		}
 	}
 	
-	// 分頁
+	// 分頁_未使用,交由前端顯示分頁
 	@GetMapping("/paged")
     public ResponseEntity<Page<OrderDTO>> getOrdersWithPagination(
             @RequestParam(defaultValue = "0") int page, 
             @RequestParam(defaultValue = "10") int size) {
         Page<OrderDTO> orderPage = orderServiceImpl.findOrdersWithPagination(page, size);
+        System.out.println("分頁內容: " + orderPage.getContent());
         return ResponseEntity.ok(orderPage);
     }
 
