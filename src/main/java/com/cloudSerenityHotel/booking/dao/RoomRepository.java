@@ -25,7 +25,8 @@ public interface RoomRepository extends JpaRepository<Room, Integer> {
 		        WHERE r.roomId NOT IN (
 		            SELECT bo.room.roomId
 		            FROM BookingOrder bo
-		            WHERE bo.checkInDate < :checkOutDate AND bo.checkOutDate > :checkInDate
+		            WHERE bo.checkInDate < :checkOutDate AND bo.checkOutDate > :checkInDate 
+		            AND bo.status <> 'cancelled'
 		        )
 		        AND r.status = 'AVAILABLE'
 		        GROUP BY rt.typeId, rt.typeName, rt.typeDesc, rt.price, rt.maxCapacity

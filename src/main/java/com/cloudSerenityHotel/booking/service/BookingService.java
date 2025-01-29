@@ -11,4 +11,14 @@ public interface BookingService {
 
 	Map<String, Object> insertOrder(BookingOrder order, Integer roomTypeId);
 
+	List<Map<String, Object>> getOrderByUserId(Integer userId);
+
+	List<Map<String, Object>> getOrderByUserIdAndStatus(Integer userId, String status);
+
+	Map<String, Object> updateOrderAdmin(BookingOrder order, Integer roomTypeId);
+
+	Map<String, Object> cancelOrder(Integer orderId);
+	
+	
+
 }

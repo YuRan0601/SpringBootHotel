@@ -53,6 +53,7 @@ public class BookingServiceImpl implements BookingService {
 			map.put("checkInDate", order.getCheckInDate());
 			map.put("checkOutDate", order.getCheckOutDate());
 			map.put("totalPrice", order.getTotalPrice());
+			map.put("paymentMethod", order.getPaymentMethod());
 			
 			String status = order.getStatus();
 			if(status.equals("pending")) {
@@ -77,6 +78,22 @@ public class BookingServiceImpl implements BookingService {
 	@Override
 	public List<Map<String, Object>> getAllOrders() {
 		List<BookingOrder> orders = bRepository.findAll();
+		
+		return ordersToMapList(orders);
+	}
+	
+	
+
+	@Override
+	public List<Map<String, Object>> getOrderByUserId(Integer userId) {
+		List<BookingOrder> orders = bRepository.findByUser_UserId(userId);
+		
+		return ordersToMapList(orders);
+	}
+	
+	@Override
+	public List<Map<String, Object>> getOrderByUserIdAndStatus(Integer userId, String status) {
+		List<BookingOrder> orders = bRepository.findByUser_UserIdAndStatus(userId, status);
 		
 		return ordersToMapList(orders);
 	}
@@ -107,11 +124,6 @@ public class BookingServiceImpl implements BookingService {
 			bRepository.save(order);
 			res.put("code", 200); //200新增成功
 			
-			SimpleMailMessage message = new SimpleMailMessage();
-			message.setTo("tp6m4b06to@gmail.com");
-			message.setSubject("測試");
-			message.setText("測試");
-			mailSender.send(message);
 			return res;
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -119,6 +131,79 @@ public class BookingServiceImpl implements BookingService {
 			res.put("code", 501); //501新增出錯
 			return res;
 		}
+	}
+
+	@Override
+	public Map<String, Object> updateOrderAdmin(BookingOrder order, Integer roomTypeId) {
+		
+		Map<String, Object> res = new HashMap<String, Object>();
+		
+		Optional<BookingOrder> dbOrderOptional = bRepository.findById(order.getOrderId());
+		
+		if(!dbOrderOptional.isPresent()) {
+			res.put("code", -1); //找不到訂單
+			return res;
+		}
+		
+		BookingOrder dbOrder = dbOrderOptional.get();
+		
+		if(dbOrder.getRoom().getRoomType().getTypeId() != roomTypeId) {
+			Optional<Room> randomRoom = rRepository.findRandomAvailableRoomByTypeAndDate(roomTypeId, order.getCheckInDate().toLocalDate(), order.getCheckOutDate().toLocalDate());
+			
+			if(!randomRoom.isPresent()) {
+				res.put("code", 404); //沒有空房
+				return res;
+			}
+			
+			dbOrder.setRoom(randomRoom.get());
+		}
+		
+		if(!dbOrder.getStatus().equals(order.getStatus())) {
+			dbOrder.setStatus(order.getStatus());
+		}
+		
+		
+		try {
+			bRepository.save(dbOrder);
+			res.put("code", 200); //修改成功
+			
+			return res;
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			res.put("code", 501); //501新增出錯
+			return res;
+		}
+	}
+
+	@Override
+	public Map<String, Object> cancelOrder(Integer orderId) {
+		
+		Map<String, Object> res = new HashMap<String, Object>();
+		
+		Optional<BookingOrder> dbOrderOptional = bRepository.findById(orderId);
+		
+		if(!dbOrderOptional.isPresent()) {
+			res.put("code", 404); //找不到訂單
+			return res;
+		}
+		
+		BookingOrder dbOrder = dbOrderOptional.get();
+		
+		dbOrder.setStatus("cancelled");
+		
+		try {
+			bRepository.save(dbOrder);
+			res.put("code", 200); //修改成功
+			
+			return res;
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			res.put("code", 501); //501伺服器出錯
+			return res;
+		}
+		
 	}
 	
 	

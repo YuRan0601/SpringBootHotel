@@ -50,6 +50,9 @@ public class BookingOrder {
 	@Column(name = "total_price")
 	private BigDecimal totalPrice;
 	
+	@Column(name = "payment_method")
+	private String paymentMethod;
+	
 	@Column(name = "status", insertable = false)
 	private String status;
 	
