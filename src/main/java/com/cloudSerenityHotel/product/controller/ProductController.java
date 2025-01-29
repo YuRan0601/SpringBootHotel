@@ -57,6 +57,24 @@ public class ProductController {
 		return productService.selectProduct(productId);
 	}
 	
+	//顯示上架or下架
+	@GetMapping("/select/productStatus/{status}")
+	public List<Map<String, Object>> selectProductStatus(@PathVariable int status) {
+		return productService.selectProductStatus(status);
+	}
+	
+	//顯示全部分類
+	@GetMapping("/select/allCategories")
+	public List<Map<String, Object>> selectAllCategories() {
+		return productService.selectAllCategories();
+	}
+	
+	//單筆分類
+	@GetMapping("/select/categoryById/{categoryId}")
+	public List<Map<String, Object>> findCategoryById(@PathVariable int categoryId) {
+		return productService.findCategoryById(categoryId);
+	}
+	
 	//新增
 	@PostMapping("/insertProducts")
 	public int insertProducts(@RequestBody Products products) throws IllegalStateException, IOException {

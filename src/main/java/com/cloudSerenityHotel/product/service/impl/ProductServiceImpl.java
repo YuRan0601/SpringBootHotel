@@ -129,7 +129,7 @@ public class ProductServiceImpl implements ProductService{
 
 
 	@Override
-	public List<Map<String, Object>> selectShowHideProducts(Integer status) {
+	public List<Map<String, Object>> selectProductStatus(Integer status) {
 		List<Products> productsTatus = productDao.findByStatus(status);
 		return productToMapList(productsTatus);
 	}
@@ -164,7 +164,11 @@ public class ProductServiceImpl implements ProductService{
 	                                       .orElse(category);
 	         existingCategory.getProducts().add(products);
 	     }
-
+	     
+	     if (products.getSpecialPrice() == null) {
+			products.setSpecialPrice(null);
+		}
+	     
 	     // 儲存商品與圖片
 	     productDao.save(products);
 	     for (ProductImages image : products.getProductImages()) {
@@ -250,6 +254,7 @@ public class ProductServiceImpl implements ProductService{
 	// 使用 JPA Repository 的 findAllById 方法查詢多個產品
      return productDao.findAllById(productIds);
  }
+
 
 
 
