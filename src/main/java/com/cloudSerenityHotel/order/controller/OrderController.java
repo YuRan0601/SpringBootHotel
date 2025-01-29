@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.cloudSerenityHotel.base.BaseController;
 import com.cloudSerenityHotel.order.dto.ApiResponse;
 import com.cloudSerenityHotel.order.dto.OrderBackendDTO;
+import com.cloudSerenityHotel.order.dto.OrderFrontendDTO;
 import com.cloudSerenityHotel.order.model.OrderBean;
 import com.cloudSerenityHotel.order.model.OrderItemsBean;
 import com.cloudSerenityHotel.order.service.impl.OrderServiceImpl;
@@ -200,6 +201,22 @@ public class OrderController extends BaseController {
         order.setAddress(dto.getAddress());
         // 其他不能修改的欄位不設置
         return order;
+    }
+    
+	// 查詢指定用戶的所有訂單（包含訂單細項）
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<OrderFrontendDTO>> getOrdersForFrontendByUserId(@PathVariable Integer userId) {
+        try {
+            // 調用 Service 的方法，獲取該用戶的訂單列表
+            List<OrderFrontendDTO> orders = orderServiceImpl.getOrdersForFrontendByUserId(userId);
+
+            // 返回成功響應
+            return ResponseEntity.ok(orders);
+        } catch (Exception e) {
+            e.printStackTrace();
+            // 返回伺服器錯誤響應
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
 
 }
