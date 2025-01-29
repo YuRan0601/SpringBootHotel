@@ -14,7 +14,7 @@ public interface ProductService {
 	List<Map<String, Object>> selectAllProduct();
 	List<Map<String, Object>> selectAllCategories();
 	List<Map<String, Object>> findCategoryById(Integer categoryId);
-	List<Map<String, Object>> selectShowHideProducts(Integer status); //顯示上架or下架
+	List<Map<String, Object>> selectProductStatus(Integer status); //顯示上架or下架
 	int insertProductAndCategories(Products products,Categories categories);
 	int insertProduct(Products products);
 	int insertCategories(Categories categories);
