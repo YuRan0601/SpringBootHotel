@@ -13,7 +13,7 @@ public interface ProductService {
 	List<Map<String, Object>> selectProduct(Integer productId);
 	List<Map<String, Object>> selectAllProduct();
 	List<Map<String, Object>> selectAllCategories();
-	List<Map<String, Object>> findCategoryById(Integer categoryId);
+	List<Map<String, Object>> findProductCategoryById(Integer categoryId, Integer status); //取得該分類的所有商品(上架的)
 	List<Map<String, Object>> selectProductStatus(Integer status); //顯示上架or下架
 	int insertProductAndCategories(Products products,Categories categories);
 	int insertProduct(Products products);
