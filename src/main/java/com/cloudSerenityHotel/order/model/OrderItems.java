@@ -24,7 +24,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Entity
 @Table(name = "OrderItems")
-public class OrderItemsBean implements Serializable {
+public class OrderItems implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	@Id
@@ -71,7 +71,7 @@ public class OrderItemsBean implements Serializable {
 	 */
 	// 改使用DTO
 	//@JsonIgnore // 不序列化 `OrderBean`，避免循環
-	private OrderBean order; // 這樣做會將 `order_id` 映射到 `Order` 實體
+	private Order order; // 這樣做會將 `order_id` 映射到 `Order` 實體
 	
 	// 多對一：商品
 	@ManyToOne(fetch = FetchType.LAZY)

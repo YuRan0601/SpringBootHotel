@@ -2,6 +2,7 @@ package com.cloudSerenityHotel.product.service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import com.cloudSerenityHotel.product.model.Categories;
 import com.cloudSerenityHotel.product.model.ProductImages;
@@ -25,4 +26,6 @@ public interface ProductService {
 	
 	// 多商品查詢_for Order用
     List<Products> findProductsById(List<Integer> productIds);
+    // 簡化版_for Cart用
+    Optional<Products> findById(Integer productId);
 }

@@ -248,16 +248,18 @@ public class ProductServiceImpl implements ProductService{
   return 0;
  }*/
  
- //多商品查詢_for Order用
- @Override
- public List<Products> findProductsById(List<Integer> productIds) {
-	// 使用 JPA Repository 的 findAllById 方法查詢多個產品
-     return productDao.findAllById(productIds);
- }
-
-
-
-
+	// 多商品查詢_for Order用
+	@Override
+	public List<Products> findProductsById(List<Integer> productIds) {
+		// 使用 JPA Repository 的 findAllById 方法查詢多個產品
+		return productDao.findAllById(productIds);
+	}
+	
+	// 簡化版_for Cart用
+	@Override
+	public Optional<Products> findById(Integer productId) {
+		return productDao.findById(productId);
+	}
 
 
 

@@ -25,8 +25,8 @@ import com.cloudSerenityHotel.base.BaseController;
 import com.cloudSerenityHotel.order.dto.ApiResponse;
 import com.cloudSerenityHotel.order.dto.OrderBackendDTO;
 import com.cloudSerenityHotel.order.dto.OrderFrontendDTO;
-import com.cloudSerenityHotel.order.model.OrderBean;
-import com.cloudSerenityHotel.order.model.OrderItemsBean;
+import com.cloudSerenityHotel.order.model.Order;
+import com.cloudSerenityHotel.order.model.OrderItems;
 import com.cloudSerenityHotel.order.service.impl.OrderServiceImpl;
 import com.cloudSerenityHotel.product.model.Products;
 import com.cloudSerenityHotel.product.service.impl.ProductServiceImpl;
@@ -102,7 +102,7 @@ public class OrderController extends BaseController {
 	}
 
 	@PostMapping("/add")
-	public ResponseEntity<Map<String, Object>> createOrder(@RequestBody OrderBean order) {
+	public ResponseEntity<Map<String, Object>> createOrder(@RequestBody Order order) {
 	    try {
 	        // 檢查訂單細項是否存在
 	        if (order.getOrderItemsBeans() == null || order.getOrderItemsBeans().isEmpty()) {
@@ -113,7 +113,7 @@ public class OrderController extends BaseController {
 	        }
 
 	        // 為訂單細項加載產品資訊
-	        for (OrderItemsBean item : order.getOrderItemsBeans()) {
+	        for (OrderItems item : order.getOrderItemsBeans()) {
 	            if (item.getProducts() == null || item.getProducts().getProductId() == null) {
 	                return ResponseEntity.badRequest().body(Map.of(
 	                        "success", false,
@@ -180,7 +180,7 @@ public class OrderController extends BaseController {
             @RequestBody OrderBackendDTO updatedOrderDTO) { // 接收前端傳遞的更新數據（OrderDTO）
         try {
             // 轉換 DTO 為實體，並更新訂單
-            OrderBean updatedOrder = convertToEntity(updatedOrderDTO);
+            Order updatedOrder = convertToEntity(updatedOrderDTO);
             OrderBackendDTO result = orderServiceImpl.updateOrder(orderId, updatedOrder);
 
             // 返回更新後的訂單資料
@@ -192,8 +192,8 @@ public class OrderController extends BaseController {
     }
 
     // 將 DTO 轉換為實體的方法
-    private OrderBean convertToEntity(OrderBackendDTO dto) {
-        OrderBean order = new OrderBean();
+    private Order convertToEntity(OrderBackendDTO dto) {
+        Order order = new Order();
         order.setOrderStatus(dto.getOrderStatus());
         order.setReceiveName(dto.getReceiveName());
         order.setEmail(dto.getEmail());
