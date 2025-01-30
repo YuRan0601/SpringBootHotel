@@ -6,9 +6,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.cloudSerenityHotel.user.model.User;
 import com.cloudSerenityHotel.user.service.UserService;
@@ -39,4 +41,41 @@ public class MemberController {
 		    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage);
 		}
 	}
+	
+	//取得會員個人資料
+	@GetMapping(path="/member/{userid}")
+	@ResponseBody
+	public User getMember(@PathVariable int userid) {
+		User memberData = uService.findMemberById(userid);
+		if (memberData != null) {
+			return memberData;
+		}
+		
+		return null;
+	}
+	
+	//更新會員資料
+	@PostMapping("/member/updateData")
+	public ResponseEntity<String> updateData(@RequestBody User member) {
+		int update = uService.updateMember(member);
+		if (update != 0) {
+			return ResponseEntity.ok("更新成功");
+		}else {
+			String errorMessage = "更新失敗";
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage);
+		}
+	}
+	
+	//修改密碼
+	@PostMapping("/member/updatePassword")
+	public ResponseEntity<String> updatePassword(@RequestBody User member) {
+		int update = uService.updateUser(member);
+		if (update != 0) {
+			return ResponseEntity.ok("更新成功");
+		}else {
+		    String errorMessage = "更新失敗";
+		    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage);
+		}
+	}
+	
 }
