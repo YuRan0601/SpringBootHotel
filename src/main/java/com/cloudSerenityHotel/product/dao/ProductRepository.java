@@ -9,4 +9,5 @@ import com.cloudSerenityHotel.product.model.Products;
 public interface ProductRepository extends JpaRepository<Products, Integer> {
 
 	List<Products> findByStatus(Integer status);
+	List<Products> findByCategories_CategoryIdAndStatus(Integer categoryId, Integer status);
 }

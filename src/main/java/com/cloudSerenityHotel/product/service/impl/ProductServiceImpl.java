@@ -118,13 +118,17 @@ public class ProductServiceImpl implements ProductService{
 	}
 
 	@Override
-	public List<Map<String, Object>> findCategoryById(Integer categoryId) {
-		Optional<Categories> category = categoriesDao.findById(categoryId);
+	public List<Map<String, Object>> findProductCategoryById(Integer categoryId, Integer status) {
+	    List<Products> products = productDao.findByCategories_CategoryIdAndStatus(categoryId, status);
+	    return productToMapList(products);
 		
-		if (category.isPresent()) {
-			return categoriesToMapList(Arrays.asList(category.get()));
-		}
-		return null;
+//		Optional<Categories> category = categoriesDao.findById(categoryId);
+//		
+//		if (category.isPresent()) {
+//			List<Products> products = category.get().getProducts();// 取得該分類的所有商品
+//			return productToMapList(products);
+//		}
+//		return null;
 	}
 
 

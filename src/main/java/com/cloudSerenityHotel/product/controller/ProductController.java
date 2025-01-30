@@ -69,10 +69,10 @@ public class ProductController {
 		return productService.selectAllCategories();
 	}
 	
-	//單筆分類
-	@GetMapping("/select/categoryById/{categoryId}")
-	public List<Map<String, Object>> findCategoryById(@PathVariable int categoryId) {
-		return productService.findCategoryById(categoryId);
+	//取得該分類的所有商品(上架的)
+	@GetMapping("/select/productCategory/{categoryId}")
+	public List<Map<String, Object>> findProductCategoryById(@PathVariable int categoryId) {
+		return productService.findProductCategoryById(categoryId, 1);
 	}
 	
 	//新增
