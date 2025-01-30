@@ -18,6 +18,8 @@ public interface BookingService {
 	Map<String, Object> updateOrderAdmin(BookingOrder order, Integer roomTypeId);
 
 	Map<String, Object> cancelOrder(Integer orderId);
+
+	void paymentSuccess(int orderId);
 	
 	
 

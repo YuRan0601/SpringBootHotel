@@ -205,7 +205,16 @@ public class BookingServiceImpl implements BookingService {
 		}
 		
 	}
-	
-	
+
+	@Override
+	public void paymentSuccess(int orderId) {
+		Optional<BookingOrder> dbOrderOptional = bRepository.findById(orderId);
+		
+		BookingOrder dbOrder = dbOrderOptional.get();
+		
+		dbOrder.setStatus("confirmed");
+		
+		bRepository.save(dbOrder);
+	}
 	
 }
