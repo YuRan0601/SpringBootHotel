@@ -21,8 +21,8 @@ import com.cloudSerenityHotel.order.dto.OrderBackendDTO;
 import com.cloudSerenityHotel.order.dto.OrderFrontendDTO;
 import com.cloudSerenityHotel.order.dto.OrderItemBackendDTO;
 import com.cloudSerenityHotel.order.dto.OrderItemFrontendDTO;
-import com.cloudSerenityHotel.order.model.OrderBean;
-import com.cloudSerenityHotel.order.model.OrderItemsBean;
+import com.cloudSerenityHotel.order.model.Order;
+import com.cloudSerenityHotel.order.model.OrderItems;
 import com.cloudSerenityHotel.order.service.OrderService;
 
 import jakarta.transaction.Transactional;
@@ -38,9 +38,9 @@ public class OrderServiceImpl implements OrderService {
 	@Autowired
 	private OrderItemsDao orderItemsDao;
 
-	// DTO 的轉換功能
+	// 後台DTO 的轉換功能
 	@Override
-	public OrderBackendDTO convertToBackendDTO(OrderBean order) {
+	public OrderBackendDTO convertToBackendDTO(Order order) {
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 
 		OrderBackendDTO orderDTO = new OrderBackendDTO();
@@ -80,7 +80,7 @@ public class OrderServiceImpl implements OrderService {
 	// 查詢所有訂單
 	@Override
 	public List<OrderBackendDTO> findAllOrders() {
-		List<OrderBean> orders = orderDao.findAll(Sort.by(Sort.Direction.ASC, "orderId"));
+		List<Order> orders = orderDao.findAll(Sort.by(Sort.Direction.ASC, "orderId"));
 		return orders.stream().map(this::convertToBackendDTO).collect(Collectors.toList());
 	}
 
@@ -89,7 +89,7 @@ public class OrderServiceImpl implements OrderService {
 	public Page<OrderBackendDTO> findOrdersWithPagination(int page, int size) {
 		// 分頁參數：page (從 0 開始)，size (每頁筆數)
 		Pageable pageable = PageRequest.of(page, size, Sort.by("orderId").ascending());
-		Page<OrderBean> orderPage = orderDao.findAll(pageable);
+		Page<Order> orderPage = orderDao.findAll(pageable);
 
 		// 將分頁結果轉換為 DTO
 		return orderPage.map(this::convertToBackendDTO);
@@ -99,7 +99,7 @@ public class OrderServiceImpl implements OrderService {
 	@Override
 	public OrderBackendDTO getOrderDetailsAsDTO(Integer orderId) {
 		// 查詢訂單，若不存在則拋出 NoSuchElementException
-		OrderBean order = orderDao.findById(orderId)
+		Order order = orderDao.findById(orderId)
 				.orElseThrow(() -> new NoSuchElementException("訂單不存在，ID: " + orderId));
 		// 將訂單實體轉換為 DTO
 		return convertToBackendDTO(order);
@@ -109,7 +109,7 @@ public class OrderServiceImpl implements OrderService {
 	@Override
 	public boolean deleteOrderById(Integer orderId) {
 		try {
-			OrderBean order = orderDao.findById(orderId)
+			Order order = orderDao.findById(orderId)
 					.orElseThrow(() -> new RuntimeException("訂單不存在，ID: " + orderId));
 			orderDao.delete(order); // 依賴 CascadeType.ALL，自動刪除細項
 			return true;
@@ -121,9 +121,9 @@ public class OrderServiceImpl implements OrderService {
 
 	// 為已存在的訂單新增訂單細項_未使用到
 	@Override
-	public List<OrderItemsBean> insertItemsToExistingOrder(Integer orderId, List<OrderItemsBean> items) {
-		OrderBean order = orderDao.findById(orderId).orElseThrow(() -> new RuntimeException("訂單不存在，ID: " + orderId));
-		for (OrderItemsBean item : items) {
+	public List<OrderItems> insertItemsToExistingOrder(Integer orderId, List<OrderItems> items) {
+		Order order = orderDao.findById(orderId).orElseThrow(() -> new RuntimeException("訂單不存在，ID: " + orderId));
+		for (OrderItems item : items) {
 			item.setOrder(order);
 		}
 		return orderItemsDao.saveAll(items);
@@ -131,9 +131,9 @@ public class OrderServiceImpl implements OrderService {
 
 	// 更新單一訂單細項_未使用到
 	@Override
-	public OrderItemsBean updateOrderItem(OrderItemsBean updatedItem) {
+	public OrderItems updateOrderItem(OrderItems updatedItem) {
 		// 檢查訂單細項是否存在
-		OrderItemsBean existingItem = orderItemsDao.findById(updatedItem.getOrderitemId())
+		OrderItems existingItem = orderItemsDao.findById(updatedItem.getOrderitemId())
 				.orElseThrow(() -> new RuntimeException("訂單細項不存在，ID: " + updatedItem.getOrderitemId()));
 
 		// 更新允許的字段
@@ -145,8 +145,8 @@ public class OrderServiceImpl implements OrderService {
 		existingItem = orderItemsDao.save(existingItem);
 
 		// 更新訂單總金額
-		OrderBean order = existingItem.getOrder();
-		List<OrderItemsBean> items = new ArrayList<>(order.getOrderItemsBeans());
+		Order order = existingItem.getOrder();
+		List<OrderItems> items = new ArrayList<>(order.getOrderItemsBeans());
 		calculateOrderTotal(order, items);
 		orderDao.save(order); // 保存更新後的訂單主檔
 
@@ -155,9 +155,9 @@ public class OrderServiceImpl implements OrderService {
 
 	// 插入訂單與訂單細項
 	@Override
-	public OrderBackendDTO insertOrderWithItems(OrderBean orderBean, List<OrderItemsBean> items) {
+	public OrderBackendDTO insertOrderWithItems(Order orderBean, List<OrderItems> items) {
 		// 設置細項的 subtotal 並與訂單關聯
-		for (OrderItemsBean item : items) {
+		for (OrderItems item : items) {
 			// 確保 product_id 已設置
 			if (item.getProducts() == null || item.getProducts().getProductId() == null) {
 				throw new RuntimeException("產品資訊未正確設置");
@@ -184,9 +184,9 @@ public class OrderServiceImpl implements OrderService {
 	}
 
 	@Override
-	public OrderBackendDTO updateOrder(Integer orderId, OrderBean updatedOrder) {
+	public OrderBackendDTO updateOrder(Integer orderId, Order updatedOrder) {
 		// 查詢舊訂單
-		OrderBean existingOrder = orderDao.findById(orderId)
+		Order existingOrder = orderDao.findById(orderId)
 				.orElseThrow(() -> new RuntimeException("訂單不存在，ID: " + orderId));
 
 		// 僅更新允許變動的欄位
@@ -209,11 +209,11 @@ public class OrderServiceImpl implements OrderService {
 	 * 在 calculateOrderTotal 方法中加入對商品表格的查詢，抓取特價價格（specialPrice）。如果沒有特價，則使用原價計算。
 	 */
 	@Override
-	public void calculateOrderTotal(OrderBean order, List<OrderItemsBean> items) {
+	public void calculateOrderTotal(Order order, List<OrderItems> items) {
 	    BigDecimal totalAmount = BigDecimal.ZERO;
 	    BigDecimal discountAmount = BigDecimal.ZERO;
 
-	    for (OrderItemsBean item : items) {
+	    for (OrderItems item : items) {
 	        // 查詢商品的特價（假設商品表格中有 getSpecialPrice 方法）
 	        BigDecimal specialPrice = item.getProducts().getSpecialPrice();
 	        BigDecimal unitPrice = specialPrice != null ? specialPrice : item.getUnitPrice();
@@ -240,7 +240,7 @@ public class OrderServiceImpl implements OrderService {
 	
 	// 前台使用者查詢
 	// 將 OrderBean 轉換為 OrderFrontendDTO
-	public OrderFrontendDTO convertToFrontendDTO(OrderBean order) {
+	public OrderFrontendDTO convertToFrontendDTO(Order order) {
 	    // 格式化日期
 	    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 
@@ -279,7 +279,7 @@ public class OrderServiceImpl implements OrderService {
 	@Override
 	public List<OrderFrontendDTO> getOrdersForFrontendByUserId(Integer userId) {
 		// 查詢該用戶的訂單
-	    List<OrderBean> orders = orderDao.findByUserId(userId);
+	    List<Order> orders = orderDao.findByUserId(userId);
 
 	    // 使用轉換方法轉換為前台的 DTO
 	    return orders.stream()

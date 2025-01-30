@@ -26,7 +26,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Entity
 @Table(name = "Orders")
-public class OrderBean implements Serializable {
+public class Order implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
@@ -78,6 +78,6 @@ public class OrderBean implements Serializable {
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "order", cascade = CascadeType.ALL)
 	// 改使用DTO
 	//@JsonIgnoreProperties({"order"}) // 只忽略 `order`，保留 `products`
-	private Set<OrderItemsBean> orderItemsBeans; // 關聯的訂單細項
+	private Set<OrderItems> orderItemsBeans; // 關聯的訂單細項
 
 }

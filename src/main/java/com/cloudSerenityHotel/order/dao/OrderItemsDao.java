@@ -5,10 +5,10 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.cloudSerenityHotel.order.model.OrderItemsBean;
+import com.cloudSerenityHotel.order.model.OrderItems;
 
 @Repository
-public interface OrderItemsDao extends JpaRepository<OrderItemsBean, Integer> {
+public interface OrderItemsDao extends JpaRepository<OrderItems, Integer> {
 
 	/*
 	 * 1.) 屬於 DAO（Data Access Object）層，直接操作資料庫，與資料表一一對應。
@@ -17,5 +17,5 @@ public interface OrderItemsDao extends JpaRepository<OrderItemsBean, Integer> {
 	 */
 	
 	// 根據訂單編號 (orderId) 查詢訂單細項
-    List<OrderItemsBean> findByOrderOrderId(Integer orderId);
+    List<OrderItems> findByOrderOrderId(Integer orderId);
 }

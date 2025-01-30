@@ -7,13 +7,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.cloudSerenityHotel.order.model.OrderBean;
+import com.cloudSerenityHotel.order.model.Order;
 
 @Repository
-public interface OrderDao extends JpaRepository<OrderBean, Integer>{
+public interface OrderDao extends JpaRepository<Order, Integer>{
 	// 分頁查詢所有訂單_未使用
-	Page<OrderBean> findAll(Pageable pageable);
+	Page<Order> findAll(Pageable pageable);
 	
 	// 根據 userId 查詢訂單
-    List<OrderBean> findByUserId(Integer userId);
+    List<Order> findByUserId(Integer userId);
 }
