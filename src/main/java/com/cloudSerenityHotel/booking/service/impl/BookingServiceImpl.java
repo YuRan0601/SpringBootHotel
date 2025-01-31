@@ -74,6 +74,21 @@ public class BookingServiceImpl implements BookingService {
 		
 		return res;
 	}
+	
+	
+
+	@Override
+	public BookingOrder getOrderById(int orderId) {
+		Optional<BookingOrder> dbOrder = bRepository.findById(orderId);
+		
+		if(!dbOrder.isPresent()) {
+			return null;
+		}
+		
+		return dbOrder.get();
+	}
+
+
 
 	@Override
 	public List<Map<String, Object>> getAllOrders() {
@@ -121,8 +136,49 @@ public class BookingServiceImpl implements BookingService {
 		order.setRoom(randomRoom.get());
 		
 		try {
-			bRepository.save(order);
+			BookingOrder dbOrder = bRepository.save(order);
 			res.put("code", 200); //200新增成功
+			
+			SimpleMailMessage message = new SimpleMailMessage();
+			
+			String email = dbOrder.getUser().getEmail();
+			
+			//設定收件信箱
+			//setTo也可以傳入String陣列，寄送信件到多個信箱
+			message.setTo(email);
+			
+			//設定信件主旨(String)
+			message.setSubject("訂房訂單建立成功!");
+			
+			String userName = dbOrder.getUser().getUserName();
+			
+			String orderId = dbOrder.getOrderId().toString();
+			
+			String roomType = dbOrder.getRoom().getRoomType().getTypeName();
+			
+			String checkInDate = dbOrder.getCheckInDate().toString();
+			
+			String checkOutDate = dbOrder.getCheckOutDate().toString();
+			
+			String totalPrice = dbOrder.getTotalPrice().toString();
+			
+			String content = String.format("""
+					親愛的 %s 您好
+					您的訂房訂單建立成功!
+					訂單編號：%s
+					預定房型：%s
+					入住日期：%s
+					退房日期：%s
+					總金額：%s
+					若您是選擇信用卡付款，請點擊下方連結去會員中心付款!
+					http://localhost:5173/front/member/bookingOrder
+					""", userName, orderId, roomType, checkInDate, checkOutDate, totalPrice);
+			
+			//設定信件內文(String)
+			message.setText(content);
+			
+			//用JavaMailSender物件的send方法，把SimpleMailMessage物件傳入參數，送出信件
+			mailSender.send(message);
 			
 			return res;
 		} catch (Exception e) {

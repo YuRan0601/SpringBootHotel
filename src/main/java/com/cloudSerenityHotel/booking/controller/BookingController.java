@@ -21,6 +21,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,16 +33,28 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 
-@Controller
+@RestController
 @RequestMapping("/booking")
 @CrossOrigin(origins = {"http://localhost:5173"}, methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
 public class BookingController {
 	
-    private static final String MERCHANT_ID = "2000132"; //測試用特店編號
-    private static final String HASH_KEY = "5294y06JbISpM5x9"; //測試用HASH_KEY
-    private static final String HASH_IV = "v77hoKGq4kWxNNIS";  //測試用HASH_IV
-    private static final String RETURN_URL = "https://localhost:8080/CloudSerenityHotel/booking/return";  //付款後回傳訊息接收的controller url
-    private static final String PAYMENT_URL = "https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5"; //綠界測試付款網址
+	@Value("${ecpay.merchantId}")
+    private String MERCHANT_ID; //測試用特店編號
+	
+	@Value("${ecpay.hashKey}")
+    private String HASH_KEY; //測試用HASH_KEY
+	
+	@Value("${ecpay.hashIv}")
+    private String HASH_IV;  //測試用HASH_IV
+	
+	@Value("${ecpay.paymentURL}")
+    private String PAYMENT_URL; //ecpay付款測試環境網址
+    
+    @Value("${ngrok.baseURL}")
+    private String NGROK_BASEURL; //ngrok對外暴露伺服器的網址
+    
+    @Autowired
+    private JavaMailSender mailSender;
 	
 	@Autowired
 	BookingService bService;
@@ -49,6 +64,8 @@ public class BookingController {
     public String createPayment(@RequestBody EcpayOrderVo order) {
         Map<String, String> params = new HashMap<>();
         
+        String RETURN_URL = NGROK_BASEURL + "/CloudSerenityHotel/booking/return";
+
         String merchantTradeNo = order.getOrderId() + "t" + System.currentTimeMillis(); //訂單ID後加上時間戳，避免付款網頁意外關閉時無法再重新進入付款網頁
         
         params.put("MerchantID", MERCHANT_ID);
@@ -61,7 +78,6 @@ public class BookingController {
         params.put("ReturnURL", RETURN_URL);
         params.put("ChoosePayment", "Credit");
         params.put("ClientBackURL", "http://localhost:5173/front/member/bookingOrder");
-        params.put("OrderResultURL", "http://localhost:5173/booking/paySuccess");
         params.put("CheckMacValue", generateCheckMacValue(params));
 
         StringBuilder form = new StringBuilder();
@@ -77,26 +93,77 @@ public class BookingController {
     }
 
     @PostMapping("/return")
+    @ResponseBody
     public String paymentReturn(@RequestParam Map<String, String> responseParams) {
+    	
     	String receivedCheckMacValue = responseParams.get("CheckMacValue");
-        if (!generateCheckMacValue(responseParams).equalsIgnoreCase(receivedCheckMacValue)) {
-            return "CheckMacValue 驗證失敗";
-        }
+    	
+    	responseParams.remove("CheckMacValue");
+    	
+    	String myCheckMacValue = generateCheckMacValue(responseParams);
+
+	    if (!myCheckMacValue.equalsIgnoreCase(receivedCheckMacValue)) {
+	        System.out.println("驗證失敗");
+	        return "CheckMacValue 驗證失敗";
+	    }
 
         // 取得訂單號碼
         String orderId = responseParams.get("MerchantTradeNo").split("t")[0];
         String rtnCode = responseParams.get("RtnCode");
+        
 
-        String redirectUrl;
         if ("1".equals(rtnCode)) {
             // ✅ 付款成功，更新訂單狀態
+        	System.out.println("付款成功");
+        	
             bService.paymentSuccess(Integer.parseInt(orderId));
-            redirectUrl = "http://localhost:5173/booking/paySuccess";
+            BookingOrder dbOrder = bService.getOrderById(Integer.parseInt(orderId));
+            
+            SimpleMailMessage message = new SimpleMailMessage();
+			
+			String email = dbOrder.getUser().getEmail();
+			
+			//設定收件信箱
+			//setTo也可以傳入String陣列，寄送信件到多個信箱
+			message.setTo(email);
+			
+			//設定信件主旨(String)
+			message.setSubject("您的訂房訂單付款成功!");
+			
+			String userName = dbOrder.getUser().getUserName();
+			
+			String roomType = dbOrder.getRoom().getRoomType().getTypeName();
+			
+			String checkInDate = dbOrder.getCheckInDate().toString();
+			
+			String checkOutDate = dbOrder.getCheckOutDate().toString();
+			
+			String totalPrice = dbOrder.getTotalPrice().toString();
+			
+			String content = String.format("""
+					親愛的 %s 您好
+					您的訂房訂單付款成功!
+					訂單編號：%s
+					預定房型：%s
+					入住日期：%s
+					退房日期：%s
+					總金額：%s
+					您可以點擊下方連結至會員中心查看訂單狀態
+					http://localhost:5173/front/member/bookingOrder
+					""", userName, orderId, roomType, checkInDate, checkOutDate, totalPrice);
+			
+			//設定信件內文(String)
+			message.setText(content);
+			
+			//用JavaMailSender物件的send方法，把SimpleMailMessage物件傳入參數，送出信件
+			mailSender.send(message);
+            
+            return "1";
         } else {
-        	redirectUrl = "http://localhost:5173/booking/payFail";
+        	System.out.println("付款失敗");
+        	return "0";
         }
         
-        return "<html><head><meta http-equiv='refresh' content='0;url=" + redirectUrl + "'></head></html>";
     }
 
     private String generateCheckMacValue(Map<String, String> params) {

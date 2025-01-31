@@ -20,6 +20,9 @@ public interface BookingService {
 	Map<String, Object> cancelOrder(Integer orderId);
 
 	void paymentSuccess(int orderId);
+
+	BookingOrder getOrderById(int orderId);
+
 	
 	
 
