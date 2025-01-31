@@ -26,8 +26,10 @@ import lombok.Setter;
 @Table(name = "CartItems")
 public class CartItems implements Serializable{
 	private static final long serialVersionUID = 1L;
+	
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "cartitem_id")
     private Integer cartItemId; // 購物車商品 ID
 
     //@Column(name = "cart_id")
