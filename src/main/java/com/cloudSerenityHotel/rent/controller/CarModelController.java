@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.cloudSerenityHotel.rent.model.CarModel;
 import com.cloudSerenityHotel.rent.model.CarModelService;
+import com.cloudSerenityHotel.rent.model.CarUserInfo;
 import com.cloudSerenityHotel.rent.model.api.ResponseModel;
 import com.cloudSerenityHotel.rent.model.api.StatusEnum;
 
@@ -71,12 +72,23 @@ public class CarModelController {
 			ResponseModel<Integer> resp = carModelService.countByCarModel(carModelId);
 
 			// 根據查詢結果的狀態返回相應的 HTTP 狀態碼
+			return ResponseEntity.ok(resp.getData());
+		}
+
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("查詢失敗，請提供有效的車型名稱");
+	}
+
+	@GetMapping("/UserDetailByOrderId/{orderId}")
+	@ResponseBody
+	public ResponseEntity<?> UserDetailByOrderId(@PathVariable("orderId") int orderId) {
+		if (orderId > 0) {
+			ResponseModel<CarUserInfo> resp = carModelService.getUserDetailByOrderId(orderId);
+
+			// 根據查詢結果的狀態返回相應的 HTTP 狀態碼
 			return StatusEnum.SUCCESS.equals(resp.getStatus()) ? ResponseEntity.ok(resp.getData())
 					: ResponseEntity.status(HttpStatus.NOT_FOUND).body(resp.getData());
 		}
 
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("查詢失敗，請提供有效的車型名稱");
 	}
-
-	
 }
