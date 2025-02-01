@@ -44,7 +44,7 @@ public class RoomType implements Serializable{
 	@Column(name = "type_name")
 	private String typeName;
 	
-	@Column(name = "type_desc")
+	@Column(name = "type_desc", columnDefinition = "NVARCHAR(MAX)")
 	private String typeDesc;
 	
 	@Column(name = "price")

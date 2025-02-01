@@ -38,7 +38,7 @@ public class Room implements Serializable {
 	@Column(name = "room_name")
 	private String roomName;
 	
-	@Column(name = "room_description")
+	@Column(name = "room_description", columnDefinition = "NVARCHAR(MAX)")
 	private String roomDescription;
 	
 	
