@@ -141,8 +141,6 @@ public class ProductServiceImpl implements ProductService{
 
 	 @Override
 	 public int insertProductAndCategories(Products products,Categories categories) {
-		 insertProduct(products);
-		 insertCategories(categories);
 	  
 	     products.getCategories().add(categories);
 	     categories.getProducts().add(products);
@@ -169,10 +167,6 @@ public class ProductServiceImpl implements ProductService{
 	         existingCategory.getProducts().add(products);
 	     }
 	     
-	     if (products.getSpecialPrice() == null) {
-			products.setSpecialPrice(null);
-		}
-	     
 	     // 儲存商品與圖片
 	     productDao.save(products);
 	     for (ProductImages image : products.getProductImages()) {
@@ -184,21 +178,11 @@ public class ProductServiceImpl implements ProductService{
 
 
 	@Override
-	public int uploadImage(Products products,ProductImages Images) {
-		// 因為前端還沒用，可以顯示多張圖片，然後設定哪個是主圖片(封面)，所以暫時先設定最新上傳的圖片設為封面
-		// 查詢該產品是否已有主圖片
-		ProductImages currentPrimaryImage = productImagesDao.findByProductsAndIsPrimaryTrue(products);
-		
-        // 如果已有主圖片，設為非主圖片
-        if (currentPrimaryImage != null) {
-            currentPrimaryImage.setIsPrimary(false);
-            productImagesDao.save(currentPrimaryImage);
-        }
+	public int uploadImage(Products products,ProductImages images) {
         
-        // 設定新圖片為主圖片並與產品關聯
-        Images.setProducts(products);
-        Images.setIsPrimary(true);
-        productImagesDao.save(Images);
+        images.setProducts(products);
+        products.getProductImages().add(images);
+//        productImagesDao.save(images);
   
 	  return 0;
 	 }

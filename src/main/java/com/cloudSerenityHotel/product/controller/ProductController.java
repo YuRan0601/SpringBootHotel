@@ -88,7 +88,7 @@ public class ProductController {
 	
 	
 	@PostMapping(value = "/insertProductWithImagesAndCategories", consumes = {"multipart/form-data"})
-	public int insertProductWithImagesAndCategories(@RequestPart("product") Products products,@RequestPart("images") List<MultipartFile> images) throws IllegalStateException, IOException {
+	public int insertProductWithImagesAndCategories(@RequestPart("product") Products products,@RequestPart("imageCover") MultipartFile imageCover,@RequestPart(value = "images", required = false) List<MultipartFile> images) throws IllegalStateException, IOException {
 	    // 暫存更新後的分類
 	    List<Categories> updatedCategories = new ArrayList<>();
 	    for (Categories category : products.getCategories()) {
@@ -101,21 +101,33 @@ public class ProductController {
 	        updatedCategories.add(existingCategory); // 加入暫存清單
 	    }
 	    products.setCategories(updatedCategories); // 將更新後的分類設回產品
+	    
+	    //上傳商品封面
+	    String CoverFileName = imageCover.getOriginalFilename();
+	    String CoverSaveFileDir = "src/main/webapp/static/product/uploadImage/";
+	    File CoverSaveFilePath = new File(CoverSaveFileDir, CoverFileName);
+	    imageCover.transferTo(CoverSaveFilePath.getAbsoluteFile());
+	    
+	    ProductImages CoverImage = new ProductImages();
+	    CoverImage.setImageUrl("static/product/uploadImage/" + CoverFileName);
+	    CoverImage.setIsPrimary(true);
+	    productService.uploadImage(products, CoverImage);
+	    
+	    // 上傳其他商品圖片
+	    if (images != null && !images.isEmpty()) {
+		    for (int i = 0; i < images.size(); i++) {
+		        MultipartFile file = images.get(i);
+		        String fileName = file.getOriginalFilename();
+		        String saveFileDir = "src/main/webapp/static/product/uploadImage/";
+		        File saveFilePath = new File(saveFileDir, fileName);
+		        file.transferTo(saveFilePath.getAbsoluteFile());
 
-	    // 保存圖片
-	    for (int i = 0; i < images.size(); i++) {
-	        MultipartFile file = images.get(i);
-	        String fileName = file.getOriginalFilename();
-	        String saveFileDir = "src/main/webapp/static/product/uploadImage/";
-	        File saveFilePath = new File(saveFileDir, fileName);
-	        file.transferTo(saveFilePath.getAbsoluteFile());
-
-	        ProductImages image = new ProductImages();
-	        image.setImageUrl("/static/product/uploadImage/" + fileName);
-	        image.setIsPrimary(i == 0); // 第一張設為主圖
-	        image.setProducts(products);
-	        products.getProductImages().add(image);
-	    }
+		        ProductImages image = new ProductImages();
+		        image.setImageUrl("static/product/uploadImage/" + fileName);
+//		        image.setIsPrimary(i == 0); // 第一張設為主圖
+		        productService.uploadImage(products, image);
+		    }
+		}
 
 	    return productService.insertProduct(products);
 	}
