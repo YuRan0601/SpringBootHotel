@@ -18,7 +18,7 @@ public interface ProductService {
 	List<Map<String, Object>> selectProductStatus(Integer status); //顯示上架or下架
 	int insertProductAndCategories(Products products,Categories categories);
 	int insertProduct(Products products);
-	int insertCategories(Categories categories);
+	int insertCategory(List<Categories> categories);
 	int uploadImage(Products products,ProductImages Images);
 	int deleteProduct(Integer productId);
 	int updateProduct(Products products,Categories categories);

@@ -81,9 +81,10 @@ public class ProductController {
 		return productService.insertProduct(products);
 	}
 	
-	@PostMapping("/insertCategories")
-	public int insertCategories(@RequestBody Categories categories) {
-		return productService.insertCategories(categories);
+	// 新增分類
+	@PostMapping("/insert/category")
+	public int insertCategory(@RequestBody List<Categories> categories) {
+		return productService.insertCategory(categories);
 	}
 	
 	

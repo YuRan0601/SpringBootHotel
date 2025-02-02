@@ -95,12 +95,14 @@ public class ProductServiceImpl implements ProductService{
 		return mapList;
 	}
 	
+	// 顯示全部商品
 	@Override
 	public List<Map<String, Object>> selectAllProduct() {
 		List<Products> getAll = productDao.findAll();
 		return productToMapList(getAll);
 	}
 	
+	// 顯示單筆商品
 	@Override
 	public List<Map<String, Object>> selectProduct(Integer productId) {
 		Optional<Products> product = productDao.findById(productId);
@@ -111,12 +113,14 @@ public class ProductServiceImpl implements ProductService{
 		return null;
 	}
 	
+	// 顯示全部分類
 	@Override
 	public List<Map<String, Object>> selectAllCategories() {
 		List<Categories> getAll = categoriesDao.findAll();
 		return categoriesToMapList(getAll);
 	}
 
+	//取得該分類的所有商品(上架的)
 	@Override
 	public List<Map<String, Object>> findProductCategoryById(Integer categoryId, Integer status) {
 	    List<Products> products = productDao.findByCategories_CategoryIdAndStatus(categoryId, status);
@@ -132,6 +136,7 @@ public class ProductServiceImpl implements ProductService{
 	}
 
 
+	// 顯示上架or下架商品
 	@Override
 	public List<Map<String, Object>> selectProductStatus(Integer status) {
 		List<Products> productsTatus = productDao.findByStatus(status);
@@ -153,8 +158,8 @@ public class ProductServiceImpl implements ProductService{
 	 }
 	 
 	 @Override
-	 public int insertCategories(Categories categories) {
-		categoriesDao.save(categories);
+	 public int insertCategory(List<Categories> categories) {
+		categoriesDao.saveAll(categories);
 	 	return 0;
 	 }
 	 
