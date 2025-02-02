@@ -44,6 +44,8 @@ public class CartServiceImpl implements CartService{
                 : ""; // 默認值，當無圖片時
 
         return new CartItemFrontendDTO(
+        		cartItem.getCartItemId(), // 確保返回 cartItemId
+        		cartItem.getProducts().getProductId(), // 添加 productId
                 cartItem.getProducts().getProductName(), // 商品名稱
                 imageUrl, // 商品圖片 URL
                 cartItem.getQuantity(),
@@ -201,7 +203,7 @@ public class CartServiceImpl implements CartService{
 
 	// 修改購物車中的商品數量
     @Override
-    public void updateCartItem(Integer userId, Integer productId, int newQuantity) {
+    public CartItemFrontendDTO updateCartItem(Integer userId, Integer productId, int newQuantity) {
     	// 查詢購物車
         Cart cart = cartDao.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("購物車不存在"));
@@ -233,6 +235,14 @@ public class CartServiceImpl implements CartService{
                 createNewCartItem(cart, productId, newQuantity);
             }
         }
+     // 轉換為 DTO 並返回
+        CartItems updatedCartItem = cartItemsDao.findByCartCartId(cart.getCartId()).stream()
+                .filter(item -> item.getProducts().getProductId().equals(productId) && item.getIsValid() == 0)
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("更新後商品未找到"));
+            
+        // 返回 CartItemFrontendDTO
+        return convertToFrontendDTO(updatedCartItem);
     }
     
     // 清空購物車_假刪除

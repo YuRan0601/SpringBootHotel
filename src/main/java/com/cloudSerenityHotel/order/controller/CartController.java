@@ -1,5 +1,6 @@
 package com.cloudSerenityHotel.order.controller;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,15 +59,19 @@ public class CartController extends BaseController {
     
     // 修改購物車中的商品數量
     @PutMapping("/update")
-    public ResponseEntity<String> updateCartItem(
+    public ResponseEntity<CartItemFrontendDTO> updateCartItem(
             @RequestParam Integer userId,
             @RequestParam Integer productId,
             @RequestParam Integer newQuantity) {
         try {
-            cartServiceImpl.updateCartItem(userId, productId, newQuantity);
-            return ResponseEntity.ok("購物車商品數量已更新");
+        	System.out.println("Received userId: " + userId); // 打印 userId 以便調試
+        	// 更新商品並返回更新後的 CartItemFrontendDTO
+            CartItemFrontendDTO updatedItem = cartServiceImpl.updateCartItem(userId, productId, newQuantity);
+            return ResponseEntity.ok(updatedItem); // 返回 DTO
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            CartItemFrontendDTO errorResponse = new CartItemFrontendDTO(newQuantity, newQuantity, "Error", "", 0, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
+            errorResponse.setProductName(e.getMessage());  // 如果有錯誤，將錯誤訊息設定為商品名稱
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         }
     }
 

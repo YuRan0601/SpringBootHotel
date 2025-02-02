@@ -22,6 +22,7 @@ public interface CartService {
     // 清空購物車
     void clearCart(Integer userId);
 
-    // 修改購物車中的商品數量
-	void updateCartItem(Integer userId, Integer productId, int newQuantity);
+    // 修改購物車中的商品數量並返回更新後的 DTO
+    CartItemFrontendDTO updateCartItem(Integer userId, Integer productId, int newQuantity);
+
 }
