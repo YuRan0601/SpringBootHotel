@@ -69,7 +69,7 @@ public class CartController extends BaseController {
             CartItemFrontendDTO updatedItem = cartServiceImpl.updateCartItem(userId, productId, newQuantity);
             return ResponseEntity.ok(updatedItem); // 返回 DTO
         } catch (RuntimeException e) {
-            CartItemFrontendDTO errorResponse = new CartItemFrontendDTO(newQuantity, "Error", "", 0, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
+            CartItemFrontendDTO errorResponse = new CartItemFrontendDTO(newQuantity, newQuantity, "Error", "", 0, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
             errorResponse.setProductName(e.getMessage());  // 如果有錯誤，將錯誤訊息設定為商品名稱
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         }

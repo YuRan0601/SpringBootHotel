@@ -44,6 +44,7 @@ public class CartServiceImpl implements CartService{
                 : ""; // 默認值，當無圖片時
 
         return new CartItemFrontendDTO(
+        		cartItem.getCartItemId(), // 確保返回 cartItemId
         		cartItem.getProducts().getProductId(), // 添加 productId
                 cartItem.getProducts().getProductName(), // 商品名稱
                 imageUrl, // 商品圖片 URL
