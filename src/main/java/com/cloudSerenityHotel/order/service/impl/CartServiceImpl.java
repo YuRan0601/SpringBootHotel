@@ -10,12 +10,16 @@ import org.springframework.stereotype.Service;
 import com.cloudSerenityHotel.order.dao.CartDao;
 import com.cloudSerenityHotel.order.dao.CartItemsDao;
 import com.cloudSerenityHotel.order.dto.CartItemFrontendDTO;
+import com.cloudSerenityHotel.order.dto.MemberForCartFrontendDTO;
 import com.cloudSerenityHotel.order.model.Cart;
 import com.cloudSerenityHotel.order.model.CartItems;
 import com.cloudSerenityHotel.order.service.CartService;
 import com.cloudSerenityHotel.product.model.ProductImages;
 import com.cloudSerenityHotel.product.model.Products;
 import com.cloudSerenityHotel.product.service.impl.ProductServiceImpl;
+import com.cloudSerenityHotel.user.model.Member;
+import com.cloudSerenityHotel.user.model.User;
+import com.cloudSerenityHotel.user.model.UserRepository;
 
 import jakarta.transaction.Transactional;
 
@@ -32,6 +36,34 @@ public class CartServiceImpl implements CartService{
 	
 	@Autowired
 	private ProductServiceImpl productService;
+	
+	@Autowired
+	private UserRepository userRepository;
+	
+	// 查找會員資料並返回 DTO
+    public MemberForCartFrontendDTO getMemberForCart(int userId) {
+        Optional<User> userOptional = userRepository.findByUserIdAndUserIdentity(userId, "user");
+
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            Member member = user.getMember();
+
+            // 封裝成 DTO 返回
+            MemberForCartFrontendDTO dto = new MemberForCartFrontendDTO();
+            dto.setUserid(user.getUserId());
+            dto.setUserName(user.getUserName());
+            dto.setEmail(user.getEmail());
+            dto.setUserIdentity(user.getUserIdentity());
+            dto.setPhone(member.getPhone());
+            dto.setAddress(member.getAddress());
+
+            return dto;
+        }
+
+        // 若無資料，返回 null 或拋出例外
+        return null;
+    }
+
 	
 	// 將 CartItems 實體轉換為前台 DTO
     public CartItemFrontendDTO convertToFrontendDTO(CartItems cartItem) {

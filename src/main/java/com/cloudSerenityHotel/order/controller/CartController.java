@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cloudSerenityHotel.base.BaseController;
 import com.cloudSerenityHotel.order.dto.CartItemFrontendDTO;
+import com.cloudSerenityHotel.order.dto.MemberForCartFrontendDTO;
 import com.cloudSerenityHotel.order.service.impl.CartServiceImpl;
 
 @CrossOrigin(origins = { "http://localhost:5173" }, // Vue 的本地開發環境域名
@@ -97,5 +98,17 @@ public class CartController extends BaseController {
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
+    }
+    
+    // 查詢會員資料並返回
+    @GetMapping("/memberInfo")
+    public ResponseEntity<MemberForCartFrontendDTO> getMemberInfo(@RequestParam Integer userId) {
+        MemberForCartFrontendDTO memberDTO = cartServiceImpl.getMemberForCart(userId);
+        
+        if (memberDTO == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+        
+        return ResponseEntity.ok(memberDTO);
     }
 }
