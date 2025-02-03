@@ -5,6 +5,8 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.Set; // 使用 Java 的 Set
 
+import com.cloudSerenityHotel.order.dto.MemberForCartFrontendDTO;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -16,6 +18,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -60,6 +63,10 @@ public class Order implements Serializable {
 	@Column(name = "updated_at")
 	private Timestamp updatedAt; // 更新時間，改為 Timestamp
 
+	
+	/*public void setUserid(int userId) {
+	    this.userId = userId;}*/
+	
 	// 在新增之前設定 orderDate 和 updatedAt
 	@PrePersist
 	protected void onCreate() {
@@ -79,5 +86,9 @@ public class Order implements Serializable {
 	// 改使用DTO
 	//@JsonIgnoreProperties({"order"}) // 只忽略 `order`，保留 `products`
 	private Set<OrderItems> orderItemsBeans; // 關聯的訂單細項
+	
+	// 新增 recipient 屬性，用來儲存收件人資料
+    @Transient // 這裡使用 @Transient 表示這不是資料庫的欄位，只是在應用層使用
+    private MemberForCartFrontendDTO recipient; // 收件人資料
 
 }
