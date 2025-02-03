@@ -140,6 +140,11 @@ public class ProductController {
 		return productService.deleteProduct(productId);
 	}
 	
+	@DeleteMapping("/delete/image/{productId}")
+	public int deleteImage(@PathVariable int productId) {
+		return productService.deleteImage(productId);
+	}
+	
 	//取的某商品資料 顯示在修改頁面
 	@GetMapping("/getUpdate/{productId}")
 	public List<Map<String, Object>> getUpdate(@PathVariable int productId) {
@@ -147,22 +152,52 @@ public class ProductController {
 	}
 	
 	//修改
-	@PutMapping("/update/{productId}")
-	public int update(@RequestBody Products products, @RequestBody Categories categories, @RequestBody ProductImages image, @RequestPart MultipartFile mf) throws IllegalStateException, IOException {
+	@PutMapping(value = "/update/productWithImagesAndCategories/{productId}", consumes = {"multipart/form-data"})
+	public int ProductWithImagesAndCategories(@RequestPart("product") Products products,@RequestPart("imageCover") MultipartFile imageCover,@RequestPart(value = "images", required = false) List<MultipartFile> images) throws IllegalStateException, IOException {
 		
 		
-		//上傳圖片
-		String fileName = mf.getOriginalFilename();
-		String saveFileDir = "src/main/webapp/static/product/uploadImage/";
+	    // 暫存更新後的分類
+	    List<Categories> updatedCategories = new ArrayList<>();
+	    for (Categories category : products.getCategories()) {
+	        Categories existingCategory = categoriesDao.findByCategoriesName(category.getCategoriesName()).orElse(null);
+	        if (existingCategory == null) {
+	            existingCategory = new Categories();
+	            existingCategory.setCategoriesName(category.getCategoriesName());
+	            categoriesDao.save(existingCategory);
+	        }
+	        updatedCategories.add(existingCategory); // 加入暫存清單
+	    }
+	    products.setCategories(updatedCategories); // 將更新後的分類設回產品
+	    
+	    //上傳商品封面
+	    String CoverFileName = imageCover.getOriginalFilename();
+	    String CoverSaveFileDir = "src/main/webapp/static/product/uploadImage/";
+	    File CoverSaveFilePath = new File(CoverSaveFileDir, CoverFileName);
+	    imageCover.transferTo(CoverSaveFilePath.getAbsoluteFile());
+	    
+	    ProductImages CoverImage = new ProductImages();
+	    CoverImage.setImageUrl("static/product/uploadImage/" + CoverFileName);
+	    CoverImage.setIsPrimary(true);
+	    productService.uploadImage(products, CoverImage);
+	    
+	    // 上傳其他商品圖片
+	    if (images != null && !images.isEmpty()) {
+		    for (int i = 0; i < images.size(); i++) {
+		        MultipartFile file = images.get(i);
+		        String fileName = file.getOriginalFilename();
+		        String saveFileDir = "src/main/webapp/static/product/uploadImage/";
+		        File saveFilePath = new File(saveFileDir, fileName);
+		        file.transferTo(saveFilePath.getAbsoluteFile());
+
+		        ProductImages image = new ProductImages();
+		        image.setImageUrl("static/product/uploadImage/" + fileName);
+//		        image.setIsPrimary(i == 0); // 第一張設為主圖
+		        productService.uploadImage(products, image);
+		    }
+		}
+
 		
-		File saveFilePath = new File(saveFileDir, fileName);
-		mf.transferTo(saveFilePath.getAbsoluteFile());
-		
-        //把圖片路徑存到資料庫表格裡
-        image.setImageUrl("/CloudSerenityHotel/static/product/uploadImage/" + fileName);
-        productService.uploadImage(products,image);
-		
-		return productService.updateProduct(products,categories);
+		return productService.updateProduct(products);
 	}
 	
 	//修改上架、下架
