@@ -9,13 +9,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.cloudSerenityHotel.order.dao.CartDao;
 import com.cloudSerenityHotel.order.dao.CartItemsDao;
+import com.cloudSerenityHotel.order.dao.OrderDao;
 import com.cloudSerenityHotel.order.dto.CartItemFrontendDTO;
+import com.cloudSerenityHotel.order.dto.MemberForCartFrontendDTO;
 import com.cloudSerenityHotel.order.model.Cart;
 import com.cloudSerenityHotel.order.model.CartItems;
+import com.cloudSerenityHotel.order.model.Order;
 import com.cloudSerenityHotel.order.service.CartService;
 import com.cloudSerenityHotel.product.model.ProductImages;
 import com.cloudSerenityHotel.product.model.Products;
 import com.cloudSerenityHotel.product.service.impl.ProductServiceImpl;
+import com.cloudSerenityHotel.user.model.Member;
+import com.cloudSerenityHotel.user.model.User;
+import com.cloudSerenityHotel.user.model.UserRepository;
 
 import jakarta.transaction.Transactional;
 
@@ -23,6 +29,10 @@ import jakarta.transaction.Transactional;
 @Service
 @Transactional // 自動交易管理員
 public class CartServiceImpl implements CartService{
+	
+	@Autowired
+    private OrderDao orderDao; // 注入 OrderDao
+
 
 	@Autowired
 	private CartDao cartDao;
@@ -32,6 +42,41 @@ public class CartServiceImpl implements CartService{
 	
 	@Autowired
 	private ProductServiceImpl productService;
+	
+	@Autowired
+	private UserRepository userRepository;
+	
+	// 查找會員資料並返回 DTO
+    public MemberForCartFrontendDTO getMemberForCart(int userId) {
+        Optional<User> userOptional = userRepository.findByUserIdAndUserIdentity(userId, "user");
+
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            Member member = user.getMember();
+
+            // 使用 OrderRepository 查詢該用戶的訂單
+            List<Order> orders = orderDao.findByUserId(userId);
+            
+            // 假設你取最新的一筆訂單
+            String paymentMethod = orders.isEmpty() ? null : orders.get(0).getPaymentMethod();
+            
+            // 使用帶有 6 個參數的構造函數來創建 DTO
+            MemberForCartFrontendDTO dto = new MemberForCartFrontendDTO(
+                user.getUserId(),
+                user.getUserName(),
+                user.getEmail(),
+                member.getPhone(),
+                member.getAddress(),
+                paymentMethod  // 從訂單中獲取 paymentMethod
+            );
+
+            return dto;
+        }
+
+        // 若無資料，返回 null 或拋出例外
+        return null;
+    }
+
 	
 	// 將 CartItems 實體轉換為前台 DTO
     public CartItemFrontendDTO convertToFrontendDTO(CartItems cartItem) {

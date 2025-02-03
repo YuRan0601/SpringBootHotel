@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.data.domain.Page;
 
+import com.cloudSerenityHotel.order.dto.CartTurntoOrderDTO;
 import com.cloudSerenityHotel.order.dto.OrderBackendDTO;
 import com.cloudSerenityHotel.order.dto.OrderFrontendDTO;
 import com.cloudSerenityHotel.order.model.Order;
@@ -43,5 +44,6 @@ public interface OrderService {
 	// 查詢該名用戶的所有訂單（包含訂單細項）
 	List<OrderFrontendDTO> getOrdersForFrontendByUserId(Integer userId);
 
-
+	// Cart -> Order
+	OrderBackendDTO createOrder(CartTurntoOrderDTO orderRequest);
 }
