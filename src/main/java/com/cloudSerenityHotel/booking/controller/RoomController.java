@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -161,5 +162,27 @@ public class RoomController {
 	@GetMapping("byType/{typeId}")
 	public List<Map<String, Object>> getRoomsByRoomType(@PathVariable Integer typeId){
 		return roomService.getRoomsByRoomType(typeId);
+	}
+	
+	@GetMapping("/type-count")
+    public ResponseEntity<List<Map<String, Object>>> getRoomTypeRate() {
+        List<Map<String, Object>> result = roomService.findRoomTypeRate();
+        return ResponseEntity.ok(result);
+    }
+	
+	@GetMapping("/booking-rate")
+    public ResponseEntity<List<Map<String, Object>>> getBookingRate() {
+        List<Map<String, Object>> result = roomService.findBookingRate();
+        return ResponseEntity.ok(result);
+    }
+	
+	@GetMapping("/total-room-type-count")
+	public Long getRoomTypeCount() {
+		return roomService.getRoomTypeCount();
+	}
+	
+	@GetMapping("/total-room-count")
+	public Long getRoomCount() {
+		return roomService.getAvailableRoomCount();
 	}
 }

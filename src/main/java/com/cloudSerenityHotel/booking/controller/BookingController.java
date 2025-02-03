@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.cloudSerenityHotel.booking.dto.MonthlyBookingCount;
 import com.cloudSerenityHotel.booking.model.BookingOrder;
 import com.cloudSerenityHotel.booking.service.BookingService;
 import com.cloudSerenityHotel.booking.vo.EcpayOrderVo;
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Controller;
@@ -60,7 +62,6 @@ public class BookingController {
 	BookingService bService;
 	
 	@PostMapping("/pay")
-	@ResponseBody
     public String createPayment(@RequestBody EcpayOrderVo order) {
         Map<String, String> params = new HashMap<>();
         
@@ -93,7 +94,6 @@ public class BookingController {
     }
 
     @PostMapping("/return")
-    @ResponseBody
     public String paymentReturn(@RequestParam Map<String, String> responseParams) {
     	
     	String receivedCheckMacValue = responseParams.get("CheckMacValue");
@@ -208,26 +208,27 @@ public class BookingController {
     }
 	
 	@GetMapping("/order")
-	@ResponseBody
 	public List<Map<String, Object>> getAllOrders() {
 		return bService.getAllOrders();
 	}
 	
 	@GetMapping("/order/{userId}/{status}")
-	@ResponseBody
 	public List<Map<String, Object>> getOrderByUserIdAndStatus(@PathVariable Integer userId, @PathVariable String status) {
 		return bService.getOrderByUserIdAndStatus(userId, status);
 	}
 	
 	@GetMapping("/order/{userId}")
-	@ResponseBody
 	public List<Map<String, Object>> getOrderByUserId(@PathVariable Integer userId) {
 		return bService.getOrderByUserId(userId);
 	}
 	
+	@GetMapping("/order/status/{status}")
+	public List<Map<String, Object>> getOrderByStatus(@PathVariable String status) {
+		return bService.getOrderByStatus(status);
+	}
+	
 	
 	@PostMapping("/order/{roomTypeId}")
-	@ResponseBody
 	public Map<String, Object> insertOrder(@RequestBody BookingOrder order, @PathVariable Integer roomTypeId) {
 		System.out.println(order.getUser().getUserId());
 		System.out.println(order.getTotalPrice());
@@ -237,15 +238,21 @@ public class BookingController {
 	}
 	
 	@PutMapping("/order/cancel/{orderId}")
-	@ResponseBody
 	public Map<String, Object> cancelOrder(@PathVariable Integer orderId) {
 		return bService.cancelOrder(orderId);
 	}
 	
 	@PutMapping("/order/{roomTypeId}")
-	@ResponseBody
 	public Map<String, Object> updateOrderAdmin(@RequestBody BookingOrder order, @PathVariable Integer roomTypeId) {
 		
 		return bService.updateOrderAdmin(order, roomTypeId);
 	}
+	
+	@GetMapping("/monthly-count")
+	public ResponseEntity<List<MonthlyBookingCount>> getMonthlyBookingCounts() {
+        List<MonthlyBookingCount> result = bService.findMonthlyBookingCounts();
+        return ResponseEntity.ok(result);
+    }
+	
+	
 }
