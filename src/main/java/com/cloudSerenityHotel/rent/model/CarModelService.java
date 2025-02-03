@@ -54,7 +54,6 @@ public class CarModelService {
 			String userName = user.getUserName();
 			Member member = user.getMember();
 			LocalDate birthday = member.getBirthday();
-			LocalDateTime birthdayDateTime = birthday.atStartOfDay();
 			String gender = member.getGender();
 			String personalIdNo = member.getPersonalIdNo();
 			String passportNo = member.getPassportNo();
@@ -66,7 +65,7 @@ public class CarModelService {
 			carUserInfo.setEmail(email);
 			carUserInfo.setUserName(userName);
 			carUserInfo.setGender(gender);
-			carUserInfo.setBirthday(birthdayDateTime);
+			carUserInfo.setBirthday(birthday);
 			carUserInfo.setPersonalIdNo(personalIdNo);
 			carUserInfo.setPassportNo(passportNo);
 			
