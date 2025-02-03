@@ -197,6 +197,13 @@ public class ProductServiceImpl implements ProductService{
 	  productDao.deleteById(productId);
 	  return 0;
 	 }
+	 
+	@Override
+	public int deleteImage(Integer productId) {
+	  productDao.deleteById(productId);
+	return 0;
+	}
+ 
 
 	//修改上架、下架
 	@Override
@@ -209,24 +216,39 @@ public class ProductServiceImpl implements ProductService{
 		return 0;
 	}
 
+
+	
 	 @Override
-	 public int updateProduct(Products products,Categories categories) {
+	 public int updateProduct(Products products) {
 	  Optional<Products> getOne = productDao.findById(products.getProductId());
 	  Products productId = getOne.get();
 	  
-	  productId.setProductName(products.getProductName());
-	  productId.setDescription(products.getDescription());
-	  productId.setPrice(products.getPrice());
-	  productId.setSpecialPrice(products.getSpecialPrice());
-	  productId.setCategories(products.getCategories());
+	     // 儲存分類
+	     for (Categories category : productId.getCategories()) {
+	         Categories existingCategory = categoriesDao.findByCategoriesName(category.getCategoriesName())
+	                                       .orElse(category);
+	         existingCategory.getProducts().add(productId);
+	     }
+	     
+	     // 儲存商品與圖片
+	     productDao.save(productId);
+	     for (ProductImages image : productId.getProductImages()) {
+	         productImagesDao.save(image);
+	     }
 	  
-	  productId.setUpdatedAt(Timestamp.valueOf(LocalDateTime.now()));//修改時間
-	  
-	  productId.getCategories().add(categories);
-	     categories.getProducts().add(productId);
-	  
-	  productDao.save(productId);
-	//  categoriesDao.save(categories);
+//	  productId.setProductName(products.getProductName());
+//	  productId.setDescription(products.getDescription());
+//	  productId.setPrice(products.getPrice());
+//	  productId.setSpecialPrice(products.getSpecialPrice());
+//	  productId.setCategories(products.getCategories());
+//	  
+//	  productId.setUpdatedAt(Timestamp.valueOf(LocalDateTime.now()));//修改時間
+//	  
+//	  productId.getCategories().add(categories);
+//	     categories.getProducts().add(productId);
+//	  
+//	  productDao.save(productId);
+//	//  categoriesDao.save(categories);
 	  return 0;
 	 }
 
@@ -253,6 +275,7 @@ public class ProductServiceImpl implements ProductService{
 	public Optional<Products> findById(Integer productId) {
 		return productDao.findById(productId);
 	}
+
 
 
 
