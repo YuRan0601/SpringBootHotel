@@ -389,6 +389,26 @@ public class RoomServiceImpl implements RoomService {
 		
 		return roomToMapList(rooms);
 	}
+
+	@Override
+	public List<Map<String, Object>> findRoomTypeRate() {
+		return roomTypeRepository.findRoomTypeRate();
+	}
+
+	@Override
+	public List<Map<String, Object>> findBookingRate() {
+		return roomTypeRepository.findBookingRate();
+	}
+
+	@Override
+	public Long getAvailableRoomCount() {
+		return roomRepository.countAvailableRooms();
+	}
+
+	@Override
+	public Long getRoomTypeCount() {
+		return roomTypeRepository.countRoomTypes();
+	}
 	
 	
 }

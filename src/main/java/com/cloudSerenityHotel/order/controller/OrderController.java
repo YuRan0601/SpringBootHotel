@@ -23,10 +23,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cloudSerenityHotel.base.BaseController;
 import com.cloudSerenityHotel.order.dto.ApiResponse;
+import com.cloudSerenityHotel.order.dto.CartTurntoOrderDTO;
 import com.cloudSerenityHotel.order.dto.OrderBackendDTO;
 import com.cloudSerenityHotel.order.dto.OrderFrontendDTO;
 import com.cloudSerenityHotel.order.model.Order;
 import com.cloudSerenityHotel.order.model.OrderItems;
+import com.cloudSerenityHotel.order.service.CartService;
+import com.cloudSerenityHotel.order.service.impl.CartServiceImpl;
 import com.cloudSerenityHotel.order.service.impl.OrderServiceImpl;
 import com.cloudSerenityHotel.product.model.Products;
 import com.cloudSerenityHotel.product.service.impl.ProductServiceImpl;
@@ -45,6 +48,9 @@ public class OrderController extends BaseController {
 	
 	@Autowired
 	private ProductServiceImpl productServiceImpl;
+	
+	@Autowired
+    private CartServiceImpl cartServiceImpl;  // 注入 CartService
 
 	// 查詢所有訂單，返回 DTO 列表
 	@GetMapping("/findAllOrders")
@@ -218,5 +224,19 @@ public class OrderController extends BaseController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
+    
+    // Cart -> Order
+    @PostMapping("/CartToOrder")
+    public ResponseEntity<OrderBackendDTO> createOrder(@RequestBody CartTurntoOrderDTO cartTurntoOrderDTO) {
+        try {
+            // 呼叫服務方法來創建訂單
+        	OrderBackendDTO createdOrder = orderServiceImpl.createOrder(cartTurntoOrderDTO);
 
+            // 回傳成功的狀態碼與創建的訂單物件
+            return new ResponseEntity<>(createdOrder, HttpStatus.CREATED);
+        } catch (RuntimeException e) {
+            // 捕捉異常並返回錯誤訊息
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        }
+    }
 }

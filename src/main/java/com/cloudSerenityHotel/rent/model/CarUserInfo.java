@@ -1,6 +1,6 @@
 package com.cloudSerenityHotel.rent.model;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -33,8 +33,8 @@ public class CarUserInfo {
 	    private String email; // 電子郵件
 
 	    @Column(name = "birthday")
-	    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
-	    private LocalDateTime birthday; // 生日
+	    @JsonFormat(pattern = "yyyy-MM-dd")
+	    private LocalDate birthday; // 生日
 	    
 	    @Column(name = "gender")
 	    private String gender;  //性別

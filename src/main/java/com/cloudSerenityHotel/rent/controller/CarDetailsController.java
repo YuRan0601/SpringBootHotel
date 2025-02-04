@@ -1,6 +1,5 @@
 package com.cloudSerenityHotel.rent.controller;
 
-import java.util.List;
 import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
@@ -92,21 +91,10 @@ public class CarDetailsController {
 				: ResponseEntity.status(HttpStatus.NOT_FOUND).body(resp.getData());
 	}
 
-	@GetMapping("/available-vehicles")
+	@GetMapping("/available-vehicles/{carModelId}")
 	@ResponseBody
-	public ResponseEntity<?> getAvailableVehicles() {
-		// 調用服務層來查詢可租用的車輛
-		ResponseModel<List<CarDetails>> response = carDetailsService.findAvailableVehicles();
-
-		// 檢查查詢結果的狀態
-		if (response != null && response.getStatus() == StatusEnum.SUCCESS) {
-			// 查詢成功，返回車輛列表
-			return ResponseEntity.ok(response.getData());
-		} else {
-			// 查詢失敗，返回錯誤訊息
-			return ResponseEntity.status(HttpStatus.NOT_FOUND)
-					.body(response != null ? response.getData() : "未找到可租用的車輛");
-		}
-
+	public ResponseEntity<?> getAvailableVehicles(@PathVariable Integer carModelId) {
+		return ResponseEntity.ok(carDetailsService.findAvailableVehicle(carModelId));
 	}
+	
 }

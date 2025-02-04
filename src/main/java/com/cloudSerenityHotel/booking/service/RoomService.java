@@ -47,5 +47,13 @@ public interface RoomService {
 			LocalDate checkOutDate);
 
 	List<Map<String, Object>> getRoomsByRoomType(Integer typeId);
+
+	List<Map<String, Object>> findRoomTypeRate();
+
+	List<Map<String, Object>> findBookingRate();
+
+	Long getAvailableRoomCount();
+
+	Long getRoomTypeCount();
 	
 }

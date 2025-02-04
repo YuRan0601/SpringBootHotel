@@ -3,6 +3,7 @@ package com.cloudSerenityHotel.booking.service;
 import java.util.List;
 import java.util.Map;
 
+import com.cloudSerenityHotel.booking.dto.MonthlyBookingCount;
 import com.cloudSerenityHotel.booking.model.BookingOrder;
 
 public interface BookingService {
@@ -23,7 +24,9 @@ public interface BookingService {
 
 	BookingOrder getOrderById(int orderId);
 
-	
-	
+	List<MonthlyBookingCount> findMonthlyBookingCounts();
+
+	List<Map<String, Object>> getOrderByStatus(String status);
+
 
 }

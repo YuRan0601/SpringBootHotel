@@ -23,10 +23,10 @@ public class CarDetailsService {
 
 	@Autowired
 	private CarDetailsRepository carDetailsRepository;
-	
+
 	@Autowired
 	private CarModelRepository carModelRepository;
-	
+
 	@Autowired
 	private TimeProvider timeProvider;
 
@@ -56,42 +56,43 @@ public class CarDetailsService {
 
 	@Transactional
 	public ResponseModel insertCarDetails(CarDetails carDetails) {
-	    try {
-	        // 取得當前時間
-	        LocalDateTime currentTime = timeProvider.getCurrentTime();
-	        carDetails.setUpdatedAt(currentTime);
-	        carDetails.setCreatedAt(currentTime);
+		try {
+			// 取得當前時間
+			LocalDateTime currentTime = timeProvider.getCurrentTime();
+			carDetails.setUpdatedAt(currentTime);
+			carDetails.setCreatedAt(currentTime);
+			carDetails.setStatus(CarReservationStatuEnum.AVAILABLE.name());
 
-	        // 保存車輛詳情
-	        CarDetails carDetailsResp = carDetailsRepository.save(carDetails);
+			// 保存車輛詳情
+			CarDetails carDetailsResp = carDetailsRepository.save(carDetails);
 
-	        if (carDetailsResp != null) {
-	            // 根據車型 ID 查詢車型表中的 totalVehicles 欄位
-	            Integer carModelId = carDetails.getCarModelId(); // 修正變數名稱為 carModelId
-	            CarModel carModel = carModelRepository.findById(carModelId).orElse(null);
+			if (carDetailsResp != null) {
+				// 根據車型 ID 查詢車型表中的 totalVehicles 欄位
+				Integer carModelId = carDetails.getCarModelId(); // 修正變數名稱為 carModelId
+				CarModel carModel = carModelRepository.findById(carModelId).orElse(null);
 
-	            if (carModel != null) {
-	            	 // 如果 carModel 的 totalVehicles 為 null，則設為 0，否則加 1
-	                int newTotalVehicles = (carModel.getTotalVehicles() == null ? 0 : carModel.getTotalVehicles()) + 1;
-	                
-	                // 設定新的車輛數量
-	                carModel.setTotalVehicles(newTotalVehicles);
+				if (carModel != null) {
+					// 如果 carModel 的 totalVehicles 為 null，則設為 0，否則加 1
+					int newTotalVehicles = (carModel.getTotalVehicles() == null ? 0 : carModel.getTotalVehicles()) + 1;
 
-	                // 保存更新後的車型資訊
-	                carModelRepository.save(carModel);
-	            }
+					// 設定新的車輛數量
+					carModel.setTotalVehicles(newTotalVehicles);
 
-	            // 返回成功結果
-	            return new ResponseModel<CarDetails>(StatusEnum.SUCCESS, carDetailsResp);
-	        }
+					// 保存更新後的車型資訊
+					carModelRepository.save(carModel);
+				}
 
-	        // 返回新增失敗結果
-	        return new ResponseModel<String>(StatusEnum.FAIL, "新增失敗");
+				// 返回成功結果
+				return new ResponseModel<CarDetails>(StatusEnum.SUCCESS, carDetailsResp);
+			}
 
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	        return new ResponseModel<String>(StatusEnum.FAIL, "系統錯誤");
-	    }
+			// 返回新增失敗結果
+			return new ResponseModel<String>(StatusEnum.FAIL, "新增失敗");
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseModel<String>(StatusEnum.FAIL, "系統錯誤");
+		}
 	}
 
 	@Transactional
@@ -105,35 +106,38 @@ public class CarDetailsService {
 
 	@Transactional
 	public void deleteCarDetails(CarDetails carDetails) {
-	    try {
-	        // 先從資料庫中刪除 carDetails
-	        carDetailsRepository.delete(carDetails);
-	        
-	        // 根據 carModelId 更新對應車型資料中的 totalVehicles
-	        Integer carModelId = carDetails.getCarModelId();
-	        CarModel carModel = carModelRepository.findById(carModelId).orElse(null);
+		try {
+			// 先從資料庫中刪除 carDetails
+			carDetailsRepository.delete(carDetails);
 
-	        if (carModel != null) {
-	            // 進行 totalVehicles 減 1 操作
-	            int newTotalVehicles = (carModel.getTotalVehicles() == null ? 0 : carModel.getTotalVehicles()) - 1;
-	            if (newTotalVehicles < 0) {
-	                newTotalVehicles = 0;
-	            }
+			// 根據 carModelId 更新對應車型資料中的 totalVehicles
+			Integer carModelId = carDetails.getCarModelId();
+			CarModel carModel = carModelRepository.findById(carModelId).orElse(null);
 
-	            // 更新 carModel 的 totalVehicles
-	            carModel.setTotalVehicles(newTotalVehicles);
-	            carModelRepository.save(carModel);
-	        }
-	    } catch (Exception e) {
-	        throw new RuntimeException("刪除車輛失敗", e);  // 可以根據需要處理異常
-	    }
-	}
-	
-	public ResponseModel<List<CarDetails>> findAvailableVehicles()  {
-		List<CarDetails> carDetailsResp = carDetailsRepository.findAvailableVehicles();
-		if(carDetailsResp != null && !carDetailsResp.isEmpty()) {
-			return new ResponseModel<>(StatusEnum.SUCCESS, carDetailsResp);
+			if (carModel != null) {
+				// 進行 totalVehicles 減 1 操作
+				int newTotalVehicles = (carModel.getTotalVehicles() == null ? 0 : carModel.getTotalVehicles()) - 1;
+				if (newTotalVehicles < 0) {
+					newTotalVehicles = 0;
+				}
+
+				// 更新 carModel 的 totalVehicles
+				carModel.setTotalVehicles(newTotalVehicles);
+				carModelRepository.save(carModel);
+			}
+		} catch (Exception e) {
+			throw new RuntimeException("刪除車輛失敗", e); // 可以根據需要處理異常
 		}
-		 return new ResponseModel(StatusEnum.FAIL, "未找到可租用的車輛");
+	}
+
+	public ResponseModel<?> findAvailableVehicle(int carModelId) {
+		List<CarDetails> list = carDetailsRepository.findAvailableVehicles(CarReservationStatuEnum.AVAILABLE.name(), carModelId);
+
+		Optional<CarDetails> carDetailsOpt = list.stream().findFirst();
+		if (carDetailsOpt.isPresent()) {
+			return new ResponseModel<>(StatusEnum.SUCCESS, carDetailsOpt.get());
+		}
+
+		return new ResponseModel<>(StatusEnum.FAIL, "未找到可租用的車輛");
 	}
 }

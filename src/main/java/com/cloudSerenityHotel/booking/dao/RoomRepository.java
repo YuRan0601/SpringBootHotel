@@ -65,4 +65,8 @@ public interface RoomRepository extends JpaRepository<Room, Integer> {
 	);
 
 	List<Room> findByRoomType_TypeId(Integer roomTypeId);
+	
+	// 計算 status = 'available' 的房間數
+    @Query("SELECT COUNT(r) FROM Room r WHERE r.status = 'available'")
+    long countAvailableRooms();
 }

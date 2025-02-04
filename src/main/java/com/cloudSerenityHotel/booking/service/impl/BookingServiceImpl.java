@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import com.cloudSerenityHotel.booking.dao.BookingOrderRepository;
 import com.cloudSerenityHotel.booking.dao.RoomRepository;
+import com.cloudSerenityHotel.booking.dto.MonthlyBookingCount;
 import com.cloudSerenityHotel.booking.model.BookingOrder;
 import com.cloudSerenityHotel.booking.model.Room;
 import com.cloudSerenityHotel.booking.service.BookingService;
@@ -271,6 +272,21 @@ public class BookingServiceImpl implements BookingService {
 		dbOrder.setStatus("confirmed");
 		
 		bRepository.save(dbOrder);
+	}
+
+
+
+	@Override
+	public List<MonthlyBookingCount> findMonthlyBookingCounts() {
+		return bRepository.findMonthlyBookingCounts();
+	}
+
+
+
+	@Override
+	public List<Map<String, Object>> getOrderByStatus(String status) {
+		List<BookingOrder> dbOrder = bRepository.findByStatus(status);
+		return ordersToMapList(dbOrder);
 	}
 	
 }

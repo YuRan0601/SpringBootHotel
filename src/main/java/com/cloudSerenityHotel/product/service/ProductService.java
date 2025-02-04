@@ -20,8 +20,9 @@ public interface ProductService {
 	int insertProduct(Products products);
 	int insertCategory(List<Categories> categories);
 	int uploadImage(Products products,ProductImages Images);
+	int deleteImage(Integer productId);
 	int deleteProduct(Integer productId);
-	int updateProduct(Products products,Categories categories);
+	int updateProduct(Products products);
 	int updateStatus(Products products); //更改上下架狀態
 	
 	// 多商品查詢_for Order用

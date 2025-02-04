@@ -3,9 +3,14 @@ package com.cloudSerenityHotel.order.service;
 import java.util.List;
 
 import com.cloudSerenityHotel.order.dto.CartItemFrontendDTO;
+import com.cloudSerenityHotel.order.dto.MemberForCartFrontendDTO;
 import com.cloudSerenityHotel.order.model.CartItems;
 
 public interface CartService {
+	
+	// 查找會員資料並返回 DTO
+	MemberForCartFrontendDTO getMemberForCart(int userId);
+	
 	// 將 CartItems 實體轉換為前台 DTO
 	CartItemFrontendDTO convertToFrontendDTO(CartItems cartItem);
 	
