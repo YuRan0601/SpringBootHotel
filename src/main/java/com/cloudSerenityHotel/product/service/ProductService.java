@@ -16,11 +16,10 @@ public interface ProductService {
 	List<Map<String, Object>> selectAllCategories();
 	List<Map<String, Object>> findProductCategoryById(Integer categoryId, Integer status); //取得該分類的所有商品(上架的)
 	List<Map<String, Object>> selectProductStatus(Integer status); //顯示上架or下架
-	int insertProductAndCategories(Products products,Categories categories);
 	int insertProduct(Products products);
 	int insertCategory(List<Categories> categories);
 	int uploadImage(Products products,ProductImages Images);
-	int deleteImage(Integer productId);
+	int deleteImage(Integer imageId);
 	int deleteProduct(Integer productId);
 	int updateProduct(Products products);
 	int updateStatus(Products products); //更改上下架狀態
