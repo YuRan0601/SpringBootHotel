@@ -1,6 +1,7 @@
 package com.cloudSerenityHotel.order.service.impl;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -92,10 +93,11 @@ public class OrderServiceImpl implements OrderService {
 			orderItemDTO.setOrderId(order.getOrderId()); // 確保 orderId 被設置
 			orderItemDTO.setProductId(item.getProducts().getProductId());
 			orderItemDTO.setProductName(item.getProducts().getProductName());// 這裡Bean有修改名稱
-			orderItemDTO.setProductPrice(item.getProducts().getPrice());
+			orderItemDTO.setProductPrice(item.getProducts().getPrice()); // 商品原價
+			orderItemDTO.setSpecialPrice(item.getProducts().getSpecialPrice());  // 特價
 			orderItemDTO.setQuantity(item.getQuantity());
 			orderItemDTO.setUnitPrice(item.getUnitPrice());
-			orderItemDTO.setDiscount(item.getDiscount());
+			orderItemDTO.setDiscount(item.getDiscount()); // 折扣
 			orderItemDTO.setSubtotal(item.getSubtotal());
 			return orderItemDTO;
 		}).collect(Collectors.toList());
@@ -238,31 +240,46 @@ public class OrderServiceImpl implements OrderService {
 	 */
 	@Override
 	public void calculateOrderTotal(Order order, List<OrderItems> items) {
-	    BigDecimal totalAmount = BigDecimal.ZERO;
-	    BigDecimal discountAmount = BigDecimal.ZERO;
+		 BigDecimal totalAmount = BigDecimal.ZERO;  // 訂單總金額（原價 * 數量）
+		    BigDecimal discountAmount = BigDecimal.ZERO; // 訂單總折扣金額
 
-	    for (OrderItems item : items) {
-	        // 查詢商品的特價（假設商品表格中有 getSpecialPrice 方法）
-	        BigDecimal specialPrice = item.getProducts().getSpecialPrice();
-	        BigDecimal unitPrice = specialPrice != null ? specialPrice : item.getUnitPrice();
+		    // 計算商品的總金額和折扣
+		    for (OrderItems item : items) {
+		        // 查詢商品的特價（如果有）
+		        BigDecimal specialPrice = item.getProducts().getSpecialPrice();
+		        BigDecimal unitPrice = item.getProducts().getPrice(); // 原價
 
-	        // 計算小計（使用特價或原價）
-	        BigDecimal itemSubtotal = unitPrice.multiply(BigDecimal.valueOf(item.getQuantity()));
-	        totalAmount = totalAmount.add(itemSubtotal);
+		        // 計算商品的小計：原價 - (原價 - 特價) * 數量
+		        BigDecimal itemSubtotal;
+		        if (specialPrice != null) {
+		            // 商品的小計：原價 - (原價 - 特價) * 數量
+		            itemSubtotal = unitPrice.subtract(unitPrice.subtract(specialPrice).multiply(BigDecimal.valueOf(item.getQuantity())));
+		            // 累加折扣金額（每個商品的折扣金額）
+		            BigDecimal itemDiscount = unitPrice.subtract(specialPrice).multiply(BigDecimal.valueOf(item.getQuantity()));
+		            discountAmount = discountAmount.add(itemDiscount);
+		        } else {
+		            // 如果沒有特價，則小計為原價 * 數量
+		            itemSubtotal = unitPrice.multiply(BigDecimal.valueOf(item.getQuantity()));
+		        }
 
-	        // 計算折扣金額（原價 - 特價，如果有特價）
-	        if (specialPrice != null) {
-	            BigDecimal itemDiscount = item.getUnitPrice().subtract(specialPrice)
-	                    .multiply(BigDecimal.valueOf(item.getQuantity()));
-	            discountAmount = discountAmount.add(itemDiscount);
-	        }
-	    }
+		        // 累加商品的小計到訂單總金額（訂單總金額是原價 * 數量的加總）
+		        totalAmount = totalAmount.add(unitPrice.multiply(BigDecimal.valueOf(item.getQuantity())));
 
-	    // 設置訂單的金額資訊
-	    order.setTotalAmount(totalAmount); // 總金額
-	    order.setDiscountAmount(discountAmount); // 折扣金額
-	    order.setFinalAmount(totalAmount.subtract(discountAmount)); // 最終金額
-	}
+		        // 設置該商品的小計
+		        item.setSubtotal(itemSubtotal);
+		    }
+
+		    // 計算點數折扣（每 10 點對應 1 元）
+		    if (order.getPointsDiscount() > 0) {
+		        BigDecimal pointsDiscount = BigDecimal.valueOf(order.getPointsDiscount()).divide(BigDecimal.valueOf(10), 2, RoundingMode.DOWN);
+		        discountAmount = discountAmount.add(pointsDiscount); // 累加點數折扣
+		    }
+
+		    // 設置訂單的金額資訊
+		    order.setTotalAmount(totalAmount); // 訂單總金額 = 原價 * 數量
+		    order.setDiscountAmount(discountAmount); // 訂單總折扣金額 = 商品折扣 + 點數折扣
+		    order.setFinalAmount(totalAmount.subtract(discountAmount)); // 最終金額 = 總金額 - 總折扣金額
+		}
 
 	//========================================================================================================================	
 	
@@ -338,9 +355,11 @@ public class OrderServiceImpl implements OrderService {
 	        // 設定訂單狀態
 	        order.setOrderStatus("處理中");
 
-	        // 計算總金額
-	        BigDecimal totalAmount = BigDecimal.ZERO;
+	        // 初始化總金額和總折扣
+	        BigDecimal totalAmount = BigDecimal.ZERO;  // 計算訂單的總金額
+	        BigDecimal discountAmount = BigDecimal.ZERO;  // 計算訂單的總折扣
 	        List<OrderItems> orderItems = new ArrayList<>();
+	        
 	        for (CartItemFrontendDTO cartItem : orderRequest.getOrderItems()) {
 	            OrderItems item = new OrderItems();
 	            Optional<Products> productOptional = productDao.findById(cartItem.getProductId());
@@ -352,13 +371,20 @@ public class OrderServiceImpl implements OrderService {
 	                item.setUnitPrice(cartItem.getUnitPrice());
 	                item.setDiscount(cartItem.getDiscount());
 
+	                // 計算商品小計： (單價 - 折扣) * 數量
 	                BigDecimal subtotal = (cartItem.getUnitPrice().subtract(cartItem.getDiscount()))
 	                        .multiply(BigDecimal.valueOf(cartItem.getQuantity()));
 	                item.setSubtotal(subtotal);
 
-	                item.setOrder(order);  // 設定訂單關聯
-	                totalAmount = totalAmount.add(subtotal);  // 累加小計
+	                // 累加訂單的總金額（原價 * 數量）
+	                BigDecimal itemTotalAmount = cartItem.getUnitPrice().multiply(BigDecimal.valueOf(cartItem.getQuantity()));
+	                totalAmount = totalAmount.add(itemTotalAmount);
+	                
+	                // 累加訂單的總折扣（每個商品的折扣金額）
+	                BigDecimal itemDiscountAmount = cartItem.getDiscount().multiply(BigDecimal.valueOf(cartItem.getQuantity()));
+	                discountAmount = discountAmount.add(itemDiscountAmount);
 
+	                item.setOrder(order);  // 設定訂單關聯
 	                orderItems.add(item);
 	            } else {
 	                // 如果商品 ID 不存在
@@ -370,12 +396,12 @@ public class OrderServiceImpl implements OrderService {
 	        
 	        // 呼叫 calculateOrderTotal 方法來計算訂單總金額和最終金額
 	        calculateOrderTotal(order, orderItems);
-	        System.out.println("Order Data: " + order);
+	        //System.out.println("Order Data: " + order);
+	        
 	        // 儲存訂單到資料庫
 	        order = orderDao.save(order);
 	        
-	        
-	     // 更新購物車商品狀態為 4（已購買）
+	        // 更新購物車商品狀態為 4（已購買）
 	        for (CartItemFrontendDTO cartItem : orderRequest.getOrderItems()) {
 	            // 透過 CartItemsDao 查詢這些商品
 	            Optional<CartItems> optionalCartItem = cartItemsDao.findByCartItemIdAndIsValid(cartItem.getCartItemId(), 0);
@@ -385,10 +411,18 @@ public class OrderServiceImpl implements OrderService {
 	                cartItemsDao.save(item);  // 儲存更新後的商品狀態
 	            }
 	        }
-
 	        
 	        // 轉換為 DTO 並返回
-	        return convertToBackendDTO(order);
+	        OrderBackendDTO orderBackendDTO = convertToBackendDTO(order);
+	        
+	        // 設置訂單的總金額、折扣和最終金額
+	        // 將 BigDecimal 轉為 String
+	        orderBackendDTO.setTotalAmount(order.getTotalAmount().setScale(0, RoundingMode.HALF_UP).toString());
+	        orderBackendDTO.setDiscountAmount(order.getDiscountAmount().setScale(0, RoundingMode.HALF_UP).toString());
+	        orderBackendDTO.setFinalAmount(order.getFinalAmount().setScale(0, RoundingMode.HALF_UP).toString());
+	        
+	        // 轉換為 DTO 並返回
+	        return orderBackendDTO;
 	    } catch (Exception e) {
 	        e.printStackTrace();
 	        throw new RuntimeException("Error creating order: " + e.getMessage());  // 顯示詳細錯誤
