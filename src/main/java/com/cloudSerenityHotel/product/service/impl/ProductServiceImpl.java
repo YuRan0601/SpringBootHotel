@@ -113,6 +113,12 @@ public class ProductServiceImpl implements ProductService{
 		return null;
 	}
 	
+	@Override
+	public List<Map<String, Object>> searchProductsByName(String name) {
+		List<Products> getProduct =  productDao.findByProductNameContainingIgnoreCase(name);
+		return productToMapList(getProduct);
+	}
+	
 	// 顯示全部分類
 	@Override
 	public List<Map<String, Object>> selectAllCategories() {
@@ -269,6 +275,8 @@ public class ProductServiceImpl implements ProductService{
 	public Optional<Products> findById(Integer productId) {
 		return productDao.findById(productId);
 	}
+
+
 
 
 

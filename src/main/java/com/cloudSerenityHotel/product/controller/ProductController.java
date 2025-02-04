@@ -68,6 +68,11 @@ public class ProductController {
 		return productService.selectProduct(productId);
 	}
 	
+    @GetMapping("/search")
+    public List<Map<String, Object>> searchProducts(@RequestParam String name) {
+        return productService.searchProductsByName(name);
+    }
+	
 	//顯示上架or下架
 	@GetMapping("/select/productStatus/{status}")
 	public List<Map<String, Object>> selectProductStatus(@PathVariable int status) {
