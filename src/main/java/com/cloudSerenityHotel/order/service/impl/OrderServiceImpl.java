@@ -17,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import com.cloudSerenityHotel.order.dao.CartItemsDao;
 import com.cloudSerenityHotel.order.dao.OrderDao;
 import com.cloudSerenityHotel.order.dao.OrderItemsDao;
 import com.cloudSerenityHotel.order.dto.CartItemFrontendDTO;
@@ -26,6 +27,7 @@ import com.cloudSerenityHotel.order.dto.OrderBackendDTO;
 import com.cloudSerenityHotel.order.dto.OrderFrontendDTO;
 import com.cloudSerenityHotel.order.dto.OrderItemBackendDTO;
 import com.cloudSerenityHotel.order.dto.OrderItemFrontendDTO;
+import com.cloudSerenityHotel.order.model.CartItems;
 import com.cloudSerenityHotel.order.model.Order;
 import com.cloudSerenityHotel.order.model.OrderItems;
 import com.cloudSerenityHotel.order.service.OrderService;
@@ -47,6 +49,9 @@ public class OrderServiceImpl implements OrderService {
 	
 	@Autowired
 	private ProductRepository productDao;
+	
+	@Autowired
+	private CartItemsDao cartItemsDao;
 
 	// 後台DTO 的轉換功能
 	@Override
@@ -63,8 +68,21 @@ public class OrderServiceImpl implements OrderService {
 		orderDTO.setOrderStatus(order.getOrderStatus());
 		orderDTO.setPaymentMethod(order.getPaymentMethod());
 		orderDTO.setTotalAmount(order.getTotalAmount().toPlainString());
-		orderDTO.setDiscountAmount(order.getDiscountAmount().toPlainString());
-		orderDTO.setFinalAmount(order.getFinalAmount().toPlainString());
+		
+		// 處理 discountAmount 可能為 null 的情況
+	    BigDecimal discountAmount = order.getDiscountAmount();
+	    if (discountAmount == null) {
+	        discountAmount = BigDecimal.ZERO;  // 若為 null，設為 0
+	    }
+	    orderDTO.setDiscountAmount(discountAmount.toPlainString());
+
+	    // 處理 finalAmount 可能為 null 的情況
+	    BigDecimal finalAmount = order.getFinalAmount();
+	    if (finalAmount == null) {
+	        finalAmount = BigDecimal.ZERO;  // 若為 null，設為 0
+	    }
+	    orderDTO.setFinalAmount(finalAmount.toPlainString());
+	    
 		orderDTO.setOrderDate(formatter.format(order.getOrderDate()));
 		orderDTO.setUpdatedAt(formatter.format(order.getUpdatedAt()));
 
@@ -300,13 +318,12 @@ public class OrderServiceImpl implements OrderService {
 	// 創建訂單的方法
 	@Override
 	public OrderBackendDTO createOrder(CartTurntoOrderDTO orderRequest) {
-		BigDecimal discountAmount = BigDecimal.ZERO;
 		Order order = new Order();
 
 	    try {
 	        // 設定訂單的收件人資料
 	        MemberForCartFrontendDTO recipient = orderRequest.getRecipient();
-	        order.setReceiveName(recipient.getUserName());
+	        order.setReceiveName(recipient.getReceiveName());
 	        order.setEmail(recipient.getEmail());
 	        order.setPhoneNumber(recipient.getPhone());
 	        order.setAddress(recipient.getAddress());
@@ -353,9 +370,22 @@ public class OrderServiceImpl implements OrderService {
 	        
 	        // 呼叫 calculateOrderTotal 方法來計算訂單總金額和最終金額
 	        calculateOrderTotal(order, orderItems);
-
+	        System.out.println("Order Data: " + order);
 	        // 儲存訂單到資料庫
 	        order = orderDao.save(order);
+	        
+	        
+	     // 更新購物車商品狀態為 4（已購買）
+	        for (CartItemFrontendDTO cartItem : orderRequest.getOrderItems()) {
+	            // 透過 CartItemsDao 查詢這些商品
+	            Optional<CartItems> optionalCartItem = cartItemsDao.findByCartItemIdAndIsValid(cartItem.getCartItemId(), 0);
+	            if (optionalCartItem.isPresent()) {
+	                CartItems item = optionalCartItem.get();
+	                item.setIsValid(4);  // 更新商品狀態為 4（已購買）
+	                cartItemsDao.save(item);  // 儲存更新後的商品狀態
+	            }
+	        }
+
 	        
 	        // 轉換為 DTO 並返回
 	        return convertToBackendDTO(order);
