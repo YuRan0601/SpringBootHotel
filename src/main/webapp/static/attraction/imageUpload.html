@@ -56,8 +56,6 @@
     </style>
 </head>
 <body>
-    <!-- 載入側邊欄 -->
-    <aside class="aside"></aside>
 
     <!-- 主要內容 -->
     <div class="content">
@@ -131,13 +129,6 @@
             } catch (error) {
                 status.innerText = "上傳成功：" + error.message;
             }
-        });
-    </script>
-
-    <script>
-        // 載入 aside.html
-        $(function () {
-            $(".aside").load("http://localhost:8080/CloudSerenityHotel/static/common/aside.html");
         });
     </script>
 </body>
