@@ -45,12 +45,6 @@ public class CarUserInfo {
 	    @Column(name = "driver_license_number")
 	    private String driverLicenseNumber; // 駕駛號碼
 
-	    @Column(name = "booking_id")
-	    private Integer bookingId; // 訂房ID
-
-	    @Column(name = "booking_status")
-	    private String bookingStatus; // 訂房狀態
-
 	    @Column(name = "LicenseImage")
 	    private String licenseImage; // 駕照照片
 
