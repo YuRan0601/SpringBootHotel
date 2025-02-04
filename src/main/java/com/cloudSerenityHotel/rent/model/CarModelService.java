@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -13,6 +12,7 @@ import org.springframework.stereotype.Service;
 import com.cloudSerenityHotel.booking.dao.BookingOrderRepository;
 import com.cloudSerenityHotel.booking.model.BookingOrder;
 import com.cloudSerenityHotel.rent.dao.CarModelRepository;
+import com.cloudSerenityHotel.rent.dao.CarUserInfoRepository;
 import com.cloudSerenityHotel.rent.model.api.ResponseModel;
 import com.cloudSerenityHotel.rent.model.api.StatusEnum;
 import com.cloudSerenityHotel.rent.model.utils.TimeProvider;
@@ -20,16 +20,19 @@ import com.cloudSerenityHotel.user.model.Member;
 import com.cloudSerenityHotel.user.model.User;
 
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class CarModelService {
 
-	@Autowired
-	private CarModelRepository carModelRepository;
-	@Autowired
-	private BookingOrderRepository bookingOrderRepository;
-	@Autowired
-	private TimeProvider timeProvider;
+	private final CarModelRepository carModelRepository;
+
+	private final BookingOrderRepository bookingOrderRepository;
+
+	private final TimeProvider timeProvider;
+
+	private final CarUserInfoRepository carUserInfoRepository;
 
 	public CarModel findById(int id) {
 		Optional<CarModel> carModelResp = carModelRepository.findById(id);
@@ -47,7 +50,6 @@ public class CarModelService {
 	public ResponseModel getUserDetailByOrderId(Integer orderId) {
 		Optional<BookingOrder> bookingOrderOpt = bookingOrderRepository.findById(orderId);
 		if (bookingOrderOpt.isPresent()) {
-			String status = bookingOrderOpt.get().getStatus();
 			User user = bookingOrderOpt.get().getUser();
 			Integer userId = user.getUserId();
 			String email = user.getEmail();
@@ -58,17 +60,21 @@ public class CarModelService {
 			String personalIdNo = member.getPersonalIdNo();
 			String passportNo = member.getPassportNo();
 
-			CarUserInfo carUserInfo = new CarUserInfo();
-			carUserInfo.setBookingId(orderId);
-			carUserInfo.setBookingStatus(status);
-			carUserInfo.setUserId(userId);
-			carUserInfo.setEmail(email);
-			carUserInfo.setUserName(userName);
-			carUserInfo.setGender(gender);
-			carUserInfo.setBirthday(birthday);
-			carUserInfo.setPersonalIdNo(personalIdNo);
-			carUserInfo.setPassportNo(passportNo);
-			
+			Optional<CarUserInfo> carUserInfoOpt = carUserInfoRepository.findById(userId);
+			CarUserInfo carUserInfo;
+			if (carUserInfoOpt.isPresent()) {
+				carUserInfo = carUserInfoOpt.get();
+			} else {
+				carUserInfo = new CarUserInfo();
+				carUserInfo.setUserId(userId);
+				carUserInfo.setEmail(email);
+				carUserInfo.setUserName(userName);
+				carUserInfo.setGender(gender);
+				carUserInfo.setBirthday(birthday);
+				carUserInfo.setPersonalIdNo(personalIdNo);
+				carUserInfo.setPassportNo(passportNo);
+			}
+
 			return new ResponseModel<>(StatusEnum.SUCCESS, carUserInfo);
 		}
 
