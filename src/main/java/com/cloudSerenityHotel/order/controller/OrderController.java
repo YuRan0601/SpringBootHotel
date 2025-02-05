@@ -209,6 +209,8 @@ public class OrderController extends BaseController {
         return order;
     }
     
+    
+    // 前台
 	// 查詢指定用戶的所有訂單（包含訂單細項）
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<OrderFrontendDTO>> getOrdersForFrontendByUserId(@PathVariable Integer userId) {
@@ -224,6 +226,69 @@ public class OrderController extends BaseController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
+    
+    // 查詢指定用戶的特定訂單（包含訂單細項）
+    @GetMapping("/user/{userId}/order/{orderId}")
+    public ResponseEntity<ApiResponse<OrderFrontendDTO>> getOrderDetailForFrontend(
+            @PathVariable Integer userId, 
+            @PathVariable Integer orderId) {
+        try {
+            // 調用 Service 層的查詢方法
+            OrderFrontendDTO order = orderServiceImpl.getOrderDetailForFrontend(userId, orderId);
+
+            // 如果訂單存在，返回成功響應
+            if (order != null) {
+                ApiResponse<OrderFrontendDTO> response = new ApiResponse<>(
+                    true, 
+                    "訂單詳情查詢成功", 
+                    order
+                );
+                return ResponseEntity.ok(response); // 返回成功響應
+            } else {
+                // 如果沒有找到該訂單，返回 404 錯誤，並且返回前台訂單的 API 回應
+                ApiResponse<OrderFrontendDTO> errorResponse = new ApiResponse<>(
+                    false, 
+                    "查無 OrderId:" + orderId + " 訂單，請確認後重試！", 
+                    null
+                );
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse); // 返回錯誤訊息
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            // 返回伺服器錯誤響應，並將錯誤訊息封裝進 ApiResponse 中
+            ApiResponse<OrderFrontendDTO> errorResponse = new ApiResponse<>(
+                false, 
+                "無法處理訂單請求，請稍後再試", 
+                null
+            );
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+
+    
+    // 查詢指定用戶的特定訂單（包含訂單細項）
+    /*@GetMapping("/user/{userId}/order/{orderId}")
+    public ResponseEntity<OrderFrontendDTO> getOrderDetailForFrontend(
+            @PathVariable Integer userId, 
+            @PathVariable Integer orderId) {
+        try {
+            // 調用 Service 層的查詢方法
+            OrderFrontendDTO order = orderServiceImpl.getOrderDetailForFrontend(userId, orderId);
+
+            // 如果訂單存在，返回成功響應
+            if (order != null) {
+                return ResponseEntity.ok(order);
+            } else {
+                // 如果沒有找到該訂單，返回 404 錯誤
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null); // 訂單未找到
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            // 返回伺服器錯誤響應
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }*/
     
     // Cart -> Order
     @PostMapping("/CartToOrder")

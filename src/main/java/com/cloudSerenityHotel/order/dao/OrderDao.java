@@ -16,4 +16,7 @@ public interface OrderDao extends JpaRepository<Order, Integer>{
 	
 	// 根據 userId 查詢訂單
     List<Order> findByUserId(Integer userId);
+    
+ 	// 根據用戶 ID 和訂單 ID 查詢訂單
+    Order findByUserIdAndOrderId(Integer userId, Integer orderId);
 }

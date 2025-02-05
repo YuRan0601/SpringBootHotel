@@ -320,7 +320,7 @@ public class OrderServiceImpl implements OrderService {
 	    return orderDTO;
 	}
 
-	// 查詢該名用戶的所有訂單（包含訂單細項）
+	// 查詢指定用戶的「所有」訂單（包含訂單細項）
 	@Override
 	public List<OrderFrontendDTO> getOrdersForFrontendByUserId(Integer userId) {
 		// 查詢該用戶的訂單
@@ -329,6 +329,21 @@ public class OrderServiceImpl implements OrderService {
 		// 使用轉換方法轉換為前台的 DTO
 		return orders.stream().map(this::convertToFrontendDTO) // 使用 convertToFrontendDTO 方法
 				.collect(Collectors.toList());
+	}
+	
+	// 查詢指定用戶的「特定」訂單（包含訂單細項）
+	@Override
+	public OrderFrontendDTO getOrderDetailForFrontend(Integer userId, Integer orderId) {
+	    // 查詢該用戶的訂單
+	    Order order = orderDao.findByUserIdAndOrderId(userId, orderId);
+
+	    // 如果訂單不存在，返回 null
+	    if (order == null) {
+	        return null;
+	    }
+
+	    // 使用轉換方法將訂單轉換為前台需要的 DTO
+	    return convertToFrontendDTO(order);
 	}
 
 	// Cart -> Order
