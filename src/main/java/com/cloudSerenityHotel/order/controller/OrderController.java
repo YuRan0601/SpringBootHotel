@@ -28,8 +28,6 @@ import com.cloudSerenityHotel.order.dto.OrderBackendDTO;
 import com.cloudSerenityHotel.order.dto.OrderFrontendDTO;
 import com.cloudSerenityHotel.order.model.Order;
 import com.cloudSerenityHotel.order.model.OrderItems;
-import com.cloudSerenityHotel.order.service.CartService;
-import com.cloudSerenityHotel.order.service.impl.CartServiceImpl;
 import com.cloudSerenityHotel.order.service.impl.OrderServiceImpl;
 import com.cloudSerenityHotel.product.model.Products;
 import com.cloudSerenityHotel.product.service.impl.ProductServiceImpl;
@@ -49,8 +47,8 @@ public class OrderController extends BaseController {
 	@Autowired
 	private ProductServiceImpl productServiceImpl;
 	
-	@Autowired
-    private CartServiceImpl cartServiceImpl;  // 注入 CartService
+	/*@Autowired
+    private CartServiceImpl cartServiceImpl;  // 注入 CartService*/
 
 	// 查詢所有訂單，返回 DTO 列表
 	@GetMapping("/findAllOrders")
