@@ -45,69 +45,97 @@
             flex-grow: 1;
         }
 
-        .attraction-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            justify-content: center;
-        }
-
-        .attraction-card {
-            width: 300px;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease-in-out;
-        }
-
-        .attraction-card:hover {
-            transform: scale(1.05);
-        }
-
-        .attraction-card img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-        }
-
-        .card-body {
-            padding: 15px;
-            text-align: center;
-        }
-
-        .card-title {
-            font-size: 20px;
-            font-weight: bold;
-            color: #09c6ab;
-        }
-
-        .card-text {
-            font-size: 14px;
-            color: #555;
-            height: 60px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-	    .btn-primary, .btn-search {
-	        background-color: #09c6ab !important;
-	        border: none;
-	        color: white;
-	    }
-	
-	    .btn-primary:hover, .btn-search:hover {
-	        background-color: #068e87 !important;
-	    }
-	    
-	    .btn-primary:focus,
-		.btn-search:focus {
+		.attraction-container {
+		    display: grid;
+		    grid-template-columns: repeat(3, 1fr); /* 每行顯示 3 個 */
+		    gap: 20px; /* 設定每個卡片之間的間隔 */
+		    justify-items: center;
+		}
+		
+		.attraction-card {
+		    width: 100%; /* 卡片寬度為 100% */
+		    max-width: 500px; /* 卡片最大寬度為 350px */
+		    height: 600px; /* 設置卡片高度為 700px */
+		    border-radius: 10px;
+		    overflow: hidden;
+		    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+		    transition: transform 0.3s ease-in-out;
+		    display: flex;
+		    flex-direction: column;
+		    justify-content: space-between; /* 讓圖片和內容分開，並保持間距 */
+		}
+		
+		.attraction-card img {
+		    width: 100%;
+		    height: 50%; /* 圖片佔據卡片的上半部 */
+		    object-fit: cover;
+		}
+		
+		.card-body {
+		    padding: 15px;
+		    text-align: center;
+		    display: flex;
+		    flex-direction: column;
+		    justify-content: center; /* 垂直置中 */
+		    align-items: center; /* 水平置中 */
+		    flex-grow: 1; /* 讓內容區域佔據剩餘空間 */
+		    background-color:white;
+		}
+		
+		.card-title {
+		    font-size: 20px;
+		    font-weight: bold;
+		    color: #09c6ab;
+		}
+		
+		.card-text {
+		    font-size: 14px;
+		    color: #555;
+		    height: 60px;
+		    overflow: hidden;
+		    text-overflow: ellipsis;
+		}
+		
+		.btn-primary {
+		    background-color: #09c6ab !important;
+		    border: none;
+		    color: white;
+		}
+		
+		.btn-primary:hover {
+		    background-color: #068e87 !important;
+		}
+		
+		.btn-primary:focus {
 		    outline: none !important;
 		    box-shadow: none !important;
+		}
+
+        .pagination {
+            justify-content: center;
+            margin-top: 20px;
+        }
+        #page {
+		    position: relative;
+		    height: 100%; /* 確保背景覆蓋整個頁面 */
+		}
+		
+		#page::before {
+		    content: "";
+		    position: absolute;
+		    top: 0;
+		    left: 0;
+		    width: 100%;
+		    height: 100%;
+		    background: url('http://localhost:8080/CloudSerenityHotel/static/attraction/images/bgwood.png') no-repeat center center fixed;
+		    background-size: cover;
+		    opacity: 0.3; /* 設定透明度，達到變暗 70% 的效果 */
+		    z-index: -1; /* 確保背景在最底層 */
 		}
     </style>
 </head>
 
-<body>
+<body id="page">
     <header class="header"></header>
 
     <div class="content">
@@ -121,6 +149,12 @@
         <div class="attraction-container" id="attractionContainer">
             <!-- 景點資料將透過 JavaScript 動態插入 -->
         </div>
+
+        <nav>
+            <ul class="pagination" id="pagination">
+                <!-- 分頁按鈕將動態生成 -->
+            </ul>
+        </nav>
     </div>
 
     <script>
@@ -128,15 +162,21 @@
             $(".header").load("./frontNav.html");
         });
 
-        // 使用 Fetch 獲取所有景點並顯示
-        function loadAttractions() {
+        let currentPage = 1;
+        const attractionsPerPage = 6;
+
+        function loadAttractions(page = 1) {
             fetch('http://localhost:8080/CloudSerenityHotel/api/attractions/')
                 .then(response => response.json())
                 .then(data => {
+                    const startIndex = (page - 1) * attractionsPerPage;
+                    const endIndex = startIndex + attractionsPerPage;
+                    const pageData = data.slice(startIndex, endIndex);
+
                     const container = document.getElementById('attractionContainer');
                     container.innerHTML = '';
 
-                    data.forEach(attraction => {
+                    pageData.forEach(attraction => {
                         const card = `
                             <div class="attraction-card">
                                 <img src="${attraction.imageUrl}" alt="${attraction.name}">
@@ -150,8 +190,27 @@
                             </div>`;
                         container.innerHTML += card;
                     });
+
+                    // 生成分頁按鈕
+                    generatePagination(data.length, page);
                 })
                 .catch(error => console.error('獲取景點資料時發生錯誤:', error));
+        }
+
+        function generatePagination(totalItems, currentPage) {
+            const totalPages = Math.ceil(totalItems / attractionsPerPage);
+            const paginationContainer = document.getElementById('pagination');
+            paginationContainer.innerHTML = '';
+
+            for (let i = 1; i <= totalPages; i++) {
+                const button = document.createElement('li');
+                button.classList.add('page-item');
+                button.innerHTML = `<a class="page-link" href="javascript:void(0);" onclick="loadAttractions(${i})">${i}</a>`;
+                if (i === currentPage) {
+                    button.classList.add('active');
+                }
+                paginationContainer.appendChild(button);
+            }
         }
 
         function searchByName() {
@@ -194,7 +253,9 @@
         }
 
         // 頁面載入時執行
-        window.onload = loadAttractions;
+        window.onload = function() {
+            loadAttractions(currentPage);
+        };
     </script>
 </body>
 

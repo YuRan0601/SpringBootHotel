@@ -149,9 +149,7 @@
         <div class="btn-container">
             <button onclick="location.href='http://localhost:8080/CloudSerenityHotel/static/attraction/addAttraction.html'" class="btn btn-primary">新增景點</button>
             <button onclick="location.href='http://localhost:8080/CloudSerenityHotel/static/attraction/findAttraction.html'" class="btn btn-secondary">查詢單筆景點</button>
-            <button onclick="location.href='http://localhost:8080/CloudSerenityHotel/static/attraction/GetAllAttractions.html'" class="btn btn-secondary">返回</button>
-            
-            <button class="link-btn" onclick="location.href='http://localhost:8080/CloudSerenityHotel/static/attraction/GetAllPicture.html'">查看所有圖片</button>
+            <button onclick="location.href='http://localhost:8080/CloudSerenityHotel/static/attraction/GetAllAttractions.html'" class="btn btn-secondary">返回</button>            
         </div>
 
         <table>
@@ -160,7 +158,7 @@
                     <th>ID</th>
                     <th>景點名稱</th>
                     <th>描述</th>
-                    <th>位置</th>
+
                     <th>開放時間</th>
                     <th>聯絡資訊</th>
                     <th>圖片連結</th>
@@ -194,12 +192,14 @@
                                 <td>${attraction.attractionId}</td>
                                 <td>${attraction.name}</td>
                                 <td class="description">${description}</td>
-                                <td>${attraction.location}</td>
+
                                 <td>${attraction.openingHours}</td>
                                 <td>${attraction.contactInfo}</td>
                                 <td>
-                                	<a href="${attraction.imageLink}" target="_blank" style="pointer-events: none; color: #2894FF;">查看圖片</a>
-                                </td>
+                                <!-- 顯示圖片，設置大小為 50x50 -->
+                                <img src="${attraction.imageUrl}" alt="圖片" style="width: 150px; height: 100px; object-fit: cover;">
+                           		</td>
+
                                 <td>
                                     <button onclick="confirmDelete(${attraction.attractionId})" class="delete-btn">刪除</button>
                                     <button onclick="editAttraction(${attraction.attractionId})" class="edit-btn">修改</button>
@@ -236,7 +236,7 @@
                                 <td>${data.attractionId}</td>
                                 <td>${data.name}</td>
                                 <td class="description">${description}</td>
-                                <td>${data.location}</td>
+
                                 <td>${data.openingHours}</td>
                                 <td>${data.contactInfo}</td>
                                 <td>
