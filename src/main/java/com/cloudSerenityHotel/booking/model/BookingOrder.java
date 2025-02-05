@@ -42,6 +42,9 @@ public class BookingOrder implements Serializable{
 	@JoinColumn(name = "room_id")
 	private Room room;
 	
+	@Column(name = "room_type_name")
+	private String roomTypeName;
+	
 	@Column(name = "check_in_date")
 	private Date checkInDate;
 	

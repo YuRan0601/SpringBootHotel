@@ -48,7 +48,7 @@ public class BookingServiceImpl implements BookingService {
 			map.put("userId", order.getUser().getUserId());
 			map.put("userName", order.getUser().getUserName());
 			map.put("roomTypeId", order.getRoom().getRoomType().getTypeId());
-			map.put("roomTypeName", order.getRoom().getRoomType().getTypeName());
+			map.put("roomTypeName", order.getRoomTypeName());
 			map.put("roomId", order.getRoom().getRoomId());
 			map.put("roomName", order.getRoom().getRoomName());
 			map.put("checkInDate", order.getCheckInDate());
@@ -135,6 +135,7 @@ public class BookingServiceImpl implements BookingService {
 		
 		order.setUser(user.get());
 		order.setRoom(randomRoom.get());
+		order.setRoomTypeName(randomRoom.get().getRoomType().getTypeName());
 		
 		try {
 			BookingOrder dbOrder = bRepository.save(order);
@@ -213,6 +214,7 @@ public class BookingServiceImpl implements BookingService {
 			}
 			
 			dbOrder.setRoom(randomRoom.get());
+			dbOrder.setRoomTypeName(randomRoom.get().getRoomType().getTypeName());
 		}
 		
 		if(!dbOrder.getStatus().equals(order.getStatus())) {
