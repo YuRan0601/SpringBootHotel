@@ -16,4 +16,10 @@ public interface CarRentalRecordRespostiroy extends JpaRepository<CarRentalRecor
 
 	@Query(value = "SELECT * FROM CarRentalRecords WHERE rental_status = ?1", nativeQuery = true)
 	List<CarRentalRecord> findAllByStatus(String status);
+	
+	@Query(value = "SELECT * FROM CarRentalRecords WHERE rental_status = ?1 AND customer_id = ?2 ORDER BY updated_at" , nativeQuery = true)
+	List<CarRentalRecord> findByStatusAndCustomerId(String status, String customerId);
+	
+	@Query(value = "SELECT * FROM CarRentalRecords WHERE customer_id = ?1 ORDER BY updated_at" , nativeQuery = true)
+	List<CarRentalRecord> findByCustomerId(int customerId);
 }

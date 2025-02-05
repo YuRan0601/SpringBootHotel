@@ -2,6 +2,7 @@ package com.cloudSerenityHotel.rent.service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -139,11 +140,54 @@ public class CarReservationService {
 		return new ResponseModel<String>(StatusEnum.FAIL, "查無此筆訂單");
 	}
 	
-	public ResponseModel<?> queryAllByStatus(CarReservationStatuEnum carReservationStatuEnum) {
-		return new ResponseModel<>(StatusEnum.SUCCESS, carRentalRecordRepository.findAllByStatus(carReservationStatuEnum.name()));
+	public ResponseModel<?> qetRentalRecordByIdList(String reservationId) {
+		Optional<CarRentalRecord> carRentalRecordOpt = carRentalRecordRepository.findById(reservationId);
+		if (carRentalRecordOpt.isPresent()) {
+			
+			ArrayList<CarRentalRecord> res = new ArrayList<CarRentalRecord>();
+			
+			CarRentalRecord carRentalRecord = carRentalRecordOpt.get();
+			
+			res.add(carRentalRecord);
+
+			return new ResponseModel<>(StatusEnum.SUCCESS,
+					res);
+		}
+
+		return new ResponseModel<String>(StatusEnum.FAIL, "查無此筆訂單");
 	}
 
-	public ResponseModel<?> delete(String reservationId) {
+	public ResponseModel<?> queryByStatusAndUserId(CarReservationStatuEnum carReservationStatuEnum, String userId) {
+		return new ResponseModel<>(StatusEnum.SUCCESS,
+				carRentalRecordRepository.findByStatusAndCustomerId(carReservationStatuEnum.name(), userId));
+	}
+
+	public ResponseModel<?> queryByUserId(int userId) {
+		return new ResponseModel<>(StatusEnum.SUCCESS, carRentalRecordRepository.findByCustomerId(userId));
+	}
+
+	public ResponseModel<?> queryAllByStatus(CarReservationStatuEnum carReservationStatuEnum) {
+		return new ResponseModel<>(StatusEnum.SUCCESS,
+				carRentalRecordRepository.findAllByStatus(carReservationStatuEnum.name()));
+	}
+
+	public ResponseModel<?> delete(String reservationId,CarReservationStatuEnum carReservationStatuEnum) {
+		Optional<CarRentalRecord> carRentalRecordOpt = carRentalRecordRepository.findById(reservationId);
+		if (!carRentalRecordOpt.isPresent()) {
+			return new ResponseModel<>(StatusEnum.FAIL,"查無訂單");
+		}
+		LocalDateTime deteTime = LocalDateTime.now();
+		CarRentalRecord carRentalRecord = carRentalRecordOpt.get();
+		Optional<CarDetails> carDetailsOpt = carDetailsRepository.findById(carRentalRecord.getCarId());
+		// 為防止意外發生 查無資料庫車型時僅記錄 不做處理，讓訂單可順利修改狀態 以便結案
+		if (!carDetailsOpt.isPresent()) {
+			System.out.println("無此車型，詳細請查閱資料庫 表: CarDetails, 對應ID為: " + carRentalRecord.getCarId());
+		}else {
+			CarDetails carDetails = carDetailsOpt.get();
+			carDetails.setStatus(carReservationStatuEnum.name());
+			carDetails.setUpdatedAt(deteTime);
+			carDetailsRepository.save(carDetails);
+		}
 		try {
 			carRentalRecordRepository.deleteById(reservationId);
 			return new ResponseModel<>(StatusEnum.SUCCESS, "刪除訂單成功");
@@ -180,4 +224,5 @@ public class CarReservationService {
 			LocalDateTime rentalStart, LocalDateTime rentalEnd) {
 		return rentalStart.isBefore(requestRentalEnd) && requestRentalStart.isBefore(rentalEnd);
 	}
+
 }

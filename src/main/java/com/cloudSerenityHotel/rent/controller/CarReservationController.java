@@ -37,6 +37,24 @@ public class CarReservationController {
 		return ResponseEntity.ok(carReservationService.qetUserInfoAndRentalRecord(reservationId));
 	}
 	
+	// 查詢單筆訂單 使用預約編號
+		@GetMapping("/query/list/{reservationId}")
+		public ResponseEntity<?> qetRentalRecordByIdList(@PathVariable String reservationId) {
+			return ResponseEntity.ok(carReservationService.qetRentalRecordByIdList(reservationId));
+		}
+	
+	// 查詢會員租借中訂單
+	@GetMapping("/query/rented/{userId}")
+	public ResponseEntity<?> queryAllRented(@PathVariable String userId) {
+		return ResponseEntity.ok(carReservationService.queryByStatusAndUserId(CarReservationStatuEnum.RENTED, userId));
+	}
+	
+	// 查詢會員的所有訂單
+		@GetMapping("/query/user/{userId}")
+		public ResponseEntity<?> queryAllRentedByCustomerId(@PathVariable int userId) {
+			return ResponseEntity.ok(carReservationService.queryByUserId(userId));
+		}
+	
 	// 查詢所有租借中訂單
 	@GetMapping("/query-all/rented")
 	public ResponseEntity<?> queryAllRented() {
@@ -64,7 +82,7 @@ public class CarReservationController {
 	// 刪除訂單
 	@PostMapping("/delete/{reservationId}")
 	public ResponseEntity<?> delete(@PathVariable String reservationId) {
-		return ResponseEntity.ok(carReservationService.delete(reservationId));
+		return ResponseEntity.ok(carReservationService.delete(reservationId, CarReservationStatuEnum.AVAILABLE));
 	}
 
 }
