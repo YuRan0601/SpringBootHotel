@@ -65,7 +65,7 @@ public class AuthController {
 		
 		//設定信件內文(String)
 		//重設密碼連結
-		String resetLink = "http://localhost:5173/resetPassword?token=" + token;
+		String resetLink = "http://localhost:5173/front/resetPassword?token=" + token;
 		String msgString = "我們收到了您重設密碼的請求\n"+"請點擊以下連結重設密碼: \n" + resetLink + "\n此連結將於 1 小時後失效。" + "\n如果您沒有提出這個要求，請忽略此電子郵件。"+"\n Cloud Serenity Hotel 雲澄旅館©";
 		message.setText(msgString);
 		
