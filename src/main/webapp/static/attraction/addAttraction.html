@@ -57,71 +57,67 @@
 <body>
 
     <!-- 主要內容 -->
-    <div class="content">
-        <div class="content-inner">
-            <h1>新增景點</h1>
-            <form id="addAttractionForm">
-                <div class="mb-3">
-                    <label for="name" class="form-label">景點名稱：</label>
-                    <input type="text" id="name" name="name" class="form-control" required>
-                </div>
-
-                <div class="mb-3">
-                    <label for="description" class="form-label">描述：</label>
-                    <input type="text" id="description" name="description" class="form-control" required>
-                </div>
-
-                <div class="mb-3">
-                    <label for="location" class="form-label">位置：</label>
-                    <input type="text" id="location" name="location" class="form-control" required>
-                </div>
-
-                <div class="mb-3">
-                    <label for="openingHours" class="form-label">開放時間：</label>
-                    <input type="text" id="openingHours" name="openingHours" class="form-control" required>
-                </div>
-
-                <div class="mb-3">
-                    <label for="contactInfo" class="form-label">聯絡資訊：</label>
-                    <input type="text" id="contactInfo" name="contactInfo" class="form-control" required>
-                </div>
-
-                <div class="mb-3">
-                    <label for="typeId" class="form-label">類型ID：</label>
-                    <input type="number" id="typeId" name="typeId" class="form-control" required>
-                </div>
-
-                <div class="mb-3">
-                    <label for="imageUrl" class="form-label">圖片連結：</label>
-                    <input type="text" id="imageUrl" name="imageUrl" class="form-control" required>
-                </div>
-
-                <button type="submit" class="btn btn-primary">提交新增</button>
-            </form>
-        </div>
+<form id="addAttractionForm" enctype="multipart/form-data">
+    <div class="mb-3">
+        <label for="name" class="form-label">景點名稱：</label>
+        <input type="text" id="name" name="name" class="form-control" required>
     </div>
 
-    <script>
-        document.getElementById('addAttractionForm').addEventListener('submit', function (e) {
-            e.preventDefault();
-            const attraction = {
-                name: document.getElementById('name').value,
-                description: document.getElementById('description').value,
-                location: document.getElementById('location').value,
-                openingHours: document.getElementById('openingHours').value,
-                contactInfo: document.getElementById('contactInfo').value,
-                typeId: document.getElementById('typeId').value,
-                imageUrl: document.getElementById('imageUrl').value
-            };
+    <div class="mb-3">
+        <label for="description" class="form-label">描述：</label>
+        <input type="text" id="description" name="description" class="form-control" required>
+    </div>
 
-            fetch('http://localhost:8080/CloudSerenityHotel/api/attractions/', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(attraction)
-            })
-                .then(() => location.href = 'GetAllAttractions.html');
-        });
-    </script>
+    <div class="mb-3">
+        <label for="location" class="form-label">位置：</label>
+        <input type="text" id="location" name="location" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+        <label for="openingHours" class="form-label">開放時間：</label>
+        <input type="text" id="openingHours" name="openingHours" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+        <label for="contactInfo" class="form-label">聯絡資訊：</label>
+        <input type="text" id="contactInfo" name="contactInfo" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+        <label for="typeId" class="form-label">類型ID：</label>
+        <input type="number" id="typeId" name="typeId" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+        <label for="image" class="form-label">上傳圖片：</label>
+        <input type="file" id="image" name="image" class="form-control" accept="image/*" required>
+    </div>
+
+    <button type="submit" class="btn btn-primary">提交新增</button>
+</form>
+
+<script>
+    document.getElementById('addAttractionForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const formData = new FormData();
+        formData.append('name', document.getElementById('name').value);
+        formData.append('description', document.getElementById('description').value);
+        formData.append('location', document.getElementById('location').value);
+        formData.append('openingHours', document.getElementById('openingHours').value);
+        formData.append('contactInfo', document.getElementById('contactInfo').value);
+        formData.append('typeId', document.getElementById('typeId').value);
+        formData.append('image', document.getElementById('image').files[0]); // 上傳圖片
+
+        fetch('http://localhost:8080/CloudSerenityHotel/api/attractions/upload', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(() => location.href = 'GetAllAttractions.html')
+        .catch(error => console.error('錯誤:', error));
+    });
+</script>
 
 </body>
 
