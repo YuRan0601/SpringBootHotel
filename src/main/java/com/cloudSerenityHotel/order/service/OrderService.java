@@ -43,6 +43,8 @@ public interface OrderService {
 	OrderFrontendDTO convertToFrontendDTO(Order order);
 	// 查詢該名用戶的所有訂單（包含訂單細項）
 	List<OrderFrontendDTO> getOrdersForFrontendByUserId(Integer userId);
+	// 查詢指定用戶的特定訂單（包含訂單細項）
+	OrderFrontendDTO getOrderDetailForFrontend(Integer userId, Integer orderId);
 
 	// Cart -> Order
 	OrderBackendDTO createOrder(CartTurntoOrderDTO orderRequest);

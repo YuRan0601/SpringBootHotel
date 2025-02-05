@@ -68,7 +68,7 @@ public class BookingController {
         BookingOrder dbOrder = bService.getOrderById(order.getOrderId());
         
         System.out.println(dbOrder.getStatus());
-        
+       
         if(dbOrder.getStatus().equals("pending")) {
         	String RETURN_URL = NGROK_BASEURL + "/CloudSerenityHotel/booking/return";
 
