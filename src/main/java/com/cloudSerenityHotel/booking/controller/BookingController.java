@@ -65,32 +65,45 @@ public class BookingController {
     public String createPayment(@RequestBody EcpayOrderVo order) {
         Map<String, String> params = new HashMap<>();
         
-        String RETURN_URL = NGROK_BASEURL + "/CloudSerenityHotel/booking/return";
-
-        String merchantTradeNo = order.getOrderId() + "t" + System.currentTimeMillis(); //訂單ID後加上時間戳，避免付款網頁意外關閉時無法再重新進入付款網頁
+        BookingOrder dbOrder = bService.getOrderById(order.getOrderId());
         
-        params.put("MerchantID", MERCHANT_ID);
-        params.put("MerchantTradeNo", merchantTradeNo);
-        params.put("MerchantTradeDate", new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(new Date()));
-        params.put("PaymentType", "aio");
-        params.put("TotalAmount", order.getPrice().toString());
-        params.put("TradeDesc", "信用卡支付");
-        params.put("ItemName", order.getProductName());
-        params.put("ReturnURL", RETURN_URL);
-        params.put("ChoosePayment", "Credit");
-        params.put("ClientBackURL", "http://localhost:5173/front/member/bookingOrder");
-        params.put("CheckMacValue", generateCheckMacValue(params));
+        System.out.println(dbOrder.getStatus());
+        
+        if(dbOrder.getStatus().equals("pending")) {
+        	String RETURN_URL = NGROK_BASEURL + "/CloudSerenityHotel/booking/return";
 
-        StringBuilder form = new StringBuilder();
-        form.append("<form id='ecpay-form' action='").append(PAYMENT_URL).append("' method='post'>");
-        for (Map.Entry<String, String> entry : params.entrySet()) {
-            form.append("<input type='hidden' name='").append(entry.getKey()).append("' value='").append(entry.getValue()).append("'>");
+            String merchantTradeNo = order.getOrderId() + "t" + System.currentTimeMillis(); //訂單ID後加上時間戳，避免付款網頁意外關閉時無法再重新進入付款網頁
+            
+            params.put("MerchantID", MERCHANT_ID);
+            params.put("MerchantTradeNo", merchantTradeNo);
+            params.put("MerchantTradeDate", new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(new Date()));
+            params.put("PaymentType", "aio");
+            params.put("TotalAmount", order.getPrice().toString());
+            params.put("TradeDesc", "信用卡支付");
+            params.put("ItemName", order.getProductName());
+            params.put("ReturnURL", RETURN_URL);
+            params.put("ChoosePayment", "Credit");
+            params.put("ClientBackURL", "http://localhost:5173/front/member/bookingOrder");
+            params.put("CheckMacValue", generateCheckMacValue(params));
+
+            StringBuilder form = new StringBuilder();
+            form.append("<form id='ecpay-form' action='").append(PAYMENT_URL).append("' method='post'>");
+            for (Map.Entry<String, String> entry : params.entrySet()) {
+                form.append("<input type='hidden' name='").append(entry.getKey()).append("' value='").append(entry.getValue()).append("'>");
+            }
+            form.append("<button type='submit'>前往付款</button>");
+            form.append("</form>");
+            form.append("<script>document.getElementById('ecpay-form').submit();</script>");
+
+            return form.toString();
+        } else if (dbOrder.getStatus().equals("confirmed")) {
+        	return "1";
+        } else if (dbOrder.getStatus().equals("cancelled")) {
+        	return "2";
+        } else {
+        	return "3";
         }
-        form.append("<button type='submit'>前往付款</button>");
-        form.append("</form>");
-        form.append("<script>document.getElementById('ecpay-form').submit();</script>");
-
-        return form.toString();
+        
     }
 
     @PostMapping("/return")

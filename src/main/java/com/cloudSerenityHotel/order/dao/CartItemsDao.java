@@ -17,4 +17,7 @@ public interface CartItemsDao extends JpaRepository<CartItems, Integer>{
     
     // 查詢某商品在某購物車內的有效記錄（is_valid = 0）
     Optional<CartItems> findByCartCartIdAndProductsProductIdAndIsValid(Integer cartId, Integer productId, Integer isValid);
+    
+    // 查詢 CartItem 根據 cartItemId 和 isValid
+    Optional<CartItems> findByCartItemIdAndIsValid(Integer cartItemId, Integer isValid);
 }
