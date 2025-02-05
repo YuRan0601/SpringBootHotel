@@ -7,9 +7,11 @@ import jakarta.servlet.annotation.MultipartConfig;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.client.RestTemplate;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -89,6 +91,17 @@ public class AttractionController {
 //    public Attraction createAttraction(@RequestBody Attraction attraction) {
 //        return attractionService.createAttraction(attraction);
 //    }
+    
+    @GetMapping("/static/attraction/detail.html")
+    public String showDetailPage(@RequestParam("id") Integer id, Model model) {
+        // 向 API 請求景點資料
+        String apiUrl = "http://localhost:8080/CloudSerenityHotel/api/attractions/" + id;
+        RestTemplate restTemplate = new RestTemplate();
+        Attraction attraction = restTemplate.getForObject(apiUrl, Attraction.class);
+
+        model.addAttribute("attraction", attraction);
+        return "attraction/detail"; // 轉發到 `WEB-INF/views/attraction/detail.jsp`
+    }
 
     @PutMapping("/{id}")
     public Attraction updateAttraction(@PathVariable Integer id, @RequestBody Attraction updatedAttraction) {
