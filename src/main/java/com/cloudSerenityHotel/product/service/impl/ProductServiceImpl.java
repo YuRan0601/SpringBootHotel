@@ -113,6 +113,12 @@ public class ProductServiceImpl implements ProductService{
 		return null;
 	}
 	
+	@Override
+	public List<Map<String, Object>> searchProductsByName(String name) {
+		List<Products> getProduct =  productDao.findByProductNameContainingIgnoreCase(name);
+		return productToMapList(getProduct);
+	}
+	
 	// 顯示全部分類
 	@Override
 	public List<Map<String, Object>> selectAllCategories() {
@@ -143,26 +149,14 @@ public class ProductServiceImpl implements ProductService{
 		return productToMapList(productsTatus);
 	}
 
-
-	 @Override
-	 public int insertProductAndCategories(Products products,Categories categories) {
-	  
-	     products.getCategories().add(categories);
-	     categories.getProducts().add(products);
-	  
-	     productDao.save(products);
-	     categoriesDao.save(categories);
-	     
-	  
-	  return 0;
-	 }
-	 
+	 // 新增分類
 	 @Override
 	 public int insertCategory(List<Categories> categories) {
 		categoriesDao.saveAll(categories);
 	 	return 0;
 	 }
 	 
+	 // 新增商品
 	 @Override
 	 public int insertProduct(Products products) {
 	     // 儲存分類
@@ -191,16 +185,18 @@ public class ProductServiceImpl implements ProductService{
   
 	  return 0;
 	 }
-
+	
+	// 刪除商品
 	 @Override
 	 public int deleteProduct(Integer productId) {
 	  productDao.deleteById(productId);
 	  return 0;
 	 }
-	 
+	
+	// 刪除圖片
 	@Override
-	public int deleteImage(Integer productId) {
-	  productDao.deleteById(productId);
+	public int deleteImage(Integer imageId) {
+	  productImagesDao.deleteById(imageId);
 	return 0;
 	}
  
@@ -217,40 +213,44 @@ public class ProductServiceImpl implements ProductService{
 	}
 
 
-	
-	 @Override
-	 public int updateProduct(Products products) {
-	  Optional<Products> getOne = productDao.findById(products.getProductId());
-	  Products productId = getOne.get();
-	  
-	     // 儲存分類
-	     for (Categories category : productId.getCategories()) {
-	         Categories existingCategory = categoriesDao.findByCategoriesName(category.getCategoriesName())
-	                                       .orElse(category);
-	         existingCategory.getProducts().add(productId);
-	     }
-	     
-	     // 儲存商品與圖片
-	     productDao.save(productId);
-	     for (ProductImages image : productId.getProductImages()) {
-	         productImagesDao.save(image);
-	     }
-	  
-//	  productId.setProductName(products.getProductName());
-//	  productId.setDescription(products.getDescription());
-//	  productId.setPrice(products.getPrice());
-//	  productId.setSpecialPrice(products.getSpecialPrice());
-//	  productId.setCategories(products.getCategories());
-//	  
-//	  productId.setUpdatedAt(Timestamp.valueOf(LocalDateTime.now()));//修改時間
-//	  
-//	  productId.getCategories().add(categories);
-//	     categories.getProducts().add(productId);
-//	  
-//	  productDao.save(productId);
-//	//  categoriesDao.save(categories);
-	  return 0;
-	 }
+	// 修改商品
+	@Override
+	public int updateProduct(Products products) {
+	    Optional<Products> getOne = productDao.findById(products.getProductId());
+	    if (!getOne.isPresent()) {
+	        return 0;
+	    }
+	    Products existingProduct = getOne.get();
+
+	    // 清除舊的分類關聯並保存
+	    existingProduct.getCategories().clear();
+	    productDao.save(existingProduct);
+
+	    // 儲存新的分類
+	    List<Categories> updatedCategories = new ArrayList<>();
+	    for (Categories category : products.getCategories()) {
+	        Categories existingCategory = categoriesDao.findByCategoriesName(category.getCategoriesName()).orElse(null);
+	        if (existingCategory == null) {
+	            existingCategory = new Categories();
+	            existingCategory.setCategoriesName(category.getCategoriesName());
+	            categoriesDao.save(existingCategory);
+	        }
+	        if (!existingCategory.getProducts().contains(existingProduct)) {
+	            existingCategory.getProducts().add(existingProduct);
+	        }
+	        if (!existingProduct.getCategories().contains(existingCategory)) {
+	            existingProduct.getCategories().add(existingCategory);
+	        }
+	        updatedCategories.add(existingCategory);
+	    }
+
+	    existingProduct.setCategories(updatedCategories);
+	    productDao.save(existingProduct);
+
+	    return 1;
+	}
+
+
 
  // 商品狀態(待改)
 /* @Override
@@ -275,6 +275,8 @@ public class ProductServiceImpl implements ProductService{
 	public Optional<Products> findById(Integer productId) {
 		return productDao.findById(productId);
 	}
+
+
 
 
 

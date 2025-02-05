@@ -6,7 +6,8 @@ import lombok.Setter;
 @Getter @Setter
 public class MemberForCartFrontendDTO {
     private int userid;
-    private String userName;
+    private String receiveName; // 收件人名稱
+    private String userName;    // 會員姓名
     private String email;
     private String userIdentity; // 管理員或會員身份
     private String phone;
