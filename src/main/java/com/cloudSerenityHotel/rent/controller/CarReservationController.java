@@ -37,6 +37,12 @@ public class CarReservationController {
 		return ResponseEntity.ok(carReservationService.qetUserInfoAndRentalRecord(reservationId));
 	}
 	
+	// 查詢單筆訂單 使用預約編號
+		@GetMapping("/query/list/{reservationId}")
+		public ResponseEntity<?> qetRentalRecordByIdList(@PathVariable String reservationId) {
+			return ResponseEntity.ok(carReservationService.qetRentalRecordByIdList(reservationId));
+		}
+	
 	// 查詢會員租借中訂單
 	@GetMapping("/query/rented/{userId}")
 	public ResponseEntity<?> queryAllRented(@PathVariable String userId) {

@@ -2,6 +2,7 @@ package com.cloudSerenityHotel.rent.service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -134,6 +135,23 @@ public class CarReservationService {
 
 			return new ResponseModel<>(StatusEnum.SUCCESS,
 					new CarReservationQueryResponse(carRentalRecord, carUserInfo));
+		}
+
+		return new ResponseModel<String>(StatusEnum.FAIL, "查無此筆訂單");
+	}
+	
+	public ResponseModel<?> qetRentalRecordByIdList(String reservationId) {
+		Optional<CarRentalRecord> carRentalRecordOpt = carRentalRecordRepository.findById(reservationId);
+		if (carRentalRecordOpt.isPresent()) {
+			
+			ArrayList<CarRentalRecord> res = new ArrayList<CarRentalRecord>();
+			
+			CarRentalRecord carRentalRecord = carRentalRecordOpt.get();
+			
+			res.add(carRentalRecord);
+
+			return new ResponseModel<>(StatusEnum.SUCCESS,
+					res);
 		}
 
 		return new ResponseModel<String>(StatusEnum.FAIL, "查無此筆訂單");
