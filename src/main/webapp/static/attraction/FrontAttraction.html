@@ -33,9 +33,17 @@
             height: 100vh;
             overflow: hidden;
         }
+        
+        .header {
+        	position: fixed;
+        	top:0;
+        	left:0;
+        	right:0;
+        }
 
         .content {
-            margin-left: 300px;
+        	margin-top: 80px;
+            
             width: 100%;
             padding: 20px;
             overflow-y: auto;
@@ -108,7 +116,7 @@
             position: fixed;
             top: -20px;
             left: -20px;
-            width: 260px;
+            width: 310px;
             height: 100vh;
             padding: 20px;
             overflow-x: hidden;
@@ -139,7 +147,7 @@
 </head>
 
 <body>
-	<aside class="aside"></aside>
+	<header class="header"></header>
     <div class="content">
         <h1>景點列表</h1>
         <div class="search-container">
@@ -171,12 +179,13 @@
                 <!-- 景點資料由JavaScript填充 -->
             </tbody>
         </table>
-        
-        <script>
+
+		<script>
         $(function () {
-            $(".aside").load("./backAside.html");
+            $(".header").load("./frontNav.html");
         })
         </script>
+		
 
         <script>
             // 使用 Fetch 獲取所有景點並顯示
