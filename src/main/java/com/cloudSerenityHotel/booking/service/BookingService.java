@@ -28,5 +28,9 @@ public interface BookingService {
 
 	List<Map<String, Object>> getOrderByStatus(String status);
 
+	List<Map<String, Object>> getOrderLikeUserNameOrOrderIdByKeyword(String keyword);
+
+	List<Map<String, Object>> getOrderByOrderIdAndUserId(Integer userId, Integer orderId);
+
 
 }

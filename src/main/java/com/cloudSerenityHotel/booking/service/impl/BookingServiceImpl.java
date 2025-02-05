@@ -47,10 +47,12 @@ public class BookingServiceImpl implements BookingService {
 			map.put("orderId", order.getOrderId());
 			map.put("userId", order.getUser().getUserId());
 			map.put("userName", order.getUser().getUserName());
-			map.put("roomTypeId", order.getRoom().getRoomType().getTypeId());
+			if(order.getRoom() != null) {
+				map.put("roomTypeId", order.getRoom().getRoomType().getTypeId());
+				map.put("roomId", order.getRoom().getRoomId());
+				map.put("roomName", order.getRoom().getRoomName());
+			}
 			map.put("roomTypeName", order.getRoomTypeName());
-			map.put("roomId", order.getRoom().getRoomId());
-			map.put("roomName", order.getRoom().getRoomName());
 			map.put("checkInDate", order.getCheckInDate());
 			map.put("checkOutDate", order.getCheckOutDate());
 			map.put("totalPrice", order.getTotalPrice());
@@ -290,5 +292,20 @@ public class BookingServiceImpl implements BookingService {
 		List<BookingOrder> dbOrder = bRepository.findByStatus(status);
 		return ordersToMapList(dbOrder);
 	}
-	
+
+
+
+	@Override
+	public List<Map<String, Object>> getOrderLikeUserNameOrOrderIdByKeyword(String keyword) {
+		List<BookingOrder> orders = bRepository.searchByKeyword(keyword);
+		return ordersToMapList(orders);
+	}
+
+
+
+	@Override
+	public List<Map<String, Object>> getOrderByOrderIdAndUserId(Integer userId, Integer orderId) {
+		List<BookingOrder> orders = bRepository.findByUser_UserIdAndOrderId(userId, orderId);
+		return ordersToMapList(orders);
+	}
 }

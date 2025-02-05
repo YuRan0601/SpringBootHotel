@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import com.cloudSerenityHotel.booking.dto.MonthlyBookingCount;
 import com.cloudSerenityHotel.booking.model.BookingOrder;
@@ -24,5 +25,13 @@ public interface BookingOrderRepository extends JpaRepository<BookingOrder, Inte
 	List<MonthlyBookingCount> findMonthlyBookingCounts();
 
 	List<BookingOrder> findByStatus(String status);
+	
+	@Query("SELECT bo FROM BookingOrder bo " +
+	           "JOIN bo.user u " +
+	           "WHERE (:keyword IS NULL OR u.userName LIKE %:keyword%) " +
+	           "OR (:keyword IS NULL OR CAST(bo.orderId AS string) LIKE %:keyword%)")
+	List<BookingOrder> searchByKeyword(@Param("keyword") String keyword);
+	
+	List<BookingOrder> findByUser_UserIdAndOrderId(Integer userId, Integer orderId);
 
 }
