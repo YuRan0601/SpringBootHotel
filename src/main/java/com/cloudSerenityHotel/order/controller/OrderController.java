@@ -264,6 +264,7 @@ public class OrderController extends BaseController {
     }
     
     // Cart -> Order
+    // 無串金流版本
     @PostMapping("/CartToOrder")
     public ResponseEntity<OrderBackendDTO> createOrder(@RequestBody CartTurntoOrderDTO cartTurntoOrderDTO) {
         try {
@@ -277,4 +278,6 @@ public class OrderController extends BaseController {
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
         }
     }
+    
+    // 串金流版本
 }

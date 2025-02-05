@@ -47,9 +47,9 @@ public class Order implements Serializable {
 	@Column(name = "address")
 	private String address; // 地址
 	@Column(name = "order_status")
-	private String orderStatus; // 訂單狀態 V 11/17修改
+	private String orderStatus; // 訂單狀態
 	@Column(name = "payment_method")
-	private String paymentMethod; // 付款方式 V 11/17修改
+	private String paymentMethod; // 付款方式
 	@Column(name = "total_amount", nullable = false)
 	private BigDecimal totalAmount = BigDecimal.ZERO; // 預設值確保不為 NULL
 	@Column(name = "points_discount")
