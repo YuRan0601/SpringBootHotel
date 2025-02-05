@@ -262,31 +262,6 @@ public class OrderController extends BaseController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
-
-
-    
-    // 查詢指定用戶的特定訂單（包含訂單細項）
-    /*@GetMapping("/user/{userId}/order/{orderId}")
-    public ResponseEntity<OrderFrontendDTO> getOrderDetailForFrontend(
-            @PathVariable Integer userId, 
-            @PathVariable Integer orderId) {
-        try {
-            // 調用 Service 層的查詢方法
-            OrderFrontendDTO order = orderServiceImpl.getOrderDetailForFrontend(userId, orderId);
-
-            // 如果訂單存在，返回成功響應
-            if (order != null) {
-                return ResponseEntity.ok(order);
-            } else {
-                // 如果沒有找到該訂單，返回 404 錯誤
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null); // 訂單未找到
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            // 返回伺服器錯誤響應
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
-    }*/
     
     // Cart -> Order
     @PostMapping("/CartToOrder")
