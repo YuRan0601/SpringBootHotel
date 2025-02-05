@@ -9,11 +9,16 @@ import org.springframework.stereotype.Service;
 
 import com.cloudSerenityHotel.order.model.Order;
 import com.cloudSerenityHotel.order.model.OrderItems;
+import com.cloudSerenityHotel.user.model.User;
+import com.cloudSerenityHotel.user.service.UserService;
 
 @Service
 public class EmailService {
 	@Autowired
     private JavaMailSender mailSender;
+	
+	@Autowired
+    private UserService userService;  // 注入 UserService
 
 	// 通用的發送郵件方法
     public void sendEmail(String to, String subject, String text) {
@@ -28,8 +33,11 @@ public class EmailService {
     public void sendPaymentSuccessEmail(Order dbOrder) {
         SimpleMailMessage message = new SimpleMailMessage();
 
+        // 使用 UserService 根據 userId 查詢使用者資料
+        User user = userService.findUserById(dbOrder.getUserId());  // 用 userId 查詢
+
         // 設置郵件收件人、主旨和內容
-        String email = dbOrder.getUser().getEmail();
+        String email = user.getEmail();  // 使用查詢到的使用者 email
         message.setTo(email);
         message.setSubject("您的伴手禮商城訂單付款成功!");
 
@@ -62,11 +70,10 @@ public class EmailService {
         BigDecimal finalAmount = totalAmount.subtract(discountAmount);
 
         // 設置郵件內容
-        String userName = dbOrder.getUser().getUserName();
+        String userName = user.getUserName();  // 使用查詢到的使用者 userName
         String orderId = dbOrder.getOrderId().toString();
         String orderDate = dbOrder.getOrderDate().toString(); // 訂單成立時間
 
-        // 確保顯示總金額無點數折抵的情況
         String content = String.format("""
                 親愛的 %s 您好，
                 您的伴手禮商城訂單付款成功！
