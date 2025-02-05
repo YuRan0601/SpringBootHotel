@@ -5,6 +5,8 @@
 //import org.springframework.util.StringUtils;
 //import org.springframework.web.bind.annotation.*;
 //import org.springframework.web.multipart.MultipartFile;
+//import org.springframework.web.bind.annotation.CrossOrigin;
+//import org.springframework.web.bind.annotation.RequestMethod;
 //
 //import java.io.File;
 //import java.io.IOException;
@@ -13,6 +15,7 @@
 //
 //@RestController
 //@RequestMapping("/CloudSerenityHotel/api/images")
+//@CrossOrigin(origins = {"http://localhost:5173"}, methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
 //public class ImageUploadController {
 //
 //    private static final String UPLOAD_DIR = "/SpringBootHotel/src/main/webapp/static/attraction/uploads/";
