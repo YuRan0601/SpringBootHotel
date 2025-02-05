@@ -113,6 +113,7 @@ public class ProductServiceImpl implements ProductService{
 		return null;
 	}
 	
+	// 模糊查詢
 	@Override
 	public List<Map<String, Object>> searchProductsByName(String name) {
 		List<Products> getProduct =  productDao.findByProductNameContainingIgnoreCase(name);

@@ -56,18 +56,13 @@ public class ProductController {
 	private ProductRepository productDao;
 
 	
-//	//側邊選單(套版用)
-//	@GetMapping("/aside")
-//	public String productHome() {
-//		return "/common/aside.html";
-//	}
-	
-	//查詢單筆
+	// 查詢單筆
 	@GetMapping("/select/{productId}")
 	public List<Map<String, Object>> select(@PathVariable int productId) {
 		return productService.selectProduct(productId);
 	}
 	
+	// 模糊查詢
     @GetMapping("/search")
     public List<Map<String, Object>> searchProducts(@RequestParam String name) {
         return productService.searchProductsByName(name);
@@ -98,9 +93,9 @@ public class ProductController {
 		return productService.insertCategory(categories);
 	}
 	
-	
+	// 新增
 	@PostMapping(value = "/insertProductWithImagesAndCategories", consumes = {"multipart/form-data"})
-	public int insertProductWithImagesAndCategories(@RequestPart("product") Products products,@RequestPart("imageCover") MultipartFile imageCover,@RequestPart(value = "images", required = false) List<MultipartFile> images) throws IllegalStateException, IOException {
+	public int insertProductWithImagesAndCategories(@RequestPart("product") Products products,@RequestPart(value = "imageCover", required = false) MultipartFile imageCover,@RequestPart(value = "images", required = false) List<MultipartFile> images) throws IllegalStateException, IOException {
 	    // 暫存更新後的分類
 	    List<Categories> updatedCategories = new ArrayList<>();
 	    for (Categories category : products.getCategories()) {
@@ -115,15 +110,18 @@ public class ProductController {
 	    products.setCategories(updatedCategories); // 將更新後的分類設回產品
 	    
 	    //上傳商品封面
-	    String CoverFileName = imageCover.getOriginalFilename();
-	    String CoverSaveFileDir = "src/main/webapp/static/product/uploadImage/";
-	    File CoverSaveFilePath = new File(CoverSaveFileDir, CoverFileName);
-	    imageCover.transferTo(CoverSaveFilePath.getAbsoluteFile());
-	    
-	    ProductImages CoverImage = new ProductImages();
-	    CoverImage.setImageUrl("static/product/uploadImage/" + CoverFileName);
-	    CoverImage.setIsPrimary(true);
-	    productService.uploadImage(products, CoverImage);
+	    if (imageCover != null && !imageCover.isEmpty()) {
+		    String CoverFileName = imageCover.getOriginalFilename();
+		    String CoverSaveFileDir = "src/main/webapp/static/product/uploadImage/";
+		    File CoverSaveFilePath = new File(CoverSaveFileDir, CoverFileName);
+		    imageCover.transferTo(CoverSaveFilePath.getAbsoluteFile());
+		    
+		    ProductImages CoverImage = new ProductImages();
+		    CoverImage.setImageUrl("static/product/uploadImage/" + CoverFileName);
+		    CoverImage.setIsPrimary(true);
+		    productService.uploadImage(products, CoverImage);
+		}
+
 	    
 	    // 上傳其他商品圖片
 	    if (images != null && !images.isEmpty()) {
@@ -167,7 +165,7 @@ public class ProductController {
 	public int updateProductWithImagesAndCategories(
 	    @PathVariable int productId, 
 	    @RequestPart("product") Products products,
-	    @RequestPart("imageCover") MultipartFile imageCover,
+	    @RequestPart(value = "imageCover", required = false) MultipartFile imageCover,
 	    @RequestPart(value = "images", required = false) List<MultipartFile> images) 
 	    throws IllegalStateException, IOException {
 
@@ -210,24 +208,30 @@ public class ProductController {
 	    // 設置更新後的分類
 	    existingProduct.setCategories(updatedCategories);
 	    productDao.save(existingProduct);
-
+	    
+	    
+	    String SaveFileDir = "src/main/webapp/static/product/uploadImage/";
 	    // 5. 上傳商品封面
-	    String coverFileName = imageCover.getOriginalFilename();
-	    String coverSaveFileDir = "src/main/webapp/static/product/uploadImage/";
-	    File coverSaveFilePath = new File(coverSaveFileDir, coverFileName);
-	    imageCover.transferTo(coverSaveFilePath.getAbsoluteFile());
+	    System.out.println(imageCover);
+	    if(imageCover != null) {
+	    	String coverFileName = imageCover.getOriginalFilename();
+	 	    
+	 	    File coverSaveFilePath = new File(SaveFileDir, coverFileName);
+	 	    imageCover.transferTo(coverSaveFilePath.getAbsoluteFile());
 
-	    ProductImages coverImage = new ProductImages();
-	    coverImage.setImageUrl("static/product/uploadImage/" + coverFileName);
-	    coverImage.setIsPrimary(true);
-	    coverImage.setProducts(existingProduct);
-	    productImagesDao.save(coverImage);
+	 	    ProductImages coverImage = new ProductImages();
+	 	    coverImage.setImageUrl("static/product/uploadImage/" + coverFileName);
+	 	    coverImage.setIsPrimary(true);
+	 	    coverImage.setProducts(existingProduct);
+	 	    productImagesDao.save(coverImage);
+	    }
+	   
 
 	    // 6. 上傳其他商品圖片
 	    if (images != null && !images.isEmpty()) {
 	        for (MultipartFile file : images) {
 	            String fileName = file.getOriginalFilename();
-	            File saveFilePath = new File(coverSaveFileDir, fileName);
+	            File saveFilePath = new File(SaveFileDir, fileName);
 	            file.transferTo(saveFilePath.getAbsoluteFile());
 
 	            ProductImages image = new ProductImages();
