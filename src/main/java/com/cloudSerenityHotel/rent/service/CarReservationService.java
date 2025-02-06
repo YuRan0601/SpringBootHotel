@@ -170,6 +170,11 @@ public class CarReservationService {
 		return new ResponseModel<>(StatusEnum.SUCCESS,
 				carRentalRecordRepository.findAllByStatus(carReservationStatuEnum.name()));
 	}
+	
+	public ResponseModel<?> queryAllCarTape(CarReservationStatuEnum carReservationStatuEnum) {
+		return new ResponseModel<>(StatusEnum.SUCCESS,
+				carRentalRecordRepository.findAllByStatus(carReservationStatuEnum.name()));
+	}
 
 	public ResponseModel<?> delete(String reservationId,CarReservationStatuEnum carReservationStatuEnum) {
 		Optional<CarRentalRecord> carRentalRecordOpt = carRentalRecordRepository.findById(reservationId);
