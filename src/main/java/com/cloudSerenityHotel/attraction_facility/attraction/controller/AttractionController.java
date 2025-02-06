@@ -30,7 +30,7 @@ public class AttractionController {
     
 
     // 設定圖片上傳的目錄
-    private static final String UPLOAD_DIR = "D:/hotel/SpringBootHotel/src/main/webapp/static/attraction/images/";
+    private static final String UPLOAD_DIR = "D:/hotel/workspace/SpringHotelMerge/src/main/webapp/static/attraction/images/";
 
 
     @GetMapping("/")

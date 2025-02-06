@@ -225,6 +225,11 @@ public class BookingController {
 		return bService.getAllOrders();
 	}
 	
+	@GetMapping("/order/one/{orderId}")
+	public Map<String, Object> getOrderByOrderId(@PathVariable Integer orderId) {
+		return bService.getOrderByOrderId(orderId);
+	}
+	
 	@GetMapping("/order/like/{keyword}")
 	public List<Map<String, Object>> getOrderLikeUserNameOrOrderIdByKeyword(@PathVariable String keyword) {
 		return bService.getOrderLikeUserNameOrOrderIdByKeyword(keyword);

@@ -92,6 +92,44 @@ public class BookingServiceImpl implements BookingService {
 	}
 
 
+	@Override
+	public Map<String, Object> getOrderByOrderId(Integer orderId) {
+		BookingOrder order = getOrderById(orderId);
+		
+		Map<String, Object> map = new HashMap<String, Object>();
+		
+		map.put("orderId", order.getOrderId());
+		map.put("userId", order.getUser().getUserId());
+		map.put("userName", order.getUser().getUserName());
+		if(order.getRoom() != null) {
+			map.put("roomTypeId", order.getRoom().getRoomType().getTypeId());
+			map.put("roomId", order.getRoom().getRoomId());
+			map.put("roomName", order.getRoom().getRoomName());
+		}
+		map.put("roomTypeName", order.getRoomTypeName());
+		map.put("checkInDate", order.getCheckInDate());
+		map.put("checkOutDate", order.getCheckOutDate());
+		map.put("totalPrice", order.getTotalPrice());
+		map.put("paymentMethod", order.getPaymentMethod());
+		
+		String status = order.getStatus();
+		if(status.equals("pending")) {
+			map.put("status", "待付款");
+		} else if (status.equals("confirmed")){
+			map.put("status", "已付款");
+		} else if (status.equals("cancelled")){
+			map.put("status", "已取消");
+		} else if (status.equals("completed")){
+			map.put("status", "已退房");
+		}
+		
+		map.put("createdDate", sdf.format(order.getCreatedDate()));
+		map.put("updatedDate", sdf.format(order.getUpdatedDate()));
+		
+		return map;
+	}
+
+
 
 	@Override
 	public List<Map<String, Object>> getAllOrders() {

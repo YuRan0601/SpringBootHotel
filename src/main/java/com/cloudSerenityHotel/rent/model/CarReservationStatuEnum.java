@@ -7,7 +7,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum CarReservationStatuEnum {
 
-	RENTED("租借中"), RESERVED("已預約"), AVAILABLE(" 可租用 ");
+	RENTED("租借中"), RESERVED("已預約"), AVAILABLE("可租用");
 
 	private String description;
 }

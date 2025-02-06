@@ -61,6 +61,7 @@ public class CarDetailsService {
 			LocalDateTime currentTime = timeProvider.getCurrentTime();
 			carDetails.setUpdatedAt(currentTime);
 			carDetails.setCreatedAt(currentTime);
+			System.out.println(CarReservationStatuEnum.AVAILABLE.name());
 			carDetails.setStatus(CarReservationStatuEnum.AVAILABLE.name());
 
 			// 保存車輛詳情

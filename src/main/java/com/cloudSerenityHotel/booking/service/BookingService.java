@@ -32,5 +32,7 @@ public interface BookingService {
 
 	List<Map<String, Object>> getOrderByOrderIdAndUserId(Integer userId, Integer orderId);
 
+	Map<String, Object> getOrderByOrderId(Integer orderId);
+
 
 }
