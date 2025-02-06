@@ -84,5 +84,11 @@ public class CarReservationController {
 	public ResponseEntity<?> delete(@PathVariable String reservationId) {
 		return ResponseEntity.ok(carReservationService.delete(reservationId, CarReservationStatuEnum.AVAILABLE));
 	}
+	
+	// 透過車輛類型查詢
+	@GetMapping("/query-all/carTape")
+	public ResponseEntity<?> queryAllCarTape() {
+		return ResponseEntity.ok(carReservationService.queryAllByStatus(CarReservationStatuEnum.AVAILABLE));
+	}
 
 }
