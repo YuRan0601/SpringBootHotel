@@ -1,5 +1,6 @@
 package com.cloudSerenityHotel.order.controller;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -26,8 +27,10 @@ import com.cloudSerenityHotel.order.dto.ApiResponse;
 import com.cloudSerenityHotel.order.dto.CartTurntoOrderDTO;
 import com.cloudSerenityHotel.order.dto.OrderBackendDTO;
 import com.cloudSerenityHotel.order.dto.OrderFrontendDTO;
+import com.cloudSerenityHotel.order.dto.PaymentDTO;
 import com.cloudSerenityHotel.order.model.Order;
 import com.cloudSerenityHotel.order.model.OrderItems;
+import com.cloudSerenityHotel.order.service.PaymentService;
 import com.cloudSerenityHotel.order.service.impl.OrderServiceImpl;
 import com.cloudSerenityHotel.product.model.Products;
 import com.cloudSerenityHotel.product.service.impl.ProductServiceImpl;
@@ -46,6 +49,10 @@ public class OrderController extends BaseController {
 	
 	@Autowired
 	private ProductServiceImpl productServiceImpl;
+	
+	@Autowired
+    private PaymentService paymentService;  // 注入 PaymentService
+
 	
 	/*@Autowired
     private CartServiceImpl cartServiceImpl;  // 注入 CartService*/
@@ -280,4 +287,45 @@ public class OrderController extends BaseController {
     }
     
     // 串金流版本
+    @PostMapping("/CartToOrderWithPayment")
+    public ResponseEntity<String> createOrderWithPayment(@RequestBody CartTurntoOrderDTO cartTurntoOrderDTO) {
+        try {
+            // 1. 創建訂單
+            OrderBackendDTO createdOrder = orderServiceImpl.createOrder(cartTurntoOrderDTO);
+
+            // 2. 生成 PaymentDTO 並進行支付處理
+            PaymentDTO paymentDTO = new PaymentDTO();
+            paymentDTO.setOrderId(createdOrder.getOrderId());
+            paymentDTO.setFinalAmount(new BigDecimal(createdOrder.getFinalAmount()));
+            paymentDTO.setProductName("購物車商品");
+            paymentDTO.setPaymentMethod("Credit");
+
+            // 3. 返回支付表單，前端提交支付請求
+            String paymentForm = paymentService.createPayment(paymentDTO);
+
+            // 4. 返回支付表單給前端
+            return ResponseEntity.ok(paymentForm);
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+            return new ResponseEntity<>("訂單創建或支付處理失敗", HttpStatus.BAD_REQUEST);
+        }
+    }
+    
+    // 處理支付結果回調
+    @PostMapping("/paymentResult")
+    public String paymentReturn(@RequestParam Map<String, String> responseParams) {
+    	// 印出回傳參數
+        System.out.println("綠界回傳的支付結果參數：");
+        for (Map.Entry<String, String> entry : responseParams.entrySet()) {
+            System.out.println(entry.getKey() + "=" + entry.getValue());
+        }
+
+        try {
+            // 調用 PaymentService 處理支付回調
+            paymentService.processPaymentReturn(responseParams);
+            return "交易成功";
+        } catch (RuntimeException e) {
+            return "交易失敗: " + e.getMessage();
+        }
+    }
 }
