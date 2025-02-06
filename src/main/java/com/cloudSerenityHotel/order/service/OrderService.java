@@ -48,4 +48,7 @@ public interface OrderService {
 
 	// Cart -> Order
 	OrderBackendDTO createOrder(CartTurntoOrderDTO orderRequest);
+	
+	// 更新訂單狀態為支付成功
+	void paymentSuccess(Integer orderId);
 }
