@@ -4,6 +4,54 @@
 <head>
     <meta charset="UTF-8">
     <title>景點列表</title>
+    
+    <meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>Paper &mdash; Free Website Template, Free HTML5 Template by freehtml5.co</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description" content="Free HTML5 Website Template by freehtml5.co" />
+	<meta name="keywords" content="free website templates, free html5, free template, free bootstrap, free website template, html5, css3, mobile first, responsive" />
+	<meta name="author" content="freehtml5.co" />
+
+	<!-- 
+	//////////////////////////////////////////////////////
+
+	FREE HTML5 TEMPLATE 
+	DESIGNED & DEVELOPED by FreeHTML5.co
+		
+	Website: 		http://freehtml5.co/
+	Email: 			info@freehtml5.co
+	Twitter: 		http://twitter.com/fh5co
+	Facebook: 		https://www.facebook.com/fh5co
+
+	//////////////////////////////////////////////////////
+	 -->
+
+  	<!-- Facebook and Twitter integration -->
+	<meta property="og:title" content=""/>
+	<meta property="og:image" content=""/>
+	<meta property="og:url" content=""/>
+	<meta property="og:site_name" content=""/>
+	<meta property="og:description" content=""/>
+	<meta name="twitter:title" content="" />
+	<meta name="twitter:image" content="" />
+	<meta name="twitter:url" content="" />
+	<meta name="twitter:card" content="" />
+
+	<link href="https://fonts.googleapis.com/css?family=Josefin+Slab:400,600,700" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css?family=Sacramento" rel="stylesheet">
+
+
+	<!-- Theme style  -->
+	<link rel="stylesheet" href="css/papercss/style.css">
+
+	<!-- Modernizr JS -->
+	<script src="css/js/modernizr-2.6.2.min.js"></script>
+	<!-- FOR IE9 below -->
+	<!--[if lt IE 9]>
+	<script src="js/respond.min.js"></script>
+	<![endif]-->
+    
 
     <!-- 引入 jQuery -->
     <script src="https://code.jquery.com/jquery-3.7.1.js"
@@ -11,13 +59,10 @@
 
     <!-- 引入 Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-
+    
     <!-- 引入 FontAwesome 圖示 -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
-
-    <!-- 自訂 CSS -->
-    <link rel="stylesheet" href="/static/attraction/css/style.css" />
-
+    
     <style>
         * {
             margin: 0;
@@ -33,10 +78,10 @@
         }
 
         .header {
-        	position: fixed;
-        	top:0;
-        	left:0;
-        	right:0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
         }
 
         .content {
@@ -45,93 +90,122 @@
             flex-grow: 1;
         }
 
-		.attraction-container {
-		    display: grid;
-		    grid-template-columns: repeat(3, 1fr); /* 每行顯示 3 個 */
-		    gap: 20px; /* 設定每個卡片之間的間隔 */
-		    justify-items: center;
-		}
-		
-		.attraction-card {
-		    width: 100%; /* 卡片寬度為 100% */
-		    max-width: 500px; /* 卡片最大寬度為 350px */
-		    height: 600px; /* 設置卡片高度為 700px */
-		    border-radius: 10px;
-		    overflow: hidden;
-		    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-		    transition: transform 0.3s ease-in-out;
-		    display: flex;
-		    flex-direction: column;
-		    justify-content: space-between; /* 讓圖片和內容分開，並保持間距 */
-		}
-		
-		.attraction-card img {
-		    width: 100%;
-		    height: 50%; /* 圖片佔據卡片的上半部 */
-		    object-fit: cover;
-		}
-		
-		.card-body {
-		    padding: 15px;
-		    text-align: center;
-		    display: flex;
-		    flex-direction: column;
-		    justify-content: center; /* 垂直置中 */
-		    align-items: center; /* 水平置中 */
-		    flex-grow: 1; /* 讓內容區域佔據剩餘空間 */
-		    background-color:white;
-		}
-		
-		.card-title {
-		    font-size: 20px;
-		    font-weight: bold;
-		    color: #09c6ab;
-		}
-		
-		.card-text {
-		    font-size: 14px;
-		    color: #555;
-		    height: 60px;
-		    overflow: hidden;
-		    text-overflow: ellipsis;
-		}
-		
-		.btn-primary {
-		    background-color: #09c6ab !important;
-		    border: none;
-		    color: white;
-		}
-		
-		.btn-primary:hover {
-		    background-color: #068e87 !important;
-		}
-		
-		.btn-primary:focus {
-		    outline: none !important;
-		    box-shadow: none !important;
-		}
+        .attraction-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); /* 每行顯示 3 個 */
+            gap: 20px; /* 設定每個卡片之間的間隔 */
+            justify-items: center;
+        }
+        
+        .attraction-card {
+            width: 100%; /* 卡片寬度為 100% */
+            max-width: 500px; /* 卡片最大寬度為 350px */
+            height: 600px; /* 設置卡片高度為 700px */
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease-in-out;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between; /* 讓圖片和內容分開，並保持間距 */
+        }
+        
+        .attraction-card img {
+            width: 100%;
+            height: 50%; /* 圖片佔據卡片的上半部 */
+            object-fit: cover;
+        }
+        
+        .card-body {
+            padding: 15px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center; /* 垂直置中 */
+            align-items: center; /* 水平置中 */
+            flex-grow: 1; /* 讓內容區域佔據剩餘空間 */
+            background-color:white;
+        }
+        
+        .card-title {
+            font-size: 30px;
+            font-weight: bold;
+            color: #09c6ab;
+        }
+        
+        .card-text {
+            font-size: 20px;
+            color: #555;
+            height: 60px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .btn-primary {
+            background-color: #09c6ab !important;
+            border: none;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #068e87 !important;
+        }
+        
+        .btn-primary:focus {
+            outline: none !important;
+            box-shadow: none !important;
+        }
 
         .pagination {
             justify-content: center;
             margin-top: 20px;
         }
+        
         #page {
-		    position: relative;
-		    height: 100%; /* 確保背景覆蓋整個頁面 */
-		}
-		
-		#page::before {
-		    content: "";
-		    position: absolute;
-		    top: 0;
-		    left: 0;
-		    width: 100%;
-		    height: 100%;
-		    background: url('http://localhost:8080/CloudSerenityHotel/static/attraction/images/bgwood.png') no-repeat center center fixed;
-		    background-size: cover;
-		    opacity: 0.3; /* 設定透明度，達到變暗 70% 的效果 */
-		    z-index: -1; /* 確保背景在最底層 */
-		}
+            position: relative;
+            height: 100%; /* 確保背景覆蓋整個頁面 */
+        }
+        
+        #page::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('http://localhost:8080/CloudSerenityHotel/static/attraction/images/bgwood.png') no-repeat center center fixed;
+            background-size: cover;
+            opacity: 0.3; /* 設定透明度，達到變暗 70% 的效果 */
+            z-index: -1; /* 確保背景在最底層 */
+        }
+
+        /* 新增的底部區域 */
+        .bottom-section {
+            background-color: #09c6ab; /* 背景色 */
+            padding: 50px 0;
+            text-align: center;
+            color: white;
+        }
+
+        .bottom-section h2 {
+            font-size: 32px;
+            margin-bottom: 20px;
+        }
+
+        .bottom-section button {
+            background-color: #ffffff;
+            color: #09c6ab;
+            padding: 12px 25px;
+            font-size: 18px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .bottom-section button:hover {
+            background-color: #068e87;
+            color: white;
+        }
     </style>
 </head>
 
@@ -156,6 +230,60 @@
             </ul>
         </nav>
     </div>
+
+    <!-- 新增底部區塊 -->
+    <div class="bottom-section">
+        <h2>心動了嗎???</h2>
+        <button onclick="location.href='http://localhost:5173/bookingSearch'">立即預約訂房</button>
+        <br><br><br> <br>
+        <h2>觀看我們合作舉辦的活動</h2>
+        <button onclick="location.href='http://localhost:8080/CloudSerenityHotel/static/attraction/blog.html'">往期活動</button>
+    </div>
+    
+    	<footer id="fh5co-footer" role="contentinfo">
+		<div class="container">
+			<div class="row row-pb-md">
+				<div class="col-md-4 fh5co-widget">
+					<h4>士林區</h4>
+					<p>士林區位於台北市北部，是文化、美食與觀光的熱門地區。擁有著名的士林夜市、國立故宮博物院、陽明山與士林官邸，結合歷史、人文與自然景觀，是旅客與在地居民休閒的好去處。</p>
+				</div>
+				<div class="col-md-4 col-md-push-1">
+					<h4>關於我們</h4>
+					<ul class="fh5co-footer-links">
+						<li><a href="#">about</a></li>
+						<br>
+						<li><a href="#">blog</a></li>
+						<br>
+						<li><a href="#">contact</a></li>
+						<br>
+						<li><a href="#">index</a></li>
+						<br>
+					</ul>
+				</div>
+
+				<div class="col-md-4 col-md-push-1">
+					<h4>聯絡資訊</h4>
+					<ul class="fh5co-footer-links">
+						<li>111 台北市<br>士林區至善路二段221號</li>
+						<li><a href="tel://1234567920">+886 02 2881 2022</a></li>
+						<li><a href="mailto:info@yoursite.com">cloud.serenity.hotel@gmail.com</a></li>
+						<li><a href="http://freehtml5.co">csh@gmail.com</a></li>
+					</ul>
+				</div>
+
+			</div>
+
+			<div class="row copyright">
+				<div class="col-md-12 text-center">
+					<p>
+						<small class="block">&copy; Cloud Serenity Hotel 雲澄旅館©</small> 
+						<small class="block">Email : cloud.serenity.hotel@gmail.com <a href="cloud.serenity.hotel@gmail.com" target="_blank"></a><a href="http://unsplash.co/" target="_blank"></a></small>
+					</p>
+				</div>
+			</div>
+
+		</div>
+	</footer>
 
     <script>
         $(function () {
@@ -182,6 +310,7 @@
                                 <img src="${attraction.imageUrl}" alt="${attraction.name}">
                                 <div class="card-body">
                                     <h5 class="card-title">${attraction.name}</h5>
+                                    <br>
                                     <p class="card-text">${attraction.description}</p>
                                     <button class="btn btn-primary" onclick="viewDetails(${attraction.attractionId})">
                                         查看詳情
