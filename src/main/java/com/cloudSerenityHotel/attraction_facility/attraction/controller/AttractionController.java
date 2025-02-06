@@ -30,7 +30,7 @@ public class AttractionController {
     
 
     // 設定圖片上傳的目錄
-    private static final String UPLOAD_DIR = "D:/hotel/workspace/SpringBootHotel/src/main/webapp/static/attraction/images/";
+    private static final String UPLOAD_DIR = "D:/hotel/SpringBootHotel/src/main/webapp/static/attraction/images/";
 
 
     @GetMapping("/")
@@ -62,7 +62,7 @@ public class AttractionController {
             }
 
             // 產生唯一檔案名稱，避免覆蓋
-            String fileName = System.currentTimeMillis() + "_" + imageFile.getOriginalFilename();
+            String fileName = imageFile.getOriginalFilename();
             Path filePath = uploadPath.resolve(fileName);
             Files.write(filePath, imageFile.getBytes());
 

@@ -20,105 +20,135 @@
     <link rel="stylesheet" href="/static/common/aside.css" />
 
     <style>
-        body {
-            display: flex;
-            margin: 0;
-            padding: 0;
-        }
+		body {
+		    display: flex;
+		    margin: 0;
+		    padding: 0;
+		    justify-content: center; /* 使body內容居中 */
+		}
+		
+		.content {
+		    margin-left: 300px;
+		    padding: 20px;
+		    width: 100%;
+		    display: flex;
+		    justify-content: center; /* 使內容區域置中 */
+		}
+		
+		.content-inner {
+		    max-width: 800px;
+		    margin: 0 auto;
+		    width: 100%; /* 讓內容區域寬度自適應 */
+		}
+		
+		/* 主要的表單樣式 */
+		.form-label {
+		    font-weight: bold;
+		}
+		
+		.form-control {
+		    margin-bottom: 10px;
+		}
+		
+		button {
+		    margin-top: 20px;
+		}
+		
+		/* 側邊欄的樣式 */
+		.aside {
+		    background-color: #f8f9fa;
+		    position: fixed;
+		    top: 0;
+		    left: 0;
+		    width: 260px;
+		    height: 100vh;
+		    padding: 20px;
+		    overflow-x: hidden;
+		    overflow-y: auto;
+		}
 
-        /* 主要內容的樣式 */
-        .content {
-            margin-left: 300px;
-            padding: 20px;
-            width: 100%;
-        }
-
-        /* 中央區域，將內容置中 */
-        .content-inner {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        /* 表單的樣式 */
-        .form-label {
-            font-weight: bold;
-        }
-
-        .form-control {
-            margin-bottom: 10px;
-        }
-
-        button {
-            margin-top: 20px;
-        }
     </style>
 </head>
 
 <body>
-
+    <aside class="aside"></aside>
     <!-- 主要內容 -->
-<form id="addAttractionForm" enctype="multipart/form-data">
-    <div class="mb-3">
-        <label for="name" class="form-label">景點名稱：</label>
-        <input type="text" id="name" name="name" class="form-control" required>
+    <div class="content">
+        <div class="content-inner">
+            <form id="addAttractionForm" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label for="name" class="form-label">景點名稱：</label>
+                    <input type="text" id="name" name="name" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label for="description" class="form-label">描述：</label>
+                    <input type="text" id="description" name="description" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label for="location" class="form-label">詳細資訊：</label>
+                    <input type="text" id="location" name="location" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label for="openingHours" class="form-label">開放時間：</label>
+                    <input type="text" id="openingHours" name="openingHours" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label for="contactInfo" class="form-label">聯絡資訊：</label>
+                    <input type="text" id="contactInfo" name="contactInfo" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label for="typeId" class="form-label">類型ID：</label>
+                    <input type="number" id="typeId" name="typeId" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label for="image" class="form-label">上傳圖片：</label>
+                    <input type="file" id="image" name="image" class="form-control" accept="image/*" required>
+                </div>
+                <button type="submit" class="btn btn-primary">提交新增</button>
+                <button type="button" class="btn btn-secondary" id="oneClickBtn">一鍵新增</button>
+                
+            </form>
+        </div>
     </div>
 
-    <div class="mb-3">
-        <label for="description" class="form-label">描述：</label>
-        <input type="text" id="description" name="description" class="form-control" required>
-    </div>
+    <!-- 其他腳本 -->
+    <script>
+        $(function () {
+            $(".aside").load("./backAside.html");
+        });
 
-    <div class="mb-3">
-        <label for="location" class="form-label">位置：</label>
-        <input type="text" id="location" name="location" class="form-control" required>
-    </div>
+        document.getElementById('addAttractionForm').addEventListener('submit', function (e) {
+            e.preventDefault();
 
-    <div class="mb-3">
-        <label for="openingHours" class="form-label">開放時間：</label>
-        <input type="text" id="openingHours" name="openingHours" class="form-control" required>
-    </div>
+            const formData = new FormData();
+            formData.append('name', document.getElementById('name').value);
+            formData.append('description', document.getElementById('description').value);
+            formData.append('location', document.getElementById('location').value);
+            formData.append('openingHours', document.getElementById('openingHours').value);
+            formData.append('contactInfo', document.getElementById('contactInfo').value);
+            formData.append('typeId', document.getElementById('typeId').value);
+            formData.append('image', document.getElementById('image').files[0]);
 
-    <div class="mb-3">
-        <label for="contactInfo" class="form-label">聯絡資訊：</label>
-        <input type="text" id="contactInfo" name="contactInfo" class="form-control" required>
-    </div>
-
-    <div class="mb-3">
-        <label for="typeId" class="form-label">類型ID：</label>
-        <input type="number" id="typeId" name="typeId" class="form-control" required>
-    </div>
-
-    <div class="mb-3">
-        <label for="image" class="form-label">上傳圖片：</label>
-        <input type="file" id="image" name="image" class="form-control" accept="image/*" required>
-    </div>
-
-    <button type="submit" class="btn btn-primary">提交新增</button>
-</form>
-
-<script>
-    document.getElementById('addAttractionForm').addEventListener('submit', function (e) {
-        e.preventDefault();
-
-        const formData = new FormData();
-        formData.append('name', document.getElementById('name').value);
-        formData.append('description', document.getElementById('description').value);
-        formData.append('location', document.getElementById('location').value);
-        formData.append('openingHours', document.getElementById('openingHours').value);
-        formData.append('contactInfo', document.getElementById('contactInfo').value);
-        formData.append('typeId', document.getElementById('typeId').value);
-        formData.append('image', document.getElementById('image').files[0]); // 上傳圖片
-
-        fetch('http://localhost:8080/CloudSerenityHotel/api/attractions/upload', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(() => location.href = 'GetAllAttractions.html')
-        .catch(error => console.error('錯誤:', error));
-    });
-</script>
-
+            fetch('http://localhost:8080/CloudSerenityHotel/api/attractions/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(() => location.href = 'GetAllAttractions.html')
+            .catch(error => console.error('錯誤:', error));
+        });
+        
+        // 一鍵新增按鈕
+        document.getElementById('oneClickBtn').addEventListener('click', function () {
+            document.getElementById('name').value = '士林夜市';
+            document.getElementById('description').value = '台北不夜城，熱鬧非凡';
+            document.getElementById('location').value = '士林夜市是臺北市範圍最大的夜市，也是國外觀光客造訪臺北必遊的觀光夜市。鄰近捷運劍潭站，佔地十分寬廣，可分為兩個主要範圍，一個是傳統陽明戲院周邊的街道，包括大南路慈諴宮一帶；另一邊則是基河路101號重新營運的士林市場。來逛夜市的人大都以美食與購物為主，這裡有各式各樣新奇好玩的商品與美食，吸引大批的人潮。這樣特殊的夜市文化，是臺北夜生活不可缺少的一部份。';
+            document.getElementById('openingHours').value = '每天 09:00-17:00';
+            document.getElementById('contactInfo').value = '02-1524-4815';
+            document.getElementById('typeId').value = 752;
+        });
+    </script>
 </body>
+
 
 </html>

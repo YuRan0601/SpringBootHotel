@@ -33,6 +33,7 @@
             margin-left: 300px;
             padding: 20px;
             width: 100%;
+            margin-top: 300px;
         }
 
         /* 中央區域，將內容置中 */
@@ -58,11 +59,22 @@
             font-size: 1.1em;
             margin-bottom: 10px;
         }
+        .aside {
+            background-color: #f8f9fa;
+            position: fixed;
+            top: -20px;
+            left: -20px;
+            width: 260px;
+            height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
     </style>
 </head>
 
 <body>
-
+	<aside class="aside"></aside>
     <!-- 主要內容 -->
     <div class="content">
         <div class="content-inner">
@@ -77,6 +89,9 @@
     </div>
 
     <script>
+    $(function () {
+        $(".aside").load("./backAside.html");
+    })
         document.getElementById('findAttractionForm').addEventListener('submit', function (e) {
             e.preventDefault();
             const id = document.getElementById('attractionId').value;
@@ -88,7 +103,7 @@
                     detailsDiv.innerHTML = `
                         <p>景點名稱: ${data.name}</p>
                         <p>描述: ${data.description}</p>
-                        <p>位置: ${data.location}</p>
+                        <p>景點詳情: ${data.location}</p>
                         <p>開放時間: ${data.openingHours}</p>
                         <p>聯絡資訊: ${data.contactInfo}</p>
                         <p>圖片連結: ${data.imageUrl}</p>

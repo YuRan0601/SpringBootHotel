@@ -54,10 +54,22 @@
         button {
             margin-top: 20px;
         }
+        .aside {
+            background-color: #f8f9fa;
+            position: fixed;
+            top: -20px;
+            left: -20px;
+            width: 260px;
+            height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
     </style>
 </head>
 
 <body>
+	<aside class="aside"></aside>
     <!-- 主要內容 -->
     <div class="content">
         <div class="content-inner">
@@ -77,8 +89,8 @@
                 </div>
 
                 <div class="mb-3">
-                    <label for="location" class="form-label">地點：</label>
-                    <input type="text" id="location" name="location" class="form-control" required>
+                    <label for="location" class="form-label">詳細資訊：</label>
+                    <textarea type="text" id="location" name="location" class="form-control" required></textarea>
                 </div>
 
                 <div class="mb-3">
@@ -102,6 +114,9 @@
     </div>
 
     <script>
+    $(function () {
+        $(".aside").load("./backAside.html");
+    })
         // 當頁面載入時填充現有的景點資料
         window.onload = async function () {
             const id = new URLSearchParams(window.location.search).get('id'); // 獲取URL中的ID參數
