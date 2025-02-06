@@ -60,6 +60,22 @@
 	<script src="js/respond.min.js"></script>
 	<![endif]-->
 	    <style>
+	    body {
+            /* 設置背景圖片 */
+            background-image: url('http://localhost:8080/CloudSerenityHotel/static/attraction/images/Background2.jpg');
+            
+            /* 背景圖片全版顯示 */
+            background-size: cover;
+            
+            /* 背景圖片固定，不隨頁面滾動 */
+            background-attachment: fixed;
+            
+            /* 使背景圖片顯示在頁面底部 */
+            background-position: bottom center;
+            
+            /* 設置背景顏色（如果圖片沒有完全填滿） */
+            background-color: #f8f9fa;
+        }
         .header_area {
             height: 80px;
             /* 確保 header 有足夠的高度 */
@@ -102,7 +118,7 @@
         }
     </style>
 	</head>
-	<body>
+	<body class="body">
 		
 	<div class="fh5co-loader"></div>
 	
@@ -126,7 +142,7 @@
                         <li class="nav-item"><a class="nav-link"
                                 href="http://localhost:5173/front/member/Overview">會員中心</a></li>
                         <li class="nav-item"><a class="nav-link" href="http://localhost:5173/front/oneRoomType/1">房型介紹</a></li>
-                        <li class="nav-item active"><a class="nav-link"
+                        <li class="nav-item"><a class="nav-link"
                                 href="http://localhost:5173/front/product/shopping">商城</a></li>
                         <li class="nav-item"><a class="nav-link"
                                 href="http://localhost:8080/CloudSerenityHotel/static/attraction/FrontAttraction.html">景點介紹</a></li>
