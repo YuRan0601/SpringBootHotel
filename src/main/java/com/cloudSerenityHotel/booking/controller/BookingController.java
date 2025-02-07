@@ -83,6 +83,7 @@ public class BookingController {
             params.put("ItemName", order.getProductName());
             params.put("ReturnURL", RETURN_URL);
             params.put("ChoosePayment", "Credit");
+            params.put("NeedExtraPaidInfo", "N"); 
             params.put("ClientBackURL", "http://localhost:5173/front/member/bookingOrder");
             params.put("CheckMacValue", generateCheckMacValue(params));
 
