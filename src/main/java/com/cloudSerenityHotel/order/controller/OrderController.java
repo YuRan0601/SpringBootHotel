@@ -325,6 +325,7 @@ public class OrderController extends BaseController {
             paymentService.processPaymentReturn(responseParams);
             return "交易成功";
         } catch (RuntimeException e) {
+        	e.printStackTrace();
             return "交易失敗: " + e.getMessage();
         }
     }
