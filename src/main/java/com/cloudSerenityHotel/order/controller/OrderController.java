@@ -286,7 +286,7 @@ public class OrderController extends BaseController {
         }
     }
     
-    // 串金流版本
+    // 串金流版本_ngrok http http://localhost:8080
     @PostMapping("/CartToOrderWithPayment")
     public ResponseEntity<String> createOrderWithPayment(@RequestBody CartTurntoOrderDTO cartTurntoOrderDTO) {
         try {
