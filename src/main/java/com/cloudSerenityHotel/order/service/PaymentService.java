@@ -153,6 +153,7 @@ public class PaymentService {
             params.put("ItemName", paymentDTO.getProductName());
             params.put("ChoosePayment", "Credit");  // 付款方式
             params.put("ReturnURL", RETURN_URL);
+            params.put("ClientBackURL", "http://localhost:5173/front/member/Order");
             params.put("CheckMacValue", generateCheckMacValue(params));
 
             // 印出所有請求參數
