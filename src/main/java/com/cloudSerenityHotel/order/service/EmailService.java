@@ -32,12 +32,15 @@ public class EmailService {
     // 專門處理訂單付款成功後發送郵件的邏輯
     public void sendPaymentSuccessEmail(Order dbOrder) {
         SimpleMailMessage message = new SimpleMailMessage();
-
+        System.out.println("sendPaymentSuccessEmail");
         // 使用 UserService 根據 userId 查詢使用者資料
         User user = userService.findUserById(dbOrder.getUserId());  // 用 userId 查詢
 
         // 設置郵件收件人、主旨和內容
-        String email = user.getEmail();  // 使用查詢到的使用者 email
+        String email = dbOrder.getEmail();  // 使用查詢到的使用者 email
+        
+        System.out.println(email);
+        
         message.setTo(email);
         message.setSubject("您的伴手禮商城訂單付款成功!");
 
@@ -63,7 +66,7 @@ public class EmailService {
 
             // 生成每個商品的訊息
             itemList.append(String.format("%s (數量: %d, 單價: %s, 特價: %s, 折扣: %s)\n",
-                    productName, quantity, unitPrice, specialPrice != null ? specialPrice : "無", itemDiscount));
+                    productName, quantity, unitPrice.toString(), specialPrice.toString() != null ? specialPrice.toString() : "無", itemDiscount.toString()));
         }
 
         // 計算最終金額
@@ -86,11 +89,13 @@ public class EmailService {
                 最終金額：%s
                 您可以點擊下方連結至會員中心查看訂單狀態：
                 http://localhost:5173/front/member/Order
-                """, userName, orderId, itemList.toString(), orderDate, totalAmount, discountAmount, finalAmount);
+                """, userName, orderId, itemList.toString(), orderDate, totalAmount.toString(), discountAmount.toString(), finalAmount.toString());
 
+        System.out.println(content);
         message.setText(content);
 
         // 發送郵件
         mailSender.send(message);
+        System.out.println("send success");
     }
 }
