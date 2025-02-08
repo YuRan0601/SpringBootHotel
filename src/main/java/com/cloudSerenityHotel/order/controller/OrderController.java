@@ -226,7 +226,7 @@ public class OrderController extends BaseController {
     public ResponseEntity<String> exportOrders(@RequestParam String orderStatus, @RequestParam String format, @RequestParam String filePath) {
         try {
         	 // 檢查檔案路徑，如果未提供則使用桌面路徑並生成檔案名稱
-            String defaultDesktopPath = System.getProperty("user.home") + "/Desktop/";
+            String defaultDesktopPath = System.getProperty("user.home") + "/Desktop/"; // 用戶桌面路徑
             String fileName = (filePath == null || filePath.isEmpty()) ? 
                               "orders_export_" + System.currentTimeMillis() + "." + format : 
                               filePath;
@@ -241,8 +241,8 @@ public class OrderController extends BaseController {
             // 處理反斜線，將反斜線替換為正斜線
             decodedFilePath = decodedFilePath.replace("\\", "/");
 
-            // 確認 filePath 是否正確
-            System.out.println("Decoded file path: " + decodedFilePath);
+            // 確認檔案路徑是否正確
+            //System.out.println("檔案將匯出至: " + decodedFilePath);
 
             // 查詢符合條件的訂單
             List<OrderBackendDTO> orders = orderServiceImpl.findAllOrders().stream()
