@@ -107,7 +107,7 @@ public class OrderServiceImpl implements OrderService {
 		return orderDTO;
 	}
 	
-	// 依據狀態匯出訂單
+	// 依據狀態查詢訂單
 	@Override
 	public List<OrderBackendDTO> getOrdersByStatus(String status) {
 		List<Order> orders = orderDao.findByOrderStatus(status);  // 這裡從資料庫查詢
@@ -141,6 +141,8 @@ public class OrderServiceImpl implements OrderService {
 		// 將訂單實體轉換為 DTO
 		return convertToBackendDTO(order);
 	}
+	
+	
 
 	// 刪除訂單
 	@Override

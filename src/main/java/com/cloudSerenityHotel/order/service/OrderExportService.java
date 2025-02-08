@@ -47,6 +47,30 @@ public class OrderExportService {
         }
     }
     
+    // 匯出所有的訂單
+    public void exportAllOrders(List<OrderBackendDTO> orders, String format, String filePath) throws Exception {
+        // 這裡不進行篩選，直接匯出所有的訂單
+        if (orders.isEmpty()) {
+            System.out.println("目前沒有訂單");
+            return;
+        }
+        
+        // 處理路徑，這個方法會處理相對路徑並創建目錄
+        String finalFilePath = validateAndPreparePath(filePath);
+
+        // 根據使用者選擇的格式來決定匯出方式
+        switch (format.toLowerCase()) {
+            case "csv":
+                exportOrdersToCSV(orders, finalFilePath);  // 匯出 CSV
+                break;
+            case "json":
+                exportOrdersToJSON(orders, finalFilePath);  // 匯出 JSON
+                break;
+            default:
+                throw new IllegalArgumentException("不支援的格式: " + format);  // 如果格式不支援
+        }
+    }
+    
     // 驗證並準備路徑
     private String validateAndPreparePath(String filePath) {
         // 檢查是否包含 drive 路徑，處理相對路徑等情況
