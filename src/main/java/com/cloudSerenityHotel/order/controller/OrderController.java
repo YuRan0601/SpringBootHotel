@@ -225,8 +225,15 @@ public class OrderController extends BaseController {
     @PostMapping("/exportOrders")
     public ResponseEntity<String> exportOrders(@RequestParam String orderStatus, @RequestParam String format, @RequestParam String filePath) {
         try {
+        	 // 檢查檔案路徑，如果未提供則使用桌面路徑並生成檔案名稱
+            String defaultDesktopPath = System.getProperty("user.home") + "/Desktop/";
+            String fileName = (filePath == null || filePath.isEmpty()) ? 
+                              "orders_export_" + System.currentTimeMillis() + "." + format : 
+                              filePath;
+            String finalFilePath = defaultDesktopPath + fileName;
+        	
             // 解碼 URL 編碼的 filePath
-            String decodedFilePath = URLDecoder.decode(filePath, StandardCharsets.UTF_8.name());
+            String decodedFilePath = URLDecoder.decode(finalFilePath, StandardCharsets.UTF_8.name());
 
             // 清理換行符或其他不必要的字符
             decodedFilePath = decodedFilePath.replaceAll("[\r\n]", ""); // 清理換行符
