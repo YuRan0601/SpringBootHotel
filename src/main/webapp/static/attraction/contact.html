@@ -4,6 +4,25 @@
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<title>聯絡我們(Contact Us)</title>
+	
+	<script>
+    // 獲取 URL 參數
+    const urlParams = new URLSearchParams(window.location.search);
+    const message = urlParams.get('message');
+
+    // 如果 message 參數存在，顯示 alert
+    if (message) {
+        alert(message);
+        
+        // 設定跳轉的目標網址（這裡可以替換成您指定的 URL）
+        const targetUrl = "http://localhost:8080/CloudSerenityHotel/static/attraction/contact.html";
+        
+        // 設定跳轉延遲 2 秒鐘（可根據需要調整時間）
+        setTimeout(function() {
+            window.location.href = targetUrl;
+        }, 2000);  // 延遲 2 秒
+    }
+</script>
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="description" content="Free HTML5 Website Template by freehtml5.co" />
 	<meta name="keywords" content="free website templates, free html5, free template, free bootstrap, free website template, html5, css3, mobile first, responsive" />
