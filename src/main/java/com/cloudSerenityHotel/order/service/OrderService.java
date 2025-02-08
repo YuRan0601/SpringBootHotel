@@ -18,6 +18,9 @@ public interface OrderService {
 	 * DTO（OrderDTO、OrderItemDTO）。
 	 */
 	OrderBackendDTO convertToBackendDTO(Order order);
+	
+	// 依據狀態匯出訂單
+	List<OrderBackendDTO> getOrdersByStatus(String status);
 
 	// 整筆訂單
 	boolean deleteOrderById(Integer orderId); // 刪除指定訂單
