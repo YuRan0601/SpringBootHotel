@@ -1,10 +1,13 @@
 package com.cloudSerenityHotel.order.controller;
 
 import java.math.BigDecimal;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -30,6 +33,7 @@ import com.cloudSerenityHotel.order.dto.OrderFrontendDTO;
 import com.cloudSerenityHotel.order.dto.PaymentDTO;
 import com.cloudSerenityHotel.order.model.Order;
 import com.cloudSerenityHotel.order.model.OrderItems;
+import com.cloudSerenityHotel.order.service.OrderExportService;
 import com.cloudSerenityHotel.order.service.PaymentService;
 import com.cloudSerenityHotel.order.service.impl.OrderServiceImpl;
 import com.cloudSerenityHotel.product.model.Products;
@@ -52,11 +56,14 @@ public class OrderController extends BaseController {
 	
 	@Autowired
     private PaymentService paymentService;  // 注入 PaymentService
-
 	
+	@Autowired
+    private OrderExportService orderExportService;
+
 	/*@Autowired
     private CartServiceImpl cartServiceImpl;  // 注入 CartService*/
 
+// 後台
 	// 查詢所有訂單，返回 DTO 列表
 	@GetMapping("/findAllOrders")
 	public ResponseEntity<List<OrderBackendDTO>> findAllOrders() {
@@ -214,8 +221,122 @@ public class OrderController extends BaseController {
         return order;
     }
     
+    @GetMapping("/findOrdersByStatus")
+    public ResponseEntity<List<OrderBackendDTO>> findOrdersByStatus(@RequestParam String orderStatus) {
+        try {
+            // 根據 orderStatus 查詢該狀態的訂單
+            List<OrderBackendDTO> orders = orderServiceImpl.getOrdersByStatus(orderStatus);
+
+            // 如果查詢結果為空，返回 204 無內容
+            if (orders.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NO_CONTENT).body(orders);
+            }
+
+            // 正常返回訂單列表
+            return ResponseEntity.ok(orders);
+        } catch (Exception e) {
+            // 異常處理
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
     
-    // 前台
+    // 後台匯出訂單
+    @PostMapping("/exportOrders")
+    public ResponseEntity<String> exportOrders(@RequestParam(required = false) String orderStatus, 
+                                                @RequestParam String format, 
+                                                @RequestParam(required = false) String filePath) { // 讓 filePath 可選
+        try {
+            // 檢查檔案路徑，如果未提供則使用桌面路徑並生成檔案名稱
+            String defaultDesktopPath = System.getProperty("user.home") + "/Desktop/"; // 用戶桌面路徑
+            String fileName = (filePath == null || filePath.isEmpty()) ? 
+                              "orders_export_" + System.currentTimeMillis() + "." + format : 
+                              filePath;
+            String finalFilePath = defaultDesktopPath + fileName;
+            
+            // 解碼 URL 編碼的 filePath
+            String decodedFilePath = URLDecoder.decode(finalFilePath, StandardCharsets.UTF_8.name());
+            
+            // 清理換行符或其他不必要的字符
+            decodedFilePath = decodedFilePath.replaceAll("[\r\n]", ""); // 清理換行符
+
+            // 處理反斜線，將反斜線替換為正斜線
+            decodedFilePath = decodedFilePath.replace("\\", "/");
+
+            // 查詢所有訂單
+            List<OrderBackendDTO> orders = orderServiceImpl.findAllOrders();
+            
+            // 如果有提供 orderStatus，則進行篩選
+            if (orderStatus != null && !orderStatus.isEmpty()) {
+                orders = orders.stream()
+                               .filter(order -> orderStatus.equals(order.getOrderStatus()))  // 根據狀態篩選
+                               .collect(Collectors.toList());
+            }
+
+            // 如果沒有符合條件的訂單，返回提示
+            if (orders.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NO_CONTENT).body("無符合條件的訂單");
+            }
+
+            // 根據格式選擇匯出方式，無條件匯出所有訂單
+            if (orderStatus == null || orderStatus.isEmpty()) {
+                // 無條件匯出所有訂單
+                orderExportService.exportAllOrders(orders, format, decodedFilePath);
+            } else {
+                // 有條件匯出
+                orderExportService.exportOrdersByStatus(orders, orderStatus, format, decodedFilePath);
+            }
+            
+            return ResponseEntity.ok("匯出成功");
+        } catch (Exception e) {
+            e.printStackTrace();  // 打印具體錯誤
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("匯出失敗: " + e.getMessage());
+        }
+    }
+
+    // 沒有用到
+    @PostMapping("/exportOrders2")
+    public ResponseEntity<String> exportOrders2(@RequestParam String orderStatus, @RequestParam String format, @RequestParam String filePath) {
+        try {
+        	 // 檢查檔案路徑，如果未提供則使用桌面路徑並生成檔案名稱
+            String defaultDesktopPath = System.getProperty("user.home") + "/Desktop/"; // 用戶桌面路徑
+            String fileName = (filePath == null || filePath.isEmpty()) ? 
+                              "orders_export_" + System.currentTimeMillis() + "." + format : 
+                              filePath;
+            String finalFilePath = defaultDesktopPath + fileName;
+        	
+            // 解碼 URL 編碼的 filePath
+            String decodedFilePath = URLDecoder.decode(finalFilePath, StandardCharsets.UTF_8.name());
+
+            // 清理換行符或其他不必要的字符
+            decodedFilePath = decodedFilePath.replaceAll("[\r\n]", ""); // 清理換行符
+
+            // 處理反斜線，將反斜線替換為正斜線
+            decodedFilePath = decodedFilePath.replace("\\", "/");
+
+            // 確認檔案路徑是否正確
+            //System.out.println("檔案將匯出至: " + decodedFilePath);
+
+            // 查詢符合條件的訂單
+            List<OrderBackendDTO> orders = orderServiceImpl.findAllOrders().stream()
+                    .filter(order -> orderStatus.equals(order.getOrderStatus()))  // 根據狀態篩選
+                    .collect(Collectors.toList());
+
+            if (orders.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NO_CONTENT).body("無符合條件的訂單");
+            }
+
+            // 匯出訂單資料，並根據格式選擇匯出方式
+            orderExportService.exportOrdersByStatus(orders, orderStatus, format, decodedFilePath);
+            return ResponseEntity.ok("匯出成功");
+        } catch (Exception e) {
+            e.printStackTrace();  // 打印具體錯誤
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("匯出失敗: " + e.getMessage());
+        }
+    }
+
+
+    
+// 前台
 	// 查詢指定用戶的所有訂單（包含訂單細項）
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<OrderFrontendDTO>> getOrdersForFrontendByUserId(@PathVariable Integer userId) {
@@ -270,6 +391,28 @@ public class OrderController extends BaseController {
         }
     }
     
+    // 查詢指定用戶的特定「狀態」訂單
+    @GetMapping("/user/{userId}/status/{status}")
+    public ResponseEntity<List<OrderFrontendDTO>> getOrdersByStatus(
+            @PathVariable Integer userId, 
+            @PathVariable String status) {
+        try {
+            // 若 status 為空，則查詢所有訂單
+            if (status.isEmpty()) {
+                status = null; // 設定為 null 或空字符串表示查詢全部
+            }
+
+            List<OrderFrontendDTO> orders = orderServiceImpl.getOrdersByUserIdAndStatus(userId, status);
+
+            // 返回成功響應
+            return ResponseEntity.ok(orders);
+        } catch (Exception e) {
+            e.printStackTrace();
+            // 返回伺服器錯誤響應
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+    
     // Cart -> Order
     // 無串金流版本
     @PostMapping("/CartToOrder")
@@ -291,13 +434,13 @@ public class OrderController extends BaseController {
     public ResponseEntity<String> createOrderWithPayment(@RequestBody CartTurntoOrderDTO cartTurntoOrderDTO) {
         try {
             // 1. 創建訂單
-            OrderBackendDTO createdOrder = orderServiceImpl.createOrder(cartTurntoOrderDTO);
+            OrderBackendDTO createdOrder = orderServiceImpl.createOrderWithP(cartTurntoOrderDTO);
 
             // 2. 生成 PaymentDTO 並進行支付處理
             PaymentDTO paymentDTO = new PaymentDTO();
             paymentDTO.setOrderId(createdOrder.getOrderId());
             paymentDTO.setFinalAmount(new BigDecimal(createdOrder.getFinalAmount()));
-            paymentDTO.setProductName("購物車商品");
+            paymentDTO.setProductName("CloudSerenity_Hotel伴手禮商城商品");
             paymentDTO.setPaymentMethod("Credit");
 
             // 3. 返回支付表單，前端提交支付請求

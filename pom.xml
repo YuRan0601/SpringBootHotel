@@ -109,6 +109,16 @@
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
 		</dependency>
+		
+		<!-- 匯出訂單所需要 -->
+		<!-- CSV -->
+		<dependency>
+			<groupId>com.opencsv</groupId>
+			<artifactId>opencsv</artifactId>
+			<version>5.10</version>
+		</dependency>
+		<!-- JSON -->	
+		
 	</dependencies>
 	
 	

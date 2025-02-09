@@ -106,6 +106,13 @@ public class OrderServiceImpl implements OrderService {
 
 		return orderDTO;
 	}
+	
+	// 依據狀態查詢訂單
+	@Override
+	public List<OrderBackendDTO> getOrdersByStatus(String status) {
+		List<Order> orders = orderDao.findByOrderStatus(status);  // 這裡從資料庫查詢
+        return orders.stream().map(this::convertToBackendDTO).collect(Collectors.toList());  // 轉換成 DTO
+	}
 
 	// 查詢所有訂單
 	@Override
@@ -134,6 +141,8 @@ public class OrderServiceImpl implements OrderService {
 		// 將訂單實體轉換為 DTO
 		return convertToBackendDTO(order);
 	}
+	
+	
 
 	// 刪除訂單
 	@Override
@@ -388,11 +397,106 @@ public class OrderServiceImpl implements OrderService {
 	    // 使用轉換方法將訂單轉換為前台需要的 DTO
 	    return convertToFrontendDTO(order);
 	}
+	
+	// 查詢指定用戶的「狀態」訂單
+	@Override
+	public List<OrderFrontendDTO> getOrdersByUserIdAndStatus(Integer userId, String status) {
+		// 查詢該用戶的訂單，並根據訂單狀態過濾
+	    List<Order> orders = orderDao.findByUserIdAndOrderStatus(userId, status);
+
+	    // 將查詢到的訂單轉換為前台的 DTO
+	    return orders.stream().map(this::convertToFrontendDTO)
+	                 .collect(Collectors.toList());
+	}
 
 	// Cart -> Order
 	// 創建訂單的方法
+	// 不串金流
 	@Override
 	public OrderBackendDTO createOrder(CartTurntoOrderDTO orderRequest) {
+		Order order = new Order();
+
+	    try {
+	        // 設定訂單的收件人資料
+	        MemberForCartFrontendDTO recipient = orderRequest.getRecipient();
+	        order.setReceiveName(recipient.getReceiveName());
+	        order.setEmail(recipient.getEmail());
+	        order.setPhoneNumber(recipient.getPhone());
+	        order.setAddress(recipient.getAddress());
+	        order.setPaymentMethod(recipient.getPaymentMethod());
+
+	        // 查看傳入的 userid
+	        System.out.println("Recipient userid: " + recipient.getUserid());  // print recipient 的 userid
+
+	        // 設置 userid
+	        order.setUserId(recipient.getUserid());  // 確保設置 userid
+
+	        // 設定訂單狀態
+	        // 設定訂單狀態
+	        if ("貨到付款".equals(recipient.getPaymentMethod())) {
+	            order.setOrderStatus("處理中");  // 貨到付款，訂單狀態為「處理中」
+	        } 
+
+	        // 計算總金額
+	        BigDecimal totalAmount = BigDecimal.ZERO;
+	        List<OrderItems> orderItems = new ArrayList<>();
+	        for (CartItemFrontendDTO cartItem : orderRequest.getOrderItems()) {
+	            OrderItems item = new OrderItems();
+	            Optional<Products> productOptional = productDao.findById(cartItem.getProductId());
+
+	            if (productOptional.isPresent()) {
+	                Products product = productOptional.get();
+	                item.setProducts(product);
+	                item.setQuantity(cartItem.getQuantity());
+	                item.setUnitPrice(cartItem.getUnitPrice());
+	                item.setDiscount(cartItem.getDiscount());
+
+	                BigDecimal subtotal = (cartItem.getUnitPrice().subtract(cartItem.getDiscount()))
+	                        .multiply(BigDecimal.valueOf(cartItem.getQuantity()));
+	                item.setSubtotal(subtotal);
+
+	                item.setOrder(order);  // 設定訂單關聯
+	                totalAmount = totalAmount.add(subtotal);  // 累加小計
+
+	                orderItems.add(item);
+	            } else {
+	                // 如果商品 ID 不存在
+	                throw new RuntimeException("Product not found for ID: " + cartItem.getProductId());
+	            }
+	        }
+
+	        order.setOrderItemsBeans(new HashSet<>(orderItems));
+	        
+	        // 呼叫 calculateOrderTotal 方法來計算訂單總金額和最終金額
+	        calculateOrderTotal(order, orderItems);
+	        System.out.println("Order Data: " + order);
+	        // 儲存訂單到資料庫
+	        order = orderDao.save(order);
+	        
+	        
+	     // 更新購物車商品狀態為 4（已購買）
+	        for (CartItemFrontendDTO cartItem : orderRequest.getOrderItems()) {
+	            // 透過 CartItemsDao 查詢這些商品
+	            Optional<CartItems> optionalCartItem = cartItemsDao.findByCartItemIdAndIsValid(cartItem.getCartItemId(), 0);
+	            if (optionalCartItem.isPresent()) {
+	                CartItems item = optionalCartItem.get();
+	                item.setIsValid(4);  // 更新商品狀態為 4（已購買）
+	                cartItemsDao.save(item);  // 儲存更新後的商品狀態
+	            }
+	        }
+
+	        
+	        // 轉換為 DTO 並返回
+	        return convertToBackendDTO(order);
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        throw new RuntimeException("Error creating order: " + e.getMessage());  // 顯示詳細錯誤
+	    }
+	}
+	
+	// 串金流
+	@Override
+	public OrderBackendDTO createOrderWithP(CartTurntoOrderDTO orderRequest) {
 		Order order = new Order();
 
 	    try {

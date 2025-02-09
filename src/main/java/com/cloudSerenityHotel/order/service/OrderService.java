@@ -18,6 +18,9 @@ public interface OrderService {
 	 * DTO（OrderDTO、OrderItemDTO）。
 	 */
 	OrderBackendDTO convertToBackendDTO(Order order);
+	
+	// 依據狀態匯出訂單
+	List<OrderBackendDTO> getOrdersByStatus(String status);
 
 	// 整筆訂單
 	boolean deleteOrderById(Integer orderId); // 刪除指定訂單
@@ -45,9 +48,12 @@ public interface OrderService {
 	List<OrderFrontendDTO> getOrdersForFrontendByUserId(Integer userId);
 	// 查詢指定用戶的特定訂單（包含訂單細項）
 	OrderFrontendDTO getOrderDetailForFrontend(Integer userId, Integer orderId);
-
+	// 查詢指定用戶的「狀態」訂單
+	List<OrderFrontendDTO> getOrdersByUserIdAndStatus(Integer userId, String status);
+	
 	// Cart -> Order
 	OrderBackendDTO createOrder(CartTurntoOrderDTO orderRequest);
+	OrderBackendDTO createOrderWithP(CartTurntoOrderDTO orderRequest);
 	
 	// 更新訂單狀態為支付成功
 	void paymentSuccess(Integer orderId);
