@@ -440,7 +440,7 @@ public class OrderController extends BaseController {
             PaymentDTO paymentDTO = new PaymentDTO();
             paymentDTO.setOrderId(createdOrder.getOrderId());
             paymentDTO.setFinalAmount(new BigDecimal(createdOrder.getFinalAmount()));
-            paymentDTO.setProductName("CloudSerenity_Hotel購物車商品");
+            paymentDTO.setProductName("CloudSerenity_Hotel伴手禮商城商品");
             paymentDTO.setPaymentMethod("Credit");
 
             // 3. 返回支付表單，前端提交支付請求
