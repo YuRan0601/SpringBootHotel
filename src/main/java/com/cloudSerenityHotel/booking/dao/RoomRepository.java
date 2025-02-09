@@ -25,7 +25,7 @@ public interface RoomRepository extends JpaRepository<Room, Integer> {
 		        WHERE r.roomId NOT IN (
 		            SELECT bo.room.roomId
 		            FROM BookingOrder bo
-		            WHERE bo.checkInDate < :checkOutDate AND bo.checkOutDate > :checkInDate 
+		            WHERE bo.checkInDate <= :checkOutDate AND bo.checkOutDate >= :checkInDate 
 		            AND bo.status <> 'cancelled'
 		        )
 		        AND r.status = 'AVAILABLE'
@@ -55,6 +55,7 @@ public interface RoomRepository extends JpaRepository<Room, Integer> {
 			          FROM booking_order bo
 			          WHERE bo.room_id = r.room_id
 			            AND (bo.check_in_date <= :checkOutDate AND bo.check_out_date >= :checkInDate)
+			            AND bo.status <> 'cancelled'
 			      )
 			    ORDER BY NEWID() -- SQL Server 隨機排序
 			""", nativeQuery = true)

@@ -180,6 +180,9 @@ public class BookingServiceImpl implements BookingService {
 		try {
 			BookingOrder dbOrder = bRepository.save(order);
 			res.put("code", 200); //200新增成功
+			res.put("orderId", dbOrder.getOrderId());
+			res.put("roomTypeName", dbOrder.getRoomTypeName());
+			res.put("totalPrice", dbOrder.getTotalPrice());
 			
 			SimpleMailMessage message = new SimpleMailMessage();
 			
@@ -196,7 +199,7 @@ public class BookingServiceImpl implements BookingService {
 			
 			String orderId = dbOrder.getOrderId().toString();
 			
-			String roomType = dbOrder.getRoom().getRoomType().getTypeName();
+			String roomType = dbOrder.getRoomTypeName();
 			
 			String checkInDate = dbOrder.getCheckInDate().toString();
 			
