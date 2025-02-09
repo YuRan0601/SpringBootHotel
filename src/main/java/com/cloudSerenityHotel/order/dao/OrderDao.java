@@ -20,6 +20,9 @@ public interface OrderDao extends JpaRepository<Order, Integer>{
  	// 根據用戶 ID 和訂單 ID 查詢訂單
     Order findByUserIdAndOrderId(Integer userId, Integer orderId);
     
+    // 根據用戶 ID 和訂單 狀態 查詢訂單
+    List<Order> findByUserIdAndOrderStatus(Integer userId, String status);
+    
     // 根據 付款方式 查詢訂單_可用於匯出訂單
     List<Order> findByOrderStatus(String paymentMethod);
     

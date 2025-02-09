@@ -397,6 +397,17 @@ public class OrderServiceImpl implements OrderService {
 	    // 使用轉換方法將訂單轉換為前台需要的 DTO
 	    return convertToFrontendDTO(order);
 	}
+	
+	// 查詢指定用戶的「狀態」訂單
+	@Override
+	public List<OrderFrontendDTO> getOrdersByUserIdAndStatus(Integer userId, String status) {
+		// 查詢該用戶的訂單，並根據訂單狀態過濾
+	    List<Order> orders = orderDao.findByUserIdAndOrderStatus(userId, status);
+
+	    // 將查詢到的訂單轉換為前台的 DTO
+	    return orders.stream().map(this::convertToFrontendDTO)
+	                 .collect(Collectors.toList());
+	}
 
 	// Cart -> Order
 	// 創建訂單的方法

@@ -391,6 +391,28 @@ public class OrderController extends BaseController {
         }
     }
     
+    // 查詢指定用戶的特定「狀態」訂單
+    @GetMapping("/user/{userId}/status/{status}")
+    public ResponseEntity<List<OrderFrontendDTO>> getOrdersByStatus(
+            @PathVariable Integer userId, 
+            @PathVariable String status) {
+        try {
+            // 若 status 為空，則查詢所有訂單
+            if (status.isEmpty()) {
+                status = null; // 設定為 null 或空字符串表示查詢全部
+            }
+
+            List<OrderFrontendDTO> orders = orderServiceImpl.getOrdersByUserIdAndStatus(userId, status);
+
+            // 返回成功響應
+            return ResponseEntity.ok(orders);
+        } catch (Exception e) {
+            e.printStackTrace();
+            // 返回伺服器錯誤響應
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+    
     // Cart -> Order
     // 無串金流版本
     @PostMapping("/CartToOrder")
@@ -418,7 +440,7 @@ public class OrderController extends BaseController {
             PaymentDTO paymentDTO = new PaymentDTO();
             paymentDTO.setOrderId(createdOrder.getOrderId());
             paymentDTO.setFinalAmount(new BigDecimal(createdOrder.getFinalAmount()));
-            paymentDTO.setProductName("購物車商品");
+            paymentDTO.setProductName("CloudSerenity_Hotel購物車商品");
             paymentDTO.setPaymentMethod("Credit");
 
             // 3. 返回支付表單，前端提交支付請求

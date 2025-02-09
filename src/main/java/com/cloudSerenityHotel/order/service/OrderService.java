@@ -48,7 +48,9 @@ public interface OrderService {
 	List<OrderFrontendDTO> getOrdersForFrontendByUserId(Integer userId);
 	// 查詢指定用戶的特定訂單（包含訂單細項）
 	OrderFrontendDTO getOrderDetailForFrontend(Integer userId, Integer orderId);
-
+	// 查詢指定用戶的「狀態」訂單
+	List<OrderFrontendDTO> getOrdersByUserIdAndStatus(Integer userId, String status);
+	
 	// Cart -> Order
 	OrderBackendDTO createOrder(CartTurntoOrderDTO orderRequest);
 	
