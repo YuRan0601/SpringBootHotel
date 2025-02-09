@@ -3,9 +3,11 @@ package com.cloudSerenityHotel.attraction_facility.attraction.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 
-@RestController
+@Controller
 @RequestMapping("/contact")
 public class ContactController {
 
@@ -28,9 +30,11 @@ public class ContactController {
         // 發送郵件
         sendEmailToAdmin(subject, body);
 
-        return "訊息已成功發送!";
+        // 重定向回 contact 頁面，並附帶訊息
+        return "redirect:http://localhost:8080/CloudSerenityHotel/static/attraction/contact.html?message=Success!";
     }
-
+    
+    
     private void sendEmailToAdmin(String subject, String body) {
         SimpleMailMessage mailMessage = new SimpleMailMessage();
         mailMessage.setTo("cloud.serenity.hotel@gmail.com"); // 目標郵件地址
