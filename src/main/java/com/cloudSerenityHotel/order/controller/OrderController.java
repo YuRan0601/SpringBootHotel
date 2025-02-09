@@ -434,7 +434,7 @@ public class OrderController extends BaseController {
     public ResponseEntity<String> createOrderWithPayment(@RequestBody CartTurntoOrderDTO cartTurntoOrderDTO) {
         try {
             // 1. 創建訂單
-            OrderBackendDTO createdOrder = orderServiceImpl.createOrder(cartTurntoOrderDTO);
+            OrderBackendDTO createdOrder = orderServiceImpl.createOrderWithP(cartTurntoOrderDTO);
 
             // 2. 生成 PaymentDTO 並進行支付處理
             PaymentDTO paymentDTO = new PaymentDTO();
