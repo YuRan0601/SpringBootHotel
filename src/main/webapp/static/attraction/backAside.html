@@ -61,7 +61,7 @@
                     <div class="collapse show" id="chart-collapse">
                         <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
                             <li>
-                                <a class="link-dark rounded" href="http://localhost:5173/back/chart">chart</a>
+                                <a class="link-dark rounded" href="http://localhost:5173/back/chart">房型、訂房圖表</a>
                             </li>
                         </ul>
                     </div>
@@ -123,7 +123,7 @@
                             <li>
                                 <a class="link-dark rounded" href="http://localhost:5173/order/orderList">訂單總表</a>
                             </li>
-                            <li><a href="#" class="link-dark rounded">熱銷商品</a></li>
+                            <li><a href="http://localhost:5173/order/orderExport" class="link-dark rounded">匯出訂單</a></li>
                         </ul>
                     </div>
                 </li>
@@ -137,7 +137,6 @@
                         <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
                             <li><a href="http://localhost:8080/CloudSerenityHotel/static/attraction/GetAllAttractions.html"
                                     class="link-dark rounded">查詢所有景點</a></li>
-                            <li><a href="#" class="link-dark rounded">上傳圖片</a></li>
                         </ul>
                     </div>
                 </li>
@@ -171,12 +170,12 @@
                     <div class="collapse" id="account-collapse">
                         <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
                             <li>
-                                <RouterLink :to="{ name: 'adminBack' }">Overview</RouterLink>
+                                <a class="link-dark rounded" href="http://localhost:5173/adminBack">管理員列表</a>
                             </li>
                             <!-- <li>
                             <RouterLink :to="{ name: '' }">Settings</RouterLink>
                         </li> -->
-                            <li><a href="#" @click="logout()">Sign out</a></li>
+                            <li><a class="link-dark rounded" href="#" @click="logout()">登出</a></li>
                         </ul>
                     </div>
                 </li>
