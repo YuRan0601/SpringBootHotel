@@ -8,6 +8,9 @@
 此外還有使用綠界科技完成測試付款功能。
   
 網站的功能有 會員管理、訂房系統、伴手禮商城、周邊景點介紹、租車系統。
+
+- 前端專案Github：https://github.com/YuRan0601/vue-workspace
+- 後端專案Github：https://github.com/YuRan0601/SpringBootHotel
   
 --- 
   
