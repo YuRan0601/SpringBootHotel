@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>商品後台管理</title>
+    <style>
+        h2 {
+            font-size: 40px;
+        }
+
+        body {
+            margin-top: 50px;
+            margin-bottom: 50px;
+            margin-left: 100PX;
+            margin-right: 100px;
+        }
+
+        .top {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 10px;
+            width: 100%;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background-color: #f4f4f4;
+            height: 50px;
+        }
+
+        /* 清單第一欄位設4角圓角 */
+        thead th:first-child {
+            background-color: #f4f4f4;
+            height: 50px;
+            border-top-left-radius: 10px;
+            border-bottom-left-radius: 10px;
+        }
+
+        thead th:last-child {
+            background-color: #f4f4f4;
+            height: 50px;
+            border-top-right-radius: 10px;
+            border-bottom-right-radius: 10px;
+        }
+
+        tbody {
+            text-align: center;
+        }
+
+        .title {
+            width: 200px;
+        }
+
+        td {
+            padding: 10px 10px;
+        }
+
+        td img {
+            width: 150px;
+            height: 150px;
+        }
+
+
+        /* 預設設定(自訂義) */
+        .default {
+            margin: 5px;
+            border: none;
+            cursor: pointer;
+            padding: 10px 20px;
+            border-radius: 10px;
+        }
+
+        .default:hover {
+            background-color: #ECF5FF;
+        }
+
+        /* 其他按鈕的個別設定 */
+        /* 上面不是在表格中的按鈕*/
+        /* 新增商品、搜尋 */
+        .insertButton {
+            background-color: #ECF5FF;
+            color: #1162be;
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 10px;
+            border: none;
+        }
+
+        .insertButton:hover {
+            background-color: #357ac8;
+            color: #ffffff;
+        }
+
+        .selectText {
+            display: flex;
+            width: 100%;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .selectText input {
+            flex: 1;
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            font-size: 15px;
+        }
+
+        /* 清單表格中的按鈕 */
+        /* 上架、編輯、刪除等 */
+        .productLaunched {
+            background-color: #ECF5FF;
+            border: 1px solid #1162be;
+            color: #1162be;
+            margin: 5px;
+            cursor: pointer;
+            padding: 10px 20px;
+            border-radius: 10px;
+
+        }
+
+        .productLaunched:hover {
+            background-color: #d8eaff;
+        }
+
+        .delect {
+            margin: 5px;
+            border: none;
+            cursor: pointer;
+            padding: 10px 20px;
+            border-radius: 10px;
+        }
+
+        .delect:hover {
+            color: #ffffff;
+            background-color: #ae0000;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div Class="top">
+        <h2>所有商品</h2>
+
+        <button Class="insertButton"><a href="/CloudSerenityHotel/static/product/ProductLaunched.html"
+                style="text-decoration: none;color:inherit;">新增商品</a></button>
+    </div>
+
+    <form method="post" action="/xxx">
+        <div Class="selectText">
+            <input type="text" name="select" placeholder="輸入商品名稱">
+            <button Class="selectButton default">搜尋</button>
+        </div>
+        <table>
+            <thead>
+                <tr class="titleField">
+                    <th class="title">編號</th>
+                    <th class="title">圖片</th>
+                    <th class="title">商品名稱</th>
+                    <th class="title">原價格</th>
+                    <th class="title">特價</th>
+                    <th class="title">數量</th>
+                    <th class="title">上架狀態</th>
+                    <th class="title">操作</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <!-- 第一列商品 -->
+                <tr>
+                    <td>1</td>
+                    <td><img src=""></td>
+                    <td>文字</td>
+                    <td>文字</td>
+                    <td>文字</td>
+                    <td>文字</td>
+                    <td><button class="productLaunched">上架</button><button class="
+                        default">下架</button></td>
+                    <td><button class="default">編輯</button><button class="delect">刪除</button></td>
+                </tr>
+
+                <!-- 第二列商品 -->
+                <tr>
+                    <td>2</td>
+                    <td><img src=""></td>
+                    <td>文字</td>
+                    <td>文字</td>
+                    <td>文字</td>
+                    <td>文字</td>
+                    <td><button class="productLaunched">上架</button><button class="default">下架</button></td>
+                    <td><button class="default">編輯</button><button class="delect">刪除</button></td>
+                </tr>
+
+                <!-- 第二列商品 -->
+                <tr>
+                    <td>2</td>
+                    <td><img src=""></td>
+                    <td>文字</td>
+                    <td>文字</td>
+                    <td>文字</td>
+                    <td>文字</td>
+                    <td><button class="productLaunched">上架</button><button class="default">下架</button></td>
+                    <td><button class="default">編輯</button><button class="delect">刪除</button></td>
+                </tr>
+
+                <!-- 第二列商品 -->
+                <tr>
+                    <td>2</td>
+                    <td><img src=""></td>
+                    <td>文字</td>
+                    <td>文字</td>
+                    <td>文字</td>
+                    <td>文字</td>
+                    <td><button class="productLaunched">上架</button><button class="default">下架</button></td>
+                    <td><button class="default">編輯</button><button class="delect">刪除</button></td>
+                </tr>
+
+                <!-- 第二列商品 -->
+                <tr>
+                    <td>2</td>
+                    <td><img src=""></td>
+                    <td>文字</td>
+                    <td>文字</td>
+                    <td>文字</td>
+                    <td>文字</td>
+                    <td><button class="productLaunched">上架</button><button class="default">下架</button></td>
+                    <td><button class="default">編輯</button><button class="delect">刪除</button></td>
+                </tr>
+
+                <!-- 第二列商品 -->
+                <tr>
+                    <td>2</td>
+                    <td><img src=""></td>
+                    <td>文字</td>
+                    <td>文字</td>
+                    <td>文字</td>
+                    <td>文字</td>
+                    <td><button class="productLaunched">上架</button><button class="default">下架</button></td>
+                    <td><button class="default">編輯</button><button class="delect">刪除</button></td>
+                </tr>
+                <!-- 第二列商品 -->
+                <tr>
+                    <td>2</td>
+                    <td><img src=""></td>
+                    <td>文字</td>
+                    <td>文字</td>
+                    <td>文字</td>
+                    <td>文字</td>
+                    <td><button class="productLaunched">上架</button><button class="default">下架</button></td>
+                    <td><button class="default">編輯</button><button class="delect">刪除</button></td>
+                </tr>
+                <!-- 第二列商品 -->
+                <tr>
+                    <td>2</td>
+                    <td><img src=""></td>
+                    <td>文字</td>
+                    <td>文字</td>
+                    <td>文字</td>
+                    <td>文字</td>
+                    <td><button class="productLaunched">上架</button><button class="default">下架</button></td>
+                    <td><button class="default">編輯</button><button class="delect">刪除</button></td>
+                </tr>
+                <!-- 第二列商品 -->
+                <tr>
+                    <td>2</td>
+                    <td><img src=""></td>
+                    <td>文字</td>
+                    <td>文字</td>
+                    <td>文字</td>
+                    <td>文字</td>
+                    <td><button class="productLaunched">上架</button><button class="default">下架</button></td>
+                    <td><button class="default">編輯</button><button class="delect">刪除</button></td>
+                </tr>
+            </tbody>
+        </table>
+    </form>
+
+</body>
+
+</html>

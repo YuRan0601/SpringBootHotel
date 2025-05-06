@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>商品上架</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+	<link rel="stylesheet" href="../product/styles/ProductLaunched2.css">
+</head>
+<body>
+<form method="post" action="/CloudSerenityHotel/product/insert" enctype="multipart/form-data">
+    <div Class="top">
+        <h2>新增商品</h2>
+        <div>
+            <a href="/CloudSerenityHotel/ProductGetAllController" style="text-decoration: none;color:inherit;"><button
+                    Class="breakButton" type="button">返回</button></a>
+            <input Class="insertButton" type="submit" value="確認送出">
+        </div>
+    </div>
+		<input type="hidden" name="product_id" readonly value="${products.product_id}">
+        <table class="table">
+            <tr>
+                <th class="formTitle">商品名稱<span class="required">(必填)</span></th>
+            </tr>
+            <tr>
+                <td class="text"><input type="text" name="name"></td>
+            </tr>
+
+            <tr>
+                <th class="formTitle">商品圖片<span class="required">(必填)</span></th>
+            </tr>
+            <tr>
+                <td class="productImg">
+                    <input id="upload" type="file" name="file[]" accept="image/*" style="display: none;" multiple>
+                    <label id="uploadImageText" type="button" for="upload">上傳圖片</label>
+                </td>
+            </tr>
+
+            <tr>
+                <th class="formTitle">分類</th>
+            </tr>
+            <tr>
+                <td class="text">
+                    <input type="text" name="categoriesName" list="classiFication" value="${categories.name}" >
+                    <datalist id="classiFication">
+                    <c:forEach items="${allCategories}" var="categories">
+                        <option>${categories.name}</option>
+                    </c:forEach>
+                    </datalist>
+                </td>
+            </tr>
+
+
+            <tr>
+                <th class="formTitle">售價<span class="required">(必填)</span></th>
+            </tr>
+            <tr>
+                <td class="text"><input type="text" name="price"></td>
+            </tr>
+
+            <tr>
+                <th class="formTitle">特價</th>
+            </tr>
+            <tr>
+                <td class="text"><input type="text" name="special_price"></td>
+            </tr>
+
+            <tr>
+                <th class="formTitle">商品描述</th>
+            </tr>
+            <tr>
+                <td class="text"><textarea name="description"></textarea></td>
+            </tr>
+
+        </table>
+    </form>
+    
+            <script>
+            document.getElementById("upload").addEventListener("change", function () {
+                const fileCount = this.files.length;
+                const text = document.getElementById("uploadImageText");
+                text.textContent = fileCount > 0 ? `已上傳${fileCount}張圖片` : "上傳圖片";
+            })
+            </script>
+
+
+</body>
+
+</html>

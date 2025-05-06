@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bootstrap 頁首範例</title>
+    <!-- 引入 Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      .bg-header {
+        background-color: rgb(157, 205, 245);
+      }
+
+      header {
+        padding: 0px 10px 0px 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- 頁首 -->
+    <header class="bg-header shadow-sm">
+      <nav class="navbar navbar-expand-lg navbar-light bg-header py-3">
+        <!-- 標誌 -->
+        <a class="navbar-brand" href="#">
+          <img
+            src="https://via.placeholder.com/40"
+            alt="Logo"
+            class="d-inline-block align-text-top me-2"
+          />
+          雲澄飯店後台管理系統
+        </a>
+        <!-- 響應式折疊按鈕 -->
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+          aria-controls="navbarNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <!-- 導航連結 -->
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav me-auto">
+            <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="#">首頁</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">關於我們</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">服務</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">聯繫我們</a>
+            </li>
+          </ul>
+
+          <span>歡迎User</span>
+        </div>
+      </nav>
+    </header>
+
+    <!-- 引入 Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

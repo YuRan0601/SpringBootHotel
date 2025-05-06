@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <title>查詢景點</title>
+
+    <!-- 引入 jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.js"
+        integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+
+    <!-- 引入 Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <!-- 引入 Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet" />
+
+    <!-- 引入 Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- 引入aside.css -->
+    <link rel="stylesheet" href="/static/common/aside.css" />
+
+    <style>
+        body {
+            display: flex;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* 主要內容的樣式 */
+        .content {
+            margin-left: 300px;
+            padding: 20px;
+            width: 100%;
+            margin-top: 300px;
+        }
+
+        /* 中央區域，將內容置中 */
+        .content-inner {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* 樣式調整：按鈕顏色 */
+        .btn-primary {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+        }
+
+        /* 改變查詢按鈕的樣式 */
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #004085;
+        }
+
+        /* 設置景點查詢結果顯示區域的外觀 */
+        #attractionDetails p {
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+        .aside {
+            background-color: #f8f9fa;
+            position: fixed;
+            top: -20px;
+            left: -20px;
+            width: 260px;
+            height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+
+<body>
+	<aside class="aside"></aside>
+    <!-- 主要內容 -->
+    <div class="content">
+        <div class="content-inner">
+            <h1>查詢景點</h1>
+            <form id="findAttractionForm">
+                <label for="attractionId">景點ID:</label>
+                <input type="number" id="attractionId" required><br>
+                <button type="submit" class="btn btn-primary">查詢</button>
+            </form>
+            <div id="attractionDetails" class="mt-3"></div>
+        </div>
+    </div>
+
+    <script>
+    $(function () {
+        $(".aside").load("./backAside.html");
+    })
+        document.getElementById('findAttractionForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const id = document.getElementById('attractionId').value;
+
+            fetch(`http://localhost:8080/CloudSerenityHotel/api/attractions/${id}`)
+                .then(response => response.json())
+                .then(data => {
+                    const detailsDiv = document.getElementById('attractionDetails');
+                    detailsDiv.innerHTML = `
+                        <p>景點名稱: ${data.name}</p>
+                        <p>描述: ${data.description}</p>
+                        <p>景點詳情: ${data.location}</p>
+                        <p>開放時間: ${data.openingHours}</p>
+                        <p>聯絡資訊: ${data.contactInfo}</p>
+                        <p>圖片連結: ${data.imageUrl}</p>
+                    `;
+                })
+                .catch(() => alert("找不到該景點"));
+        });
+    </script>
+</body>
+
+</html>
