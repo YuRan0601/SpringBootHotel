@@ -19,7 +19,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Getter @Setter
+@Getter 
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -30,7 +31,8 @@ public class CartItems implements Serializable{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "cartitem_id")
-    private Integer cartItemId; // 購物車商品 ID
+    // 購物車商品 ID
+    private Integer cartItemId; 
 
     //@Column(name = "cart_id")
     //private Integer cartId; // 關聯的購物車 ID
@@ -39,27 +41,32 @@ public class CartItems implements Serializable{
 	//private Integer productId; // 購買商品的ID
 
     @Column(name = "quantity")
-    private int quantity; // 商品數量
+    // 商品數量
+    private int quantity; 
 
     @Column(name = "unit_price")
-    private BigDecimal unitPrice; // 當時加入購物車的單價
+    // 當時加入購物車的單價
+    private BigDecimal unitPrice; 
 
     @Column(name = "discount")
-    private BigDecimal discount; // 折扣金額
+    // 折扣金額
+    private BigDecimal discount; 
 
     @Column(name = "subtotal")
-    private BigDecimal subtotal; // 小計（(UnitPrice - Discount) * Quantity）
+    // 小計（(UnitPrice - Discount) * Quantity）
+    private BigDecimal subtotal; 
 
     @Column(name = "is_valid")
-    private int isValid = 0; // 商品狀態(0=有效, 1=無效_商品下架, 2=無效_價格變動)
+    // 商品狀態(0=有效, 1=無效_商品下架, 2=無效_價格變動)
+    private int isValid = 0; 
 
     // 多對一的關聯：一個購物車細項對應一個購物車
     @ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "cart_id", nullable = false)
+	@JoinColumn(name = "cart_id")
     private Cart cart; // 這樣做會將 `cart_id` 映射到 `Cart` 實體
     
     // 多對一的關聯：關聯到商品
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id", nullable = false)
+    @JoinColumn(name = "product_id")
     private Products products; // 與商品表的關聯
 }
