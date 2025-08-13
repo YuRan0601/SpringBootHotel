@@ -15,6 +15,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import lombok.AllArgsConstructor;
@@ -88,11 +90,31 @@ public class Order implements Serializable {
 	@Column(name = "updated_at")
 	// 更新時間，改為 Timestamp
 	private Timestamp updatedAt; 
+	
+	/*
+	 * @PrePersist 會在 第一次把這個 Entity 存進資料庫 前自動呼叫。
+	 * 設定 createdAt 和 updatedAt 都用同一個時間戳，第一次存檔就搞定兩個欄位。
+	 */
+	@PrePersist
+    public void prePersist() {
+        Timestamp now = new Timestamp(System.currentTimeMillis());
+        this.orderDate = now;
+        this.updatedAt = now;
+    }
+	
+	/*
+	 * 在 JPA Entity 裡加一個方法，並用 @PreUpdate 標註，
+	 * 當 Hibernate 發現這個 Entity 要被更新時，就會自動呼叫這個方法。
+	 */
+    @PreUpdate
+    public void preUpdate() {
+        this.updatedAt = new Timestamp(System.currentTimeMillis());
+    }
 
 	// 訂單與訂單細項的雙向關聯
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "order", cascade = CascadeType.ALL)
 	// 關聯的訂單細項
-	private Set<OrderItems> orderItemsBeans; 
+	private Set<OrderItems> orderItems; 
 	
 	// 新增 recipient 屬性，用來儲存收件人資料
     @Transient // 這裡使用 @Transient 表示這不是資料庫的欄位，只是在應用層使用

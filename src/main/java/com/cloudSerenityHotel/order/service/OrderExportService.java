@@ -9,13 +9,12 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.springframework.stereotype.Service;
+
 import com.cloudSerenityHotel.order.dto.OrderBackendDTO;
 import com.cloudSerenityHotel.order.dto.OrderItemBackendDTO;
 import com.google.gson.Gson;
 import com.opencsv.CSVWriter;
 
-@Service
 public class OrderExportService {
 	
 	// 根據訂單狀態篩選並匯出資料，並根據格式選擇匯出方式
@@ -100,7 +99,7 @@ public class OrderExportService {
 	        // 寫入標題行
 	        csvWriter.writeNext(new String[]{
 	                "OrderID", "UserID", "ReceiveName", "Email", "PhoneNumber", "Address",
-	                "OrderStatus", "PaymentMethod", "TotalAmount", "DiscountAmount", "FinalAmount",
+	                "OrderStatus", "PaymentMethod", "TotalAmount", "FinalAmount",
 	                "OrderDate", "UpdatedAt", "ProductName", "Quantity", "UnitPrice", "Discount", "Subtotal"
 	        });
 
@@ -117,7 +116,6 @@ public class OrderExportService {
 	                        order.getOrderStatus(),
 	                        order.getPaymentMethod(),
 	                        order.getTotalAmount(),
-	                        order.getDiscountAmount(),
 	                        order.getFinalAmount(),
 	                        order.getOrderDate(),
 	                        order.getUpdatedAt(),

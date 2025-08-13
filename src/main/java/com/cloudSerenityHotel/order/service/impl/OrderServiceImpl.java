@@ -1,634 +1,262 @@
 package com.cloudSerenityHotel.order.service.impl;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-
 import com.cloudSerenityHotel.order.dao.CartItemsDao;
 import com.cloudSerenityHotel.order.dao.OrderDao;
 import com.cloudSerenityHotel.order.dao.OrderItemsDao;
-import com.cloudSerenityHotel.order.dto.CartItemFrontendDTO;
 import com.cloudSerenityHotel.order.dto.CartTurntoOrderDTO;
-import com.cloudSerenityHotel.order.dto.MemberForCartFrontendDTO;
 import com.cloudSerenityHotel.order.dto.OrderBackendDTO;
 import com.cloudSerenityHotel.order.dto.OrderFrontendDTO;
 import com.cloudSerenityHotel.order.dto.OrderItemBackendDTO;
 import com.cloudSerenityHotel.order.dto.OrderItemFrontendDTO;
-import com.cloudSerenityHotel.order.model.CartItems;
 import com.cloudSerenityHotel.order.model.Order;
 import com.cloudSerenityHotel.order.model.OrderItems;
 import com.cloudSerenityHotel.order.service.OrderService;
 import com.cloudSerenityHotel.product.dao.ProductRepository;
+import com.cloudSerenityHotel.product.model.ProductImages;
 import com.cloudSerenityHotel.product.model.Products;
 
 import jakarta.transaction.Transactional;
 
-// JPA 的 save 方法會根據物件是否有主鍵來自動選擇是執行「新增」還是「更新」。
 @Service
 @Transactional // 自動交易管理員
 public class OrderServiceImpl implements OrderService {
 
 	@Autowired
 	private OrderDao orderDao;
-
 	@Autowired
 	private OrderItemsDao orderItemsDao;
-	
 	@Autowired
 	private ProductRepository productDao;
-	
 	@Autowired
 	private CartItemsDao cartItemsDao;
 
-	// 後台DTO 的轉換功能
+	// --- 後台 / 前台 DTO 轉換 ---
 	@Override
 	public OrderBackendDTO convertToBackendDTO(Order order) {
-		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-
-		OrderBackendDTO orderDTO = new OrderBackendDTO();
-		orderDTO.setOrderId(order.getOrderId());
-		orderDTO.setUserId(order.getUserId());
-		orderDTO.setReceiveName(order.getReceiveName());
-		orderDTO.setEmail(order.getEmail());
-		orderDTO.setPhoneNumber(order.getPhoneNumber());
-		orderDTO.setAddress(order.getAddress());
-		orderDTO.setOrderStatus(order.getOrderStatus());
-		orderDTO.setPaymentMethod(order.getPaymentMethod());
-		orderDTO.setTotalAmount(order.getTotalAmount().toPlainString());
-		
-		// 處理 discountAmount 可能為 null 的情況
-	    BigDecimal discountAmount = order.getDiscountAmount();
-	    if (discountAmount == null) {
-	        discountAmount = BigDecimal.ZERO;  // 若為 null，設為 0
-	    }
-	    orderDTO.setDiscountAmount(discountAmount.toPlainString());
-
-	    // 處理 finalAmount 可能為 null 的情況
-	    BigDecimal finalAmount = order.getFinalAmount();
-	    if (finalAmount == null) {
-	        finalAmount = BigDecimal.ZERO;  // 若為 null，設為 0
-	    }
-	    orderDTO.setFinalAmount(finalAmount.toPlainString());
-	    
-		orderDTO.setOrderDate(formatter.format(order.getOrderDate()));
-		orderDTO.setUpdatedAt(formatter.format(order.getUpdatedAt()));
-
-		List<OrderItemBackendDTO> orderItemDTOs = order.getOrderItemsBeans().stream().map(item -> {
-			OrderItemBackendDTO orderItemDTO = new OrderItemBackendDTO();
-			orderItemDTO.setOrderitemId(item.getOrderitemId());
-			orderItemDTO.setOrderId(order.getOrderId()); // 確保 orderId 被設置
-			orderItemDTO.setProductId(item.getProducts().getProductId());
-			orderItemDTO.setProductName(item.getProducts().getProductName());// 這裡Bean有修改名稱
-			orderItemDTO.setProductPrice(item.getProducts().getPrice()); // 商品原價
-			orderItemDTO.setSpecialPrice(item.getProducts().getSpecialPrice());  // 特價
-			orderItemDTO.setQuantity(item.getQuantity());
-			orderItemDTO.setUnitPrice(item.getUnitPrice());
-			orderItemDTO.setDiscount(item.getDiscount()); // 折扣
-			orderItemDTO.setSubtotal(item.getSubtotal());
-			return orderItemDTO;
+		if (order == null)
+			return null;
+		OrderBackendDTO dto = new OrderBackendDTO();
+		dto.setOrderId(order.getOrderId());
+		dto.setUserId(order.getUserId());
+		dto.setReceiveName(order.getReceiveName());
+		dto.setEmail(order.getEmail());
+		dto.setPhoneNumber(order.getPhoneNumber());
+		dto.setAddress(order.getAddress());
+		dto.setOrderStatus(order.getOrderStatus());
+		dto.setPaymentMethod(order.getPaymentMethod());
+		dto.setTotalAmount(order.getTotalAmount() != null ? order.getTotalAmount().toString() : "0.00");
+		dto.setFinalAmount(order.getFinalAmount() != null ? order.getFinalAmount().toString() : "0.00");
+		dto.setOrderDate(
+				order.getOrderDate() != null ? new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(order.getOrderDate())
+						: null);
+		dto.setUpdatedAt(
+				order.getUpdatedAt() != null ? new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(order.getUpdatedAt())
+						: null);
+		// 訂單細項
+		List<OrderItemBackendDTO> itemsDto = order.getOrderItems().stream().map(item -> {
+			String mainImageUrl = item.getProducts().getProductImages().stream().filter(ProductImages::getIsPrimary) // 過濾出主圖
+					.map(ProductImages::getImageUrl) // 取 URL
+					.findFirst() // 找第一張
+					.orElse(null); // 沒有就 null
+			OrderItemBackendDTO itemDto = new OrderItemBackendDTO();
+			itemDto.setOrderitemId(item.getOrderitemId());
+			itemDto.setOrderId(item.getOrder().getOrderId());
+			itemDto.setProductId(item.getProducts().getProductId());
+			itemDto.setProductName(item.getProducts().getProductName());
+			itemDto.setProductMainImage(mainImageUrl);
+			itemDto.setProductPrice(item.getProducts().getPrice());
+			itemDto.setSpecialPrice(item.getProducts().getSpecialPrice());
+			itemDto.setQuantity(item.getQuantity());
+			itemDto.setUnitPrice(item.getUnitPrice());
+			itemDto.setDiscount(item.getDiscount());
+			itemDto.setSubtotal(item.getSubtotal());
+			return itemDto;
 		}).collect(Collectors.toList());
 
-		orderDTO.setOrderItemsDtos(orderItemDTOs);
-
-		return orderDTO;
+		dto.setOrderItemsDtos(itemsDto);
+		return dto;
 	}
-	
-	// 依據狀態查詢訂單
+
 	@Override
-	public List<OrderBackendDTO> getOrdersByStatus(String status) {
-		List<Order> orders = orderDao.findByOrderStatus(status);  // 這裡從資料庫查詢
-        return orders.stream().map(this::convertToBackendDTO).collect(Collectors.toList());  // 轉換成 DTO
+	public OrderFrontendDTO convertToFrontendDTO(Order order) {
+		if (order == null)
+			return null;
+		OrderFrontendDTO dto = new OrderFrontendDTO();
+		dto.setOrderId(order.getOrderId());
+		dto.setReceiveName(order.getReceiveName());
+		dto.setEmail(order.getEmail());
+		dto.setPhoneNumber(order.getPhoneNumber());
+		dto.setAddress(order.getAddress());
+		dto.setPaymentMethod(order.getPaymentMethod());
+		dto.setOrderStatus(order.getOrderStatus());
+		dto.setTotalAmount(order.getTotalAmount() != null ? order.getTotalAmount().toString() : "0.00");
+		dto.setFinalAmount(order.getFinalAmount() != null ? order.getFinalAmount().toString() : "0.00");
+		dto.setOrderDate(
+				order.getOrderDate() != null ? new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(order.getOrderDate())
+						: null);
+		dto.setUpdatedAt(
+				order.getUpdatedAt() != null ? new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(order.getUpdatedAt())
+						: null);
+		// 訂單細項
+		List<OrderItemFrontendDTO> itemsDto = order.getOrderItems().stream().map(item -> {
+			OrderItemFrontendDTO itemDto = new OrderItemFrontendDTO();
+			itemDto.setOrderitemId(item.getOrderitemId());
+			itemDto.setProductId(item.getProducts().getProductId());
+			itemDto.setProductName(item.getProducts().getProductName());
+			// 取主圖
+			String mainImageUrl = item.getProducts().getProductImages().stream().filter(ProductImages::getIsPrimary)
+					.map(ProductImages::getImageUrl).findFirst().orElse(null);
+			itemDto.setProductMainImage(mainImageUrl);
+			itemDto.setQuantity(item.getQuantity());
+			itemDto.setUnitPrice(item.getUnitPrice());
+			itemDto.setSpecialPrice(item.getProducts().getSpecialPrice());
+			itemDto.setDiscount(item.getDiscount());
+			itemDto.setSubtotal(item.getSubtotal());
+			return itemDto;
+		}).collect(Collectors.toList());
+		dto.setOrderItemsDtos(itemsDto);
+		return dto;
 	}
 
-	// 查詢所有訂單
+	// --- 查詢 ---
 	@Override
 	public List<OrderBackendDTO> findAllOrders() {
-		List<Order> orders = orderDao.findAll(Sort.by(Sort.Direction.ASC, "orderId"));
-		return orders.stream().map(this::convertToBackendDTO).collect(Collectors.toList());
-		//order -> this.convertToBackendDTO(order)
+		return orderDao.findAll().stream().map(this::convertToBackendDTO) // 呼叫剛才寫的轉換方法
+				.collect(Collectors.toList());
 	}
 
-	// 分頁_未使用
-	@Override
-	public Page<OrderBackendDTO> findOrdersWithPagination(int page, int size) {
-		// 分頁參數：page (從 0 開始)，size (每頁筆數)
-		Pageable pageable = PageRequest.of(page, size, Sort.by("orderId").ascending());
-		Page<Order> orderPage = orderDao.findAll(pageable);
-
-		// 將分頁結果轉換為 DTO
-		return orderPage.map(this::convertToBackendDTO);
-	}
-
-	// 查詢單筆訂單
 	@Override
 	public OrderBackendDTO getOrderDetailsAsDTO(Integer orderId) {
-		// 查詢訂單，若不存在則拋出 NoSuchElementException
-		Order order = orderDao.findById(orderId)
-				.orElseThrow(() -> new NoSuchElementException("訂單不存在，ID: " + orderId));
-		// 將訂單實體轉換為 DTO
-		return convertToBackendDTO(order);
-	}
-	
-	
-
-	// 刪除訂單
-	@Override
-	public boolean deleteOrderById(Integer orderId) {
-		try {
-			Order order = orderDao.findById(orderId)
-					.orElseThrow(() -> new RuntimeException("訂單不存在，ID: " + orderId));
-			orderDao.delete(order); // 依賴 CascadeType.ALL，自動刪除細項
-			return true;
-		} catch (Exception e) {
-			e.printStackTrace();
-			return false;
-		}
+		return orderDao.findById(orderId).map(this::convertToBackendDTO).orElse(null);
 	}
 
-	// 為已存在的訂單新增訂單細項_未使用到
 	@Override
-	public List<OrderItems> insertItemsToExistingOrder(Integer orderId, List<OrderItems> items) {
-		Order order = orderDao.findById(orderId).orElseThrow(() -> new RuntimeException("訂單不存在，ID: " + orderId));
-		for (OrderItems item : items) {
-			item.setOrder(order);
-		}
-		return orderItemsDao.saveAll(items);
+	public List<OrderFrontendDTO> getOrdersForFrontendByUserId(Integer userId) {
+		return orderDao.findByUserId(userId).stream().map(this::convertToFrontendDTO).collect(Collectors.toList());
 	}
 
-	// 更新單一訂單細項_未使用到
 	@Override
-	public OrderItems updateOrderItem(OrderItems updatedItem) {
-		// 檢查訂單細項是否存在
-		OrderItems existingItem = orderItemsDao.findById(updatedItem.getOrderitemId())
-				.orElseThrow(() -> new RuntimeException("訂單細項不存在，ID: " + updatedItem.getOrderitemId()));
-
-		// 更新允許的字段
-		existingItem.setQuantity(updatedItem.getQuantity());
-		existingItem.setUnitPrice(updatedItem.getUnitPrice());
-		existingItem.setDiscount(updatedItem.getDiscount());
-
-		// 保存更新後的細項
-		existingItem = orderItemsDao.save(existingItem);
-
-		// 更新訂單總金額
-		Order order = existingItem.getOrder();
-		List<OrderItems> items = new ArrayList<>(order.getOrderItemsBeans());
-		calculateOrderTotal(order, items);
-		orderDao.save(order); // 保存更新後的訂單主檔
-
-		return existingItem;
+	public List<OrderFrontendDTO> getOrdersByUserIdAndStatus(Integer userId, String status) {
+		return orderDao.findByUserIdAndOrderStatus(userId, status).stream().map(this::convertToFrontendDTO)
+				.collect(Collectors.toList());
 	}
 
-	// 插入訂單與訂單細項
+	// --- CRUD ---
 	@Override
-	public OrderBackendDTO insertOrderWithItems(Order orderBean, List<OrderItems> items) {
-		// 設置細項的 subtotal 並與訂單關聯
-		for (OrderItems item : items) {
-			// 確保 product_id 已設置
-			if (item.getProducts() == null || item.getProducts().getProductId() == null) {
-				throw new RuntimeException("產品資訊未正確設置");
-			}
-
-			// 確保 subtotal 被計算
-			BigDecimal subtotal = item.getUnitPrice()
-					.subtract(item.getDiscount() != null ? item.getDiscount() : BigDecimal.ZERO)
-					.multiply(BigDecimal.valueOf(item.getQuantity()));
-			item.setSubtotal(subtotal); // 設置小計
-
-			// 關聯訂單
-			item.setOrder(orderBean);
-		}
-
-		// 計算訂單總金額
-		calculateOrderTotal(orderBean, items);
-
-		// 保存訂單及細項
-		orderDao.save(orderBean);
+	public OrderBackendDTO insertOrderWithItems(Order order, List<OrderItems> items) {
+		orderDao.save(order);
+		items.forEach(item -> item.setOrder(order));
 		orderItemsDao.saveAll(items);
-
-		return convertToBackendDTO(orderBean);
+		return convertToBackendDTO(order);
 	}
 
 	@Override
 	public OrderBackendDTO updateOrder(Integer orderId, Order updatedOrder) {
-		// 查詢舊訂單
-		Order existingOrder = orderDao.findById(orderId)
-				.orElseThrow(() -> new RuntimeException("訂單不存在，ID: " + orderId));
-
-		// 僅更新允許變動的欄位
-		existingOrder.setOrderStatus(updatedOrder.getOrderStatus());
-		existingOrder.setReceiveName(updatedOrder.getReceiveName());
-		existingOrder.setEmail(updatedOrder.getEmail());
-		existingOrder.setPhoneNumber(updatedOrder.getPhoneNumber());
-		existingOrder.setAddress(updatedOrder.getAddress());
-		existingOrder.setUpdatedAt(new Timestamp(System.currentTimeMillis())); // 更新時間戳
-
-		// 保存更新後的訂單
-		orderDao.save(existingOrder);
-
-		// 將更新後的訂單轉換為 DTO 並返回
-		return convertToBackendDTO(existingOrder);
+		return orderDao.findById(orderId).map(existingOrder -> {
+			existingOrder.setReceiveName(updatedOrder.getReceiveName());
+			existingOrder.setEmail(updatedOrder.getEmail());
+			existingOrder.setPhoneNumber(updatedOrder.getPhoneNumber());
+			existingOrder.setAddress(updatedOrder.getAddress());
+			existingOrder.setOrderStatus(updatedOrder.getOrderStatus());
+			existingOrder.setPaymentMethod(updatedOrder.getPaymentMethod());
+			existingOrder.setTotalAmount(updatedOrder.getTotalAmount());
+			existingOrder.setFinalAmount(updatedOrder.getFinalAmount());
+			// 建立時間不動，更新時間交由 @PreUpdate
+			Order saved = orderDao.save(existingOrder);
+			return convertToBackendDTO(saved);
+		}).orElse(null);
 	}
 
-	// 計算訂單總金額
-	/*
-	 * 在 calculateOrderTotal 方法中加入對商品表格的查詢，抓取特價價格（specialPrice）。如果沒有特價，則使用原價計算。
-	 */
 	@Override
-	public void calculateOrderTotal(Order order, List<OrderItems> items) {
-		 BigDecimal totalAmount = BigDecimal.ZERO;  // 訂單總金額（原價 * 數量）
-		    BigDecimal discountAmount = BigDecimal.ZERO; // 訂單總折扣金額
-
-		    // 計算商品的總金額和折扣
-		    for (OrderItems item : items) {
-		        // 查詢商品的特價（如果有）
-		        BigDecimal specialPrice = item.getProducts().getSpecialPrice();
-		        BigDecimal unitPrice = item.getProducts().getPrice(); // 原價
-
-		        // 計算商品的小計：原價 - (原價 - 特價) * 數量
-		        BigDecimal itemSubtotal;
-		        if (specialPrice != null) {
-		            // 商品的小計：原價 - (原價 - 特價) * 數量
-		            itemSubtotal = unitPrice.subtract(unitPrice.subtract(specialPrice)).multiply(BigDecimal.valueOf(item.getQuantity()));
-		            // 累加折扣金額（每個商品的折扣金額）
-		            BigDecimal itemDiscount = unitPrice.subtract(specialPrice).multiply(BigDecimal.valueOf(item.getQuantity()));
-		            discountAmount = discountAmount.add(itemDiscount);
-		        } else {
-		            // 如果沒有特價，則小計為原價 * 數量
-		            itemSubtotal = unitPrice.multiply(BigDecimal.valueOf(item.getQuantity()));
-		        }
-
-		        // 累加商品的小計到訂單總金額（訂單總金額是原價 * 數量的加總）
-		        totalAmount = totalAmount.add(unitPrice.multiply(BigDecimal.valueOf(item.getQuantity())));
-		        
-		        // 設置該商品的小計
-		        item.setSubtotal(itemSubtotal);
-		    }
-
-		    // 計算點數折扣（每 10 點對應 1 元）
-		    if (order.getPointsDiscount() > 0) {
-		        BigDecimal pointsDiscount = BigDecimal.valueOf(order.getPointsDiscount()).divide(BigDecimal.valueOf(10), 2, RoundingMode.DOWN);
-		        discountAmount = discountAmount.add(pointsDiscount); // 累加點數折扣
-		    }
-
-		    // 設置訂單的金額資訊
-		    order.setTotalAmount(totalAmount); // 訂單總金額 = 原價 * 數量
-		    order.setDiscountAmount(discountAmount); // 訂單總折扣金額 = 商品折扣 + 點數折扣
-		    order.setFinalAmount(totalAmount.subtract(discountAmount)); // 最終金額 = 總金額 - 總折扣金額
+	public boolean deleteOrderById(Integer orderId) {
+		if (orderDao.existsById(orderId)) {
+			orderDao.deleteById(orderId);
+			return true;
 		}
-	
-	
-		private void calculateOrderTotal1(Order order, List<OrderItems> items) {
-			 BigDecimal totalAmount = BigDecimal.ZERO;  // 訂單總金額（原價 * 數量）
-			    BigDecimal discountAmount = BigDecimal.ZERO; // 訂單總折扣金額
-	
-			    // 計算商品的總金額和折扣
-	//		    for (OrderItems item : items) {
-	//		        // 查詢商品的特價（如果有）
-	//		        BigDecimal specialPrice = item.getProducts().getSpecialPrice();
-	//		        BigDecimal unitPrice = item.getProducts().getPrice(); // 原價
-	//
-	//		        // 計算商品的小計：原價 - (原價 - 特價) * 數量
-	//		        BigDecimal itemSubtotal;
-	//		        if (specialPrice != null) {
-	//		            // 商品的小計：原價 - (原價 - 特價) * 數量
-	//		            itemSubtotal = unitPrice.subtract(unitPrice.subtract(specialPrice).multiply(BigDecimal.valueOf(item.getQuantity())));
-	//		            // 累加折扣金額（每個商品的折扣金額）
-	//		            BigDecimal itemDiscount = unitPrice.subtract(specialPrice).multiply(BigDecimal.valueOf(item.getQuantity()));
-	//		            discountAmount = discountAmount.add(itemDiscount);
-	//		        } else {
-	//		            // 如果沒有特價，則小計為原價 * 數量
-	//		            itemSubtotal = unitPrice.multiply(BigDecimal.valueOf(item.getQuantity()));
-	//		        }
-	//
-	//		        // 累加商品的小計到訂單總金額（訂單總金額是原價 * 數量的加總）
-	//		        totalAmount = totalAmount.add(unitPrice.multiply(BigDecimal.valueOf(item.getQuantity())));
-	//		        
-	//		        // 設置該商品的小計
-	//		        item.setSubtotal(itemSubtotal);
-	//		    }
-	
-			    // 計算點數折扣（每 10 點對應 1 元）
-			    if (order.getPointsDiscount() > 0) {
-			        BigDecimal pointsDiscount = BigDecimal.valueOf(order.getPointsDiscount()).divide(BigDecimal.valueOf(10), 2, RoundingMode.DOWN);
-			        discountAmount = discountAmount.add(pointsDiscount); // 累加點數折扣
-			    }
-	
-			    // 設置訂單的金額資訊
-			    order.setTotalAmount(totalAmount); // 訂單總金額 = 原價 * 數量
-			    order.setDiscountAmount(discountAmount); // 訂單總折扣金額 = 商品折扣 + 點數折扣
-			    order.setFinalAmount(totalAmount.subtract(discountAmount)); // 最終金額 = 總金額 - 總折扣金額
-			}
-
-	//========================================================================================================================	
-	
-	// 前台使用者查詢
-	// 將 OrderBean 轉換為 OrderFrontendDTO
-	public OrderFrontendDTO convertToFrontendDTO(Order order) {
-	    // 格式化日期
-	    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-
-	    // 轉換訂單細項
-	    List<OrderItemFrontendDTO> orderItemDTOs = order.getOrderItemsBeans().stream().map(item -> {
-	        OrderItemFrontendDTO orderItemDTO = new OrderItemFrontendDTO();
-	        orderItemDTO.setProductName(item.getProducts().getProductName()); // 商品名稱
-	        orderItemDTO.setQuantity(item.getQuantity());                    // 購買數量
-	        orderItemDTO.setUnitPrice(item.getUnitPrice());                  // 單價
-	        orderItemDTO.setDiscount(item.getDiscount());                    // 折扣
-	        orderItemDTO.setSubtotal(item.getSubtotal());                    // 小計
-	        orderItemDTO.setSpecialPrice(item.getProducts().getSpecialPrice()); // 特別價格
-	        return orderItemDTO;
-	    }).collect(Collectors.toList());
-
-	    // 轉換訂單主資訊
-	    OrderFrontendDTO orderDTO = new OrderFrontendDTO();
-	    orderDTO.setOrderId(order.getOrderId());                            // 訂單編號
-	    orderDTO.setReceiveName(order.getReceiveName());                    // 收件人姓名
-	    orderDTO.setEmail(order.getEmail());                                // 收件人電子信箱
-	    orderDTO.setPhoneNumber(order.getPhoneNumber());                    // 收件人電話
-	    orderDTO.setAddress(order.getAddress());                            // 收件人地址
-	    orderDTO.setOrderStatus(order.getOrderStatus());                    // 訂單狀態
-	    orderDTO.setPaymentMethod(order.getPaymentMethod());                // 付款方式
-	    orderDTO.setTotalAmount(order.getTotalAmount() != null ? order.getTotalAmount().toPlainString() : "0");            // 總金額
-	    orderDTO.setPointsDiscount(order.getPointsDiscount()); // 點數折抵
-        orderDTO.setDiscountAmount(order.getDiscountAmount() != null ? order.getDiscountAmount().toPlainString() : "0");         // 折扣金額
-        orderDTO.setFinalAmount(order.getFinalAmount() != null ? order.getFinalAmount().toPlainString() : "0");            // 最終金額
-        orderDTO.setOrderDate(order.getOrderDate() != null ? formatter.format(order.getOrderDate()) : "");             // 訂單日期
-        orderDTO.setUpdatedAt(order.getUpdatedAt() != null ? formatter.format(order.getUpdatedAt()) : "");             // 更新日期
-	    orderDTO.setOrderItemsDtos(orderItemDTOs);                          // 細項 DTO
-	    return orderDTO;
+		return false;
 	}
 
-	// 查詢指定用戶的「所有」訂單（包含訂單細項）
-	@Override
-	public List<OrderFrontendDTO> getOrdersForFrontendByUserId(Integer userId) {
-		// 查詢該用戶的訂單
-		List<Order> orders = orderDao.findByUserId(userId);
-
-		// 使用轉換方法轉換為前台的 DTO
-		return orders.stream().map(this::convertToFrontendDTO) // 使用 convertToFrontendDTO 方法
-				.collect(Collectors.toList());
-	}
-	
-	// 查詢指定用戶的「特定」訂單（包含訂單細項）
-	@Override
-	public OrderFrontendDTO getOrderDetailForFrontend(Integer userId, Integer orderId) {
-	    // 查詢該用戶的訂單
-	    Order order = orderDao.findByUserIdAndOrderId(userId, orderId);
-
-	    // 如果訂單不存在，返回 null
-	    if (order == null) {
-	        return null;
-	    }
-
-	    // 使用轉換方法將訂單轉換為前台需要的 DTO
-	    return convertToFrontendDTO(order);
-	}
-	
-	// 查詢指定用戶的「狀態」訂單
-	@Override
-	public List<OrderFrontendDTO> getOrdersByUserIdAndStatus(Integer userId, String status) {
-		// 查詢該用戶的訂單，並根據訂單狀態過濾
-	    List<Order> orders = orderDao.findByUserIdAndOrderStatus(userId, status);
-
-	    // 將查詢到的訂單轉換為前台的 DTO
-	    return orders.stream().map(this::convertToFrontendDTO)
-	                 .collect(Collectors.toList());
-	}
-
-	// Cart -> Order
-	// 創建訂單的方法
-	// 不串金流
+	// --- 業務邏輯 ---
 	@Override
 	public OrderBackendDTO createOrder(CartTurntoOrderDTO orderRequest) {
 		Order order = new Order();
+		// 設定基本資料，範例：
+		order.setUserId(orderRequest.getUserId());
+		order.setReceiveName(orderRequest.getReceiveName());
+		order.setEmail(orderRequest.getEmail());
+		order.setPhoneNumber(orderRequest.getPhoneNumber());
+		order.setAddress(orderRequest.getAddress());
+		order.setOrderStatus("Pending");
+		order.setPaymentMethod(orderRequest.getPaymentMethod());
 
-	    try {
-	        // 設定訂單的收件人資料
-	        MemberForCartFrontendDTO recipient = orderRequest.getRecipient();
-	        order.setReceiveName(recipient.getReceiveName());
-	        order.setEmail(recipient.getEmail());
-	        order.setPhoneNumber(recipient.getPhone());
-	        order.setAddress(recipient.getAddress());
-	        order.setPaymentMethod(recipient.getPaymentMethod());
-
-	        // 查看傳入的 userid
-	        System.out.println("Recipient userid: " + recipient.getUserid());  // print recipient 的 userid
-
-	        // 設置 userid
-	        order.setUserId(recipient.getUserid());  // 確保設置 userid
-
-	        // 設定訂單狀態
-	        // 設定訂單狀態
-	        if ("貨到付款".equals(recipient.getPaymentMethod())) {
-	            order.setOrderStatus("處理中");  // 貨到付款，訂單狀態為「處理中」
-	        } 
-
-	        // 計算總金額
-	        BigDecimal totalAmount = BigDecimal.ZERO;
-	        List<OrderItems> orderItems = new ArrayList<>();
-	        for (CartItemFrontendDTO cartItem : orderRequest.getOrderItems()) {
-	            OrderItems item = new OrderItems();
-	            Optional<Products> productOptional = productDao.findById(cartItem.getProductId());
-
-	            if (productOptional.isPresent()) {
-	                Products product = productOptional.get();
-	                item.setProducts(product);
-	                item.setQuantity(cartItem.getQuantity());
-	                item.setUnitPrice(cartItem.getUnitPrice());
-	                item.setDiscount(cartItem.getDiscount());
-
-	                BigDecimal subtotal = (cartItem.getUnitPrice().subtract(cartItem.getDiscount()))
-	                        .multiply(BigDecimal.valueOf(cartItem.getQuantity()));
-	                item.setSubtotal(subtotal);
-
-	                item.setOrder(order);  // 設定訂單關聯
-	                totalAmount = totalAmount.add(subtotal);  // 累加小計
-
-	                orderItems.add(item);
-	            } else {
-	                // 如果商品 ID 不存在
-	                throw new RuntimeException("Product not found for ID: " + cartItem.getProductId());
-	            }
-	        }
-
-	        order.setOrderItemsBeans(new HashSet<>(orderItems));
-	        
-	        // 呼叫 calculateOrderTotal 方法來計算訂單總金額和最終金額
-	        calculateOrderTotal(order, orderItems);
-	        System.out.println("Order Data: " + order);
-	        // 儲存訂單到資料庫
-	        order = orderDao.save(order);
-	        
-	        
-	     // 更新購物車商品狀態為 4（已購買）
-	        for (CartItemFrontendDTO cartItem : orderRequest.getOrderItems()) {
-	            // 透過 CartItemsDao 查詢這些商品
-	            Optional<CartItems> optionalCartItem = cartItemsDao.findByCartItemIdAndIsValid(cartItem.getCartItemId(), 0);
-	            if (optionalCartItem.isPresent()) {
-	                CartItems item = optionalCartItem.get();
-	                item.setIsValid(4);  // 更新商品狀態為 4（已購買）
-	                cartItemsDao.save(item);  // 儲存更新後的商品狀態
-	            }
-	        }
-
-	        
-	        // 轉換為 DTO 並返回
-	        return convertToBackendDTO(order);
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	        throw new RuntimeException("Error creating order: " + e.getMessage());  // 顯示詳細錯誤
-	    }
-	}
-	
-	// 串金流
-	@Override
-	public OrderBackendDTO createOrderWithP(CartTurntoOrderDTO orderRequest) {
-		Order order = new Order();
-
-	    try {
-	        // 設定訂單的收件人資料
-	        MemberForCartFrontendDTO recipient = orderRequest.getRecipient();
-	        
-	        // 如果 receiveName 為 null，則使用 userName 來作為 receiveName
-	        String receiveName = Optional.ofNullable(recipient.getReceiveName()).orElse(recipient.getUserName());
-	        order.setReceiveName(receiveName);  // 設置收件人名稱
-
-	        order.setEmail(recipient.getEmail());
-	        order.setPhoneNumber(recipient.getPhone());
-	        order.setAddress(recipient.getAddress());
-	        order.setPaymentMethod(recipient.getPaymentMethod());
-
-	        // 查看傳入的 userid 
-	        System.out.println("Recipient userid: " + recipient.getUserid());  // print recipient 的 userid
-	        System.out.println("Receive Name in createOrder: " + recipient.getReceiveName()); // print recipient 的 receiveName
-
-	        // 設置 userid
-	        order.setUserId(recipient.getUserid());  // 確保設置 userid
-
-	        // 設定訂單狀態
-	        // 根據付款方式設置訂單狀態
-	        if ("信用卡".equals(recipient.getPaymentMethod())) {
-	            order.setOrderStatus("未付款");
-	        } else {
-	            order.setOrderStatus("處理中");
-	        }
-
-	        // 初始化總金額和總折扣
-	        List<OrderItems> orderItems = new ArrayList<>();
-	        //BigDecimal totalAmount = BigDecimal.ZERO;  // 計算訂單的總金額
-	        //BigDecimal discountAmount = BigDecimal.ZERO;  // 計算訂單的總折扣
-	        
-	        for (CartItemFrontendDTO cartItem : orderRequest.getOrderItems()) {
-	            OrderItems item = new OrderItems();
-	            Optional<Products> productOptional = productDao.findById(cartItem.getProductId());
-
-	            if (productOptional.isPresent()) {
-	                Products product = productOptional.get();
-	                item.setProducts(product);
-	                item.setQuantity(cartItem.getQuantity());
-	                
-	                
-	                // 計算折扣：若有特價則折扣 = 原價 - 特價，若無則為 0
-	                BigDecimal unitPrice = product.getPrice(); // 使用商品原價作為單價
-	                BigDecimal discount = product.getSpecialPrice() != null && product.getSpecialPrice().compareTo(BigDecimal.ZERO) > 0
-	                    ? product.getPrice().subtract(product.getSpecialPrice()) // 折扣 = 原價 - 特價
-	                    : BigDecimal.ZERO; // 沒有特價則折扣為 0
-	                
-	                // 計算小計：(原價 - 折扣) * 數量
-	                BigDecimal subtotal = (unitPrice.subtract(discount))
-	                        .multiply(BigDecimal.valueOf(cartItem.getQuantity()));
-
-	                // 更新折扣、單價與小計
-	                item.setDiscount(discount);
-	                item.setUnitPrice(unitPrice);
-	                item.setSubtotal(subtotal);
-	                System.out.println("Product: " + cartItem.getProductId());
-	                System.out.println("Unit Price: " + unitPrice);
-	                System.out.println("Discount: " + discount);
-	                System.out.println("Quantity: " + cartItem.getQuantity());
-	                System.out.println("Subtotal: " + subtotal);
-
-	                // 累加訂單的總金額（原價 * 數量）
-	                //BigDecimal itemTotalAmount = cartItem.getUnitPrice().multiply(BigDecimal.valueOf(cartItem.getQuantity()));
-	                //totalAmount = totalAmount.add(itemTotalAmount);
-	                
-	                // 累加訂單的總折扣（每個商品的折扣金額）
-	                //BigDecimal itemDiscountAmount = cartItem.getDiscount().multiply(BigDecimal.valueOf(cartItem.getQuantity()));
-	                //discountAmount = discountAmount.add(itemDiscountAmount);
-
-	                item.setOrder(order);  // 設定訂單關聯
-	                // 在插入前檢查 OrderItems 的值
-	                System.out.println("OrderItem: " + item.getUnitPrice() + ", " + item.getDiscount() + ", " + item.getSubtotal());
-	                orderItems.add(item);
-	            } else {
-	                // 如果商品 ID 不存在
-	                throw new RuntimeException("Product not found for ID: " + cartItem.getProductId());
-	            }
-	        }
-
-	        order.setOrderItemsBeans(new HashSet<>(orderItems));
-	        
-	        
-	        // 呼叫 calculateOrderTotal 方法來計算訂單總金額和最終金額
-	        calculateOrderTotal(order, orderItems);
-	        //System.out.println("Order Data: " + order);
-	        
-	        // 儲存訂單到資料庫
-	        order = orderDao.save(order);
-	        
-	        // 更新購物車商品狀態為 4（已購買）
-	        for (CartItemFrontendDTO cartItem : orderRequest.getOrderItems()) {
-	            // 透過 CartItemsDao 查詢這些商品
-	            Optional<CartItems> optionalCartItem = cartItemsDao.findByCartItemIdAndIsValid(cartItem.getCartItemId(), 0);
-	            if (optionalCartItem.isPresent()) {
-	                CartItems item = optionalCartItem.get();
-	                item.setIsValid(4);  // 更新商品狀態為 4（已購買）
-	                cartItemsDao.save(item);  // 儲存更新後的商品狀態
-	            }
-	        }
-	        
-	        // 轉換為 DTO 並返回
-	        OrderBackendDTO orderBackendDTO = convertToBackendDTO(order);
-	        
-	        // 設置訂單的總金額、折扣和最終金額
-	        // 將 BigDecimal 轉為 String
-	        orderBackendDTO.setTotalAmount(order.getTotalAmount().setScale(0, RoundingMode.HALF_UP).toString());
-	        orderBackendDTO.setDiscountAmount(order.getDiscountAmount().setScale(0, RoundingMode.HALF_UP).toString());
-	        orderBackendDTO.setFinalAmount(order.getFinalAmount().setScale(0, RoundingMode.HALF_UP).toString());
-	        
-	        // 轉換為 DTO 並返回
-	        return orderBackendDTO;
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	        throw new RuntimeException("Error creating order: " + e.getMessage());  // 顯示詳細錯誤
-	    }
-	}
-	
-	// 更新訂單狀態為支付成功
-	public void paymentSuccess(Integer orderId) {
-	    Order order = orderDao.findById(orderId)
-	            .orElseThrow(() -> new RuntimeException("訂單不存在，ID: " + orderId));
-	    
-	    // 更新訂單狀態為已付款
-	    order.setOrderStatus("已付款");
-	    order.setUpdatedAt(new Timestamp(System.currentTimeMillis()));  // 更新時間
-
-	    orderDao.save(order);  // 保存更新後的訂單
+		List<OrderItems> orderItems = new ArrayList<>();
+		for (CartItemDTO cartItem : orderRequest.getCartItems()) {
+			OrderItems item = new OrderItems();
+			item.setOrder(order);
+			item.setQuantity(cartItem.getQuantity());
+			// 從商品資料庫載入商品並設定
+			Products product = productDao.findById(cartItem.getProductId())
+					.orElseThrow(() -> new RuntimeException("Product not found"));
+			item.setProducts(product);
+			item.setUnitPrice(product.getPrice());
+			item.setDiscount(product.getPrice()
+					.subtract(product.getSpecialPrice() != null ? product.getSpecialPrice() : product.getPrice()));
+			item.setSubtotal((item.getUnitPrice().subtract(item.getDiscount()))
+					.multiply(BigDecimal.valueOf(item.getQuantity())));
+			orderItems.add(item);
+		}
+		order.setOrderItems(new HashSet<>(orderItems));
+		calculateOrderTotal(order, orderItems);
+		orderDao.save(order);
+		return convertToBackendDTO(order);
 	}
 
+		@Override
+		public void calculateOrderTotal(Order order, List<OrderItems> items) {
+			if (order == null || items == null)
+				return; // 直接用 return; 表示「結束方法、什麼都不做」
+			BigDecimal totalAmount = BigDecimal.ZERO;
+			BigDecimal finalAmount = BigDecimal.ZERO;
+			for (OrderItems item : items) {
+				Products product = item.getProducts();
+				BigDecimal price = product.getPrice();
+				BigDecimal specialPrice = product.getSpecialPrice();
+				// 原價
+				item.setUnitPrice(price);
+				// 折扣計算
+				if (specialPrice != null && specialPrice.compareTo(BigDecimal.ZERO) > 0) {
+					item.setDiscount(price.subtract(specialPrice)); // subtract() 就是做減法，也就是「左邊減右邊」
+				} else {
+					item.setDiscount(BigDecimal.ZERO);
+					specialPrice = price; // 沒有特價就用原價
+				}
+				// 小計計算
+				BigDecimal subtotal = price.subtract(item.getDiscount())
+																		.multiply(BigDecimal.valueOf(item.getQuantity()));
+				item.setSubtotal(subtotal);
+				// 累加總金額（原價 * 數量）
+				totalAmount = totalAmount.add(price.multiply(BigDecimal.valueOf(item.getQuantity())));
+				// 累加最終金額（特價 * 數量）
+				finalAmount = finalAmount.add(specialPrice.multiply(BigDecimal.valueOf(item.getQuantity())));
+			}
+			// 設定訂單總額
+			order.setTotalAmount(totalAmount);
+			order.setFinalAmount(finalAmount);
+		}
+
+		@Override
+		public void paymentSuccess(Integer orderId) {
+			orderDao.findById(orderId).ifPresent(order -> {
+				order.setOrderStatus("Paid");
+				orderDao.save(order);
+				// 這裡可以放後續的業務邏輯，如發送郵件通知
+			});
+		}
 }

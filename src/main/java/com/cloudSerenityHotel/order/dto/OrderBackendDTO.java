@@ -16,8 +16,6 @@ public class OrderBackendDTO {
 	private String orderStatus; // 訂單狀態
 	private String paymentMethod; // 付款方式
 	private String totalAmount; // 格式化的訂單總金額
-	private int pointsDiscount; // 點數折抵(不確定的功能 先保留)
-    private String discountAmount; // 格式化的折扣金額
     private String finalAmount; // 格式化的最終金額
     //將日期類型（Timestamp）轉為字串，方便前端處理。
     private String orderDate; // 格式化的訂單建立日期

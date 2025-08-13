@@ -15,14 +15,4 @@ public class CartItemFrontendDTO {
     private BigDecimal discount; // 折扣金額
     private BigDecimal subtotal; // 小計
     
-    public CartItemFrontendDTO(int cartItemId, int productId, String productName, String imageUrl, int quantity, BigDecimal unitPrice, BigDecimal discount, BigDecimal subtotal) {
-    	this.cartItemId = cartItemId;
-    	this.productId = productId;
-    	this.productName = productName;
-        this.imageUrl = imageUrl;
-        this.quantity = quantity;
-        this.unitPrice = unitPrice;
-        this.discount = discount;
-        this.subtotal = subtotal;
-    }
 }

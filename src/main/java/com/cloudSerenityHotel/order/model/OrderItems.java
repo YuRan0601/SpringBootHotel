@@ -43,11 +43,11 @@ public class OrderItems implements Serializable {
 	private Integer quantity; 
 	
 	@Column(name = "unit_price")
-	// 單價（訂單中確定的價格）
+	// 單價(原價)
 	private BigDecimal unitPrice; 
 	
 	@Column(name = "discount")
-	// 單項商品的折扣金額
+	// 單項商品的折扣金額(原價-特價)
 	private BigDecimal discount; 
 	
 	@Column(name = "subtotal")
@@ -57,9 +57,6 @@ public class OrderItems implements Serializable {
 	// 多對一的關聯：一個訂單細項對應一個訂單
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "order_id")
-	
-	// 改使用DTO
-	// 不序列化 `OrderBean`，避免循環
 	private Order order; // 這樣做會將 `order_id` 映射到 `Order` 實體
 	
 	// 多對一：商品

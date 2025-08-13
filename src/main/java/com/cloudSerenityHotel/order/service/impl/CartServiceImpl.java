@@ -25,13 +25,12 @@ import com.cloudSerenityHotel.user.model.UserRepository;
 
 import jakarta.transaction.Transactional;
 
-//JPA 的 save 方法會根據物件是否有主鍵來自動選擇是執行「新增」還是「更新」。
 @Service
 @Transactional // 自動交易管理員
 public class CartServiceImpl implements CartService{
 	
 	@Autowired
-	private OrderDao orderDao; // 注入 OrderDao
+	private OrderDao orderDao; 
 
 	@Autowired
 	private CartDao cartDao;

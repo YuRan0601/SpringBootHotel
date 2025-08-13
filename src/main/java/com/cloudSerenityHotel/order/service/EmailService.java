@@ -52,7 +52,7 @@ public class EmailService {
         StringBuilder itemList = new StringBuilder();
         BigDecimal totalAmount = BigDecimal.ZERO;  // 總金額
         BigDecimal discountAmount = BigDecimal.ZERO; // 總折扣
-        for (OrderItems item : dbOrder.getOrderItemsBeans()) {
+        for (OrderItems item : dbOrder.getOrderItems()) {
             String productName = item.getProducts().getProductName();
             int quantity = item.getQuantity();
             BigDecimal unitPrice = item.getUnitPrice();
