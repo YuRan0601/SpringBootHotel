@@ -10,11 +10,17 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.stereotype.Service;
+
 import com.cloudSerenityHotel.order.dto.OrderBackendDTO;
 import com.cloudSerenityHotel.order.dto.OrderItemBackendDTO;
 import com.google.gson.Gson;
 import com.opencsv.CSVWriter;
 
+import jakarta.transaction.Transactional;
+
+@Service
+@Transactional // 自動交易管理員
 public class OrderExportService {
 	
 	// 根據訂單狀態篩選並匯出資料，並根據格式選擇匯出方式

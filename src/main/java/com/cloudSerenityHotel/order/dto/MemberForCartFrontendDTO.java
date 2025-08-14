@@ -1,6 +1,7 @@
 package com.cloudSerenityHotel.order.dto;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter @Setter
@@ -9,9 +10,8 @@ public class MemberForCartFrontendDTO {
     private String receiveName; // 收件人名稱
     private String userName;    // 會員姓名
     private String email;
-    private String userIdentity; // 管理員或會員身份
     private String phone;
     private String address; // 地址可能為空
     private String paymentMethod; // 新增付款方式
-    
+  
 }

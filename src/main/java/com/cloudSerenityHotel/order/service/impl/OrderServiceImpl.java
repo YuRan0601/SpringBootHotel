@@ -2,14 +2,17 @@ package com.cloudSerenityHotel.order.service.impl;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.cloudSerenityHotel.order.dao.CartItemsDao;
+
 import com.cloudSerenityHotel.order.dao.OrderDao;
 import com.cloudSerenityHotel.order.dao.OrderItemsDao;
+import com.cloudSerenityHotel.order.dto.CartItemFrontendDTO;
 import com.cloudSerenityHotel.order.dto.CartTurntoOrderDTO;
 import com.cloudSerenityHotel.order.dto.OrderBackendDTO;
 import com.cloudSerenityHotel.order.dto.OrderFrontendDTO;
@@ -17,6 +20,7 @@ import com.cloudSerenityHotel.order.dto.OrderItemBackendDTO;
 import com.cloudSerenityHotel.order.dto.OrderItemFrontendDTO;
 import com.cloudSerenityHotel.order.model.Order;
 import com.cloudSerenityHotel.order.model.OrderItems;
+import com.cloudSerenityHotel.order.service.EmailService;
 import com.cloudSerenityHotel.order.service.OrderService;
 import com.cloudSerenityHotel.product.dao.ProductRepository;
 import com.cloudSerenityHotel.product.model.ProductImages;
@@ -29,13 +33,14 @@ import jakarta.transaction.Transactional;
 public class OrderServiceImpl implements OrderService {
 
 	@Autowired
-	private OrderDao orderDao;
+	private OrderDao orderDao; // 操作訂單主檔的 DAO
 	@Autowired
-	private OrderItemsDao orderItemsDao;
+	private OrderItemsDao orderItemsDao; // 操作訂單明細的 DAO
 	@Autowired
 	private ProductRepository productDao;
+
 	@Autowired
-	private CartItemsDao cartItemsDao;
+	private EmailService emailService;
 
 	// --- 後台 / 前台 DTO 轉換 ---
 	@Override
@@ -184,38 +189,57 @@ public class OrderServiceImpl implements OrderService {
 	}
 
 	// --- 業務邏輯 ---
+	
+	// CartTurntoOrderDTO = 前端傳來的 "購物車轉訂單請求"
+	// OrderBackendDTO = 後端回給前端的 "訂單資料"
 	@Override
 	public OrderBackendDTO createOrder(CartTurntoOrderDTO orderRequest) {
-		Order order = new Order();
-		// 設定基本資料，範例：
-		order.setUserId(orderRequest.getUserId());
-		order.setReceiveName(orderRequest.getReceiveName());
-		order.setEmail(orderRequest.getEmail());
-		order.setPhoneNumber(orderRequest.getPhoneNumber());
-		order.setAddress(orderRequest.getAddress());
-		order.setOrderStatus("Pending");
-		order.setPaymentMethod(orderRequest.getPaymentMethod());
-
-		List<OrderItems> orderItems = new ArrayList<>();
-		for (CartItemDTO cartItem : orderRequest.getCartItems()) {
-			OrderItems item = new OrderItems();
-			item.setOrder(order);
-			item.setQuantity(cartItem.getQuantity());
-			// 從商品資料庫載入商品並設定
-			Products product = productDao.findById(cartItem.getProductId())
-					.orElseThrow(() -> new RuntimeException("Product not found"));
-			item.setProducts(product);
-			item.setUnitPrice(product.getPrice());
-			item.setDiscount(product.getPrice()
-					.subtract(product.getSpecialPrice() != null ? product.getSpecialPrice() : product.getPrice()));
-			item.setSubtotal((item.getUnitPrice().subtract(item.getDiscount()))
-					.multiply(BigDecimal.valueOf(item.getQuantity())));
-			orderItems.add(item);
-		}
-		order.setOrderItems(new HashSet<>(orderItems));
-		calculateOrderTotal(order, orderItems);
-		orderDao.save(order);
-		return convertToBackendDTO(order);
+		 // Step 1: 建立新的 Order 物件（訂單主檔）
+	    Order order = new Order();
+	    // 從 orderRequest 的 recipient（收件人資料）填入基本資訊
+	    order.setUserId(orderRequest.getRecipient().getUserid());                // 設定會員ID
+	    order.setReceiveName(orderRequest.getRecipient().getReceiveName());      // 設定收件人姓名
+	    order.setEmail(orderRequest.getRecipient().getEmail());                  // 設定收件人Email
+	    order.setPhoneNumber(orderRequest.getRecipient().getPhone());            // 設定收件人電話
+	    order.setAddress(orderRequest.getRecipient().getAddress());              // 設定收件人地址
+	    order.setOrderStatus("Pending"); // 訂單狀態: Pending = 待處理
+	    order.setPaymentMethod(orderRequest.getRecipient().getPaymentMethod());  // 設定付款方式
+	    // Step 2: 建立訂單明細列表（OrderItems）
+	    List<OrderItems> orderItems = new ArrayList<>();
+	    // 遍歷前端傳來的購物車品項
+	    for (CartItemFrontendDTO cartItem : orderRequest.getOrderItems()) {
+	        // 建立一個新的訂單明細物件
+	        OrderItems item = new OrderItems();
+	        // 關聯這個明細到訂單主檔（多對一）
+	        item.setOrder(order);
+	        // 設定購買數量
+	        item.setQuantity(cartItem.getQuantity());
+	        // 從資料庫查詢該商品（確保存在）
+	        Products product = productDao.findById(cartItem.getProductId())
+	            .orElseThrow(() -> new RuntimeException("Product not found"));
+	        // 關聯商品資料
+	        item.setProducts(product);
+	        // 設定單價（用原價）
+	        item.setUnitPrice(product.getPrice());
+	        // 計算折扣金額 = 原價 - 特價（若沒有特價，折扣 = 0）
+	        item.setDiscount(product.getPrice()
+	            .subtract(product.getSpecialPrice() != null ? product.getSpecialPrice() : product.getPrice()));
+	        // 計算小計 = (單價 - 折扣) × 數量
+	        item.setSubtotal(
+	            (item.getUnitPrice().subtract(item.getDiscount()))
+	            .multiply(BigDecimal.valueOf(item.getQuantity()))
+	        );
+	        // 把這個明細加到訂單明細清單
+	        orderItems.add(item);
+	    }
+	    // Step 3: 把明細清單轉成 Set 並放入 Order（因為 Order 裡的型別是 Set）
+	    order.setOrderItems(new HashSet<>(orderItems));
+	    // Step 4: 計算訂單總金額（加總所有明細小計）
+	    calculateOrderTotal(order, orderItems);
+	    // Step 5: 儲存到資料庫（同時儲存主檔和明細）
+	    orderDao.save(order);
+	    // Step 6: 轉成後端用的 DTO 回傳（避免直接傳 Entity）
+	    return convertToBackendDTO(order);
 	}
 
 		@Override
@@ -253,10 +277,17 @@ public class OrderServiceImpl implements OrderService {
 
 		@Override
 		public void paymentSuccess(Integer orderId) {
-			orderDao.findById(orderId).ifPresent(order -> {
-				order.setOrderStatus("Paid");
-				orderDao.save(order);
-				// 這裡可以放後續的業務邏輯，如發送郵件通知
-			});
+			Order dbOrder = orderDao.findById(orderId)
+		            					.orElseThrow(() -> new RuntimeException("訂單不存在，ID: " + orderId));
+		    // 防止重複更新 & 寄信
+		    if ("Paid".equals(dbOrder.getOrderStatus())) {
+		        System.out.println("訂單已標記為已付款，略過更新與寄信");
+		        return;}
+		    // 更新訂單狀態
+		    dbOrder.setOrderStatus("Paid"); // 訂單狀態: Paid = 已付款
+		    orderDao.save(dbOrder);
+		    // 呼叫 EmailService直接給完整的訂單資料， 發送付款成功通知
+		    emailService.sendPaymentSuccessEmail(dbOrder);
 		}
+
 }

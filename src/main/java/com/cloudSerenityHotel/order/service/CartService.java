@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.cloudSerenityHotel.order.dto.CartItemFrontendDTO;
 import com.cloudSerenityHotel.order.dto.MemberForCartFrontendDTO;
+import com.cloudSerenityHotel.order.model.Cart;
 import com.cloudSerenityHotel.order.model.CartItems;
 
 public interface CartService {
@@ -15,7 +16,9 @@ public interface CartService {
     MemberForCartFrontendDTO getMemberForCart(int userId);
 
     // --- 購物車 CRUD ---
-    void addToCart(Integer userId, Integer productId, int quantity);
+    Cart createNewCart(Integer userId);
+    CartItems createNewCartItem(Cart cart, Integer productId, int quantity);
+    boolean addToCart(Integer userId, Integer productId, int quantity);
     List<CartItemFrontendDTO> getCartItems(Integer userId);
     void removeFromCart(Integer userId, Integer productId);
     void clearCart(Integer userId);

@@ -8,26 +8,23 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import com.cloudSerenityHotel.order.dao.OrderDao;
 import com.cloudSerenityHotel.order.dto.PaymentDTO;
 import com.cloudSerenityHotel.order.model.Order;
 
+@Service
+@Transactional
 public class PaymentService {
-	
-	@Autowired
-	private OrderDao orderDao;  // 注入 OrderDao 來查詢 Order 實體
-	
-    @Autowired
-    private EmailService emailService;	// 注入 EmailService
 
-    /*@Autowired
-    private OrderServiceImpl orderServiceImpl;  // 注入 OrderServiceImpl
-     */
-	
+    @Autowired
+    private OrderDao orderDao;
+    @Autowired
+    private OrderService orderService; 
+
 	@Value("${ecpay.merchantId}")
     private String MERCHANT_ID;
 
@@ -43,64 +40,68 @@ public class PaymentService {
     @Value("${ngrok.baseURL}")
     private String NGROK_BASEURL;
     
-    // 處理支付回調
+    /**
+     * 處理金流回調
+     */
     public void processPaymentReturn(Map<String, String> responseParams) {
     	// 取得回傳的 CheckMacValue
         String receivedCheckMacValue = responseParams.get("CheckMacValue");
-        
         responseParams.remove("CheckMacValue");
-        
         // 生成本地的 CheckMacValue
         String myCheckMacValue = generateCheckMacValue(responseParams);
-        
         // 印出來，方便檢查
-        System.out.println("回傳的 CheckMacValue: " + receivedCheckMacValue);
-        System.out.println("生成本地的 CheckMacValue: " + myCheckMacValue);
-        
+//        System.out.println("回傳的 CheckMacValue: " + receivedCheckMacValue);
+//        System.out.println("生成本地的 CheckMacValue: " + myCheckMacValue);
         // 檢查 CheckMacValue 是否一致
         if (!myCheckMacValue.equalsIgnoreCase(receivedCheckMacValue)) {
-            throw new RuntimeException("CheckMacValue 驗證失敗");
-        }
-
+            throw new RuntimeException("CheckMacValue 驗證失敗");}
         // 取得訂單 ID
-        String orderId = responseParams.get("MerchantTradeNo").split("t")[0];
+        String orderIdStr  = responseParams.get("MerchantTradeNo").split("t")[0];
         String rtnCode = responseParams.get("RtnCode");
-
-        // 根據支付結果更新訂單狀態
-        /*if ("1".equals(rtnCode)) {
-            // 支付成功，更新訂單狀態
-            Order dbOrder = orderDao.findById(Integer.parseInt(orderId))
-                    .orElseThrow(() -> new RuntimeException("訂單不存在，ID: " + orderId));
-
-            // 更新訂單狀態為已付款
-            dbOrder.setOrderStatus("已付款");
-            orderDao.save(dbOrder);  // 保存更新後的訂單
-
-            // 發送郵件
-            emailService.sendPaymentSuccessEmail(dbOrder);
-        } else {
-            throw new RuntimeException("支付失敗");
-        }*/
-        
-        //修正版
+     // 如果金流回傳成功，交給 OrderService 處理
         if ("1".equals(rtnCode)) {
-        	// 支付成功，更新訂單狀態
-            Order dbOrder = orderDao.findById(Integer.parseInt(orderId))
-                    .orElseThrow(() -> new RuntimeException("訂單不存在，ID: " + orderId));
-            //防止「重複」寄信
-            if (!"已付款".equals(dbOrder.getOrderStatus())) {
-            	// 更新訂單狀態為已付款
-                dbOrder.setOrderStatus("已付款");
-                orderDao.save(dbOrder);
-                emailService.sendPaymentSuccessEmail(dbOrder);
-            } else {
-                System.out.println("訂單已標記為已付款，略過寄信");
-            }
+            Integer orderId = Integer.parseInt(orderIdStr);
+            orderService.paymentSuccess(orderId);
         } else {
-            throw new RuntimeException("支付失敗");
+            throw new RuntimeException("支付失敗，RtnCode=" + rtnCode);
         }
     }
-
+    
+    /**
+     * 產生付款表單
+     */
+    public String createPayment(PaymentDTO paymentDTO) {
+    	Order dbOrder = orderDao.findById(paymentDTO.getOrderId())
+                .orElseThrow(() -> new RuntimeException("訂單不存在，ID: " + paymentDTO.getOrderId()));
+        if (!"未付款".equals(dbOrder.getOrderStatus())) {
+            return "訂單狀態無法進行付款";}
+        Map<String, String> params = new HashMap<>();
+        String RETURN_URL = NGROK_BASEURL + "/CloudSerenityHotel/Order/paymentResult";
+        String merchantTradeNo = paymentDTO.getOrderId() + "t" + System.currentTimeMillis();
+        params.put("MerchantID", MERCHANT_ID);
+        params.put("MerchantTradeNo", merchantTradeNo);
+        params.put("MerchantTradeDate", new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(new Date()));
+        params.put("PaymentType", "aio");
+        params.put("TotalAmount", paymentDTO.getFinalAmount().toString());
+        params.put("TradeDesc", "信用卡支付");
+        params.put("ItemName", paymentDTO.getProductName());
+        params.put("ChoosePayment", "Credit");
+        params.put("ReturnURL", RETURN_URL);
+        params.put("ClientBackURL", "http://localhost:5173/front/member/Order");
+        params.put("CheckMacValue", generateCheckMacValue(params));
+        // 生成 HTML 表單
+        StringBuilder form = new StringBuilder();
+        form.append("<form id='ecpay-form' action='").append(PAYMENT_URL).append("' method='post'>");
+        for (Map.Entry<String, String> entry : params.entrySet()) {
+            form.append("<input type='hidden' name='").append(entry.getKey())
+                .append("' value='").append(entry.getValue()).append("'>");}
+        form.append("<button type='submit'>前往付款</button>");
+        form.append("</form>");
+        form.append("<script>document.getElementById('ecpay-form').submit();</script>");
+        return form.toString();
+    }
+    
+    /* -------------------- 私有輔助方法 -------------------- */
     // 用來生成 CheckMacValue 的方法
     private String generateCheckMacValue(Map<String, String> params) {
         String sortedParams = params.entrySet().stream()
@@ -142,55 +143,6 @@ public class PaymentService {
             return hexString.toString();
         } catch (Exception e) {
             throw new RuntimeException("MD5 加密失敗", e);
-        }
-    }
-
-    // 處理訂單支付請求
-    public String createPayment(PaymentDTO paymentDTO) {
-        Map<String, String> params = new HashMap<>();
-
-        // 直接通過 OrderDao 查詢 Order 實體
-        Order dbOrder = orderDao.findById(paymentDTO.getOrderId())
-                .orElseThrow(() -> new RuntimeException("訂單不存在，ID: " + paymentDTO.getOrderId()));
-        System.out.println(dbOrder.getOrderStatus());
-
-        if (dbOrder.getOrderStatus().equals("未付款")) {
-            String RETURN_URL = NGROK_BASEURL + "/CloudSerenityHotel/Order/paymentResult";
-
-            String merchantTradeNo = paymentDTO.getOrderId() + "t" + System.currentTimeMillis(); // 訂單ID後加上時間戳
-            
-            // 設定參數
-            params.put("MerchantID", MERCHANT_ID);
-            params.put("MerchantTradeNo", merchantTradeNo);
-            params.put("MerchantTradeDate", new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(new Date()));
-            params.put("PaymentType", "aio");
-            params.put("TotalAmount", paymentDTO.getFinalAmount().toString());
-            params.put("TradeDesc", "信用卡支付");
-            params.put("ItemName", paymentDTO.getProductName());
-            params.put("ChoosePayment", "Credit");  // 付款方式
-            params.put("ReturnURL", RETURN_URL);
-            params.put("ClientBackURL", "http://localhost:5173/front/member/Order");
-            params.put("CheckMacValue", generateCheckMacValue(params));
-
-            // 印出所有請求參數
-            System.out.println("發送給綠界的請求參數：");
-            for (Map.Entry<String, String> entry : params.entrySet()) {
-                System.out.println(entry.getKey() + "=" + entry.getValue());
-            }
-            
-            // 生成表單並發送
-            StringBuilder form = new StringBuilder();
-            form.append("<form id='ecpay-form' action='").append(PAYMENT_URL).append("' method='post'>");
-            for (Map.Entry<String, String> entry : params.entrySet()) {
-                form.append("<input type='hidden' name='").append(entry.getKey()).append("' value='").append(entry.getValue()).append("'>");
-            }
-            form.append("<button type='submit'>前往付款</button>");
-            form.append("</form>");
-            form.append("<script>document.getElementById('ecpay-form').submit();</script>");
-
-            return form.toString();
-        } else {
-            return "訂單狀態無法進行付款";
         }
     }
 }
