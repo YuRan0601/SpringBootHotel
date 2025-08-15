@@ -148,9 +148,23 @@ public class OrderServiceImpl implements OrderService {
 	}
 
 	@Override
+	public OrderFrontendDTO getOrderDetailForFrontend(Integer userId, Integer orderId) {
+	    Order order = orderDao.findByUserIdAndOrderId(userId, orderId);
+	    return order != null ? convertToFrontendDTO(order) : null;
+	}
+	
+	@Override
 	public List<OrderFrontendDTO> getOrdersByUserIdAndStatus(Integer userId, String status) {
 		return orderDao.findByUserIdAndOrderStatus(userId, status).stream().map(this::convertToFrontendDTO)
 				.collect(Collectors.toList());
+	}
+	
+	@Override
+	public List<OrderBackendDTO> getOrdersByStatus(String status) {
+	    return orderDao.findByOrderStatus(status)
+	                   .stream()
+	                   .map(this::convertToBackendDTO)
+	                   .collect(Collectors.toList());
 	}
 
 	// --- CRUD ---
@@ -193,53 +207,48 @@ public class OrderServiceImpl implements OrderService {
 	// CartTurntoOrderDTO = 前端傳來的 "購物車轉訂單請求"
 	// OrderBackendDTO = 後端回給前端的 "訂單資料"
 	@Override
-	public OrderBackendDTO createOrder(CartTurntoOrderDTO orderRequest) {
-		 // Step 1: 建立新的 Order 物件（訂單主檔）
-	    Order order = new Order();
-	    // 從 orderRequest 的 recipient（收件人資料）填入基本資訊
-	    order.setUserId(orderRequest.getRecipient().getUserid());                // 設定會員ID
-	    order.setReceiveName(orderRequest.getRecipient().getReceiveName());      // 設定收件人姓名
-	    order.setEmail(orderRequest.getRecipient().getEmail());                  // 設定收件人Email
-	    order.setPhoneNumber(orderRequest.getRecipient().getPhone());            // 設定收件人電話
-	    order.setAddress(orderRequest.getRecipient().getAddress());              // 設定收件人地址
-	    order.setOrderStatus("Pending"); // 訂單狀態: Pending = 待處理
-	    order.setPaymentMethod(orderRequest.getRecipient().getPaymentMethod());  // 設定付款方式
-	    // Step 2: 建立訂單明細列表（OrderItems）
+	public Order createOrderEntity(CartTurntoOrderDTO orderRequest) {
+		Order order = new Order();
+	    // Step 1: 基本資料
+	    order.setUserId(orderRequest.getRecipient().getUserid());
+	    order.setReceiveName(orderRequest.getRecipient().getReceiveName());
+	    order.setEmail(orderRequest.getRecipient().getEmail());
+	    order.setPhoneNumber(orderRequest.getRecipient().getPhone());
+	    order.setAddress(orderRequest.getRecipient().getAddress());
+	    order.setOrderStatus("Pending");
+	    order.setPaymentMethod(orderRequest.getRecipient().getPaymentMethod());
+	    // Step 2: 明細列表
 	    List<OrderItems> orderItems = new ArrayList<>();
-	    // 遍歷前端傳來的購物車品項
 	    for (CartItemFrontendDTO cartItem : orderRequest.getOrderItems()) {
-	        // 建立一個新的訂單明細物件
 	        OrderItems item = new OrderItems();
-	        // 關聯這個明細到訂單主檔（多對一）
 	        item.setOrder(order);
-	        // 設定購買數量
 	        item.setQuantity(cartItem.getQuantity());
-	        // 從資料庫查詢該商品（確保存在）
 	        Products product = productDao.findById(cartItem.getProductId())
 	            .orElseThrow(() -> new RuntimeException("Product not found"));
-	        // 關聯商品資料
 	        item.setProducts(product);
-	        // 設定單價（用原價）
 	        item.setUnitPrice(product.getPrice());
-	        // 計算折扣金額 = 原價 - 特價（若沒有特價，折扣 = 0）
 	        item.setDiscount(product.getPrice()
 	            .subtract(product.getSpecialPrice() != null ? product.getSpecialPrice() : product.getPrice()));
-	        // 計算小計 = (單價 - 折扣) × 數量
 	        item.setSubtotal(
 	            (item.getUnitPrice().subtract(item.getDiscount()))
 	            .multiply(BigDecimal.valueOf(item.getQuantity()))
 	        );
-	        // 把這個明細加到訂單明細清單
 	        orderItems.add(item);
 	    }
-	    // Step 3: 把明細清單轉成 Set 並放入 Order（因為 Order 裡的型別是 Set）
+	    // Step 3: 設定明細
 	    order.setOrderItems(new HashSet<>(orderItems));
-	    // Step 4: 計算訂單總金額（加總所有明細小計）
+	    // Step 4: 計算總金額
 	    calculateOrderTotal(order, orderItems);
-	    // Step 5: 儲存到資料庫（同時儲存主檔和明細）
+	    // Step 5: 儲存
 	    orderDao.save(order);
-	    // Step 6: 轉成後端用的 DTO 回傳（避免直接傳 Entity）
-	    return convertToBackendDTO(order);
+	    return order; // 回傳完整實體
+	}
+	
+	// 給 Controller 調用的版本
+	@Override
+	public OrderBackendDTO createOrder(CartTurntoOrderDTO orderRequest) {
+	    Order order = createOrderEntity(orderRequest); // 建立並拿到實體
+	    return convertToBackendDTO(order); // 轉 DTO 回給前端
 	}
 
 		@Override

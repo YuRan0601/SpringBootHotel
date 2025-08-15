@@ -54,6 +54,8 @@ public class CartServiceImpl implements CartService {
 		BigDecimal discount = originalPrice.subtract((specialPrice != null) ? specialPrice : originalPrice);
 		// 小計 = (特價或原價) × 數量
 		dto.setSubtotal(originalPrice.subtract(discount).multiply(BigDecimal.valueOf(cartItem.getQuantity())));
+		// 這裡要確保 imageUrl 有取到
+//	    dto.setImageUrl(item.getProducts().getImageUrl()); // <-- 確認這個欄位存在於 Products
 		return dto;
 	}
 
@@ -108,83 +110,90 @@ public class CartServiceImpl implements CartService {
 		// 3. 儲存到資料庫並回傳剛新增的購物車明細
 		return cartItemsDao.save(newItem);
 	}
-
+	
+	/*
+	 * 成功 → 回傳 DTO
+	 * 失敗 → 丟 RuntimeException
+	 */
 	@Override
-	public boolean addToCart(Integer userId, Integer productId, int quantity) {
-		// 1. 查詢用戶的購物車，如果不存在則創建新購物車
-	    Cart cart = cartDao.findByUserId(userId).orElseGet(() -> createNewCart(userId));
-	    // 2. 查詢商品，確保商品存在且「已上架」
+	public CartItemFrontendDTO addToCart(Integer userId, Integer productId, int quantity) {
+		 // 1. 查詢用戶的購物車，如果不存在則創建新購物車
+	    Cart cart = cartDao.findByMember_UserId(userId)
+	            .orElseGet(() -> createNewCart(userId));
+	    // 2. 查詢商品，確保商品存在且已上架
 	    Products product = productDao.findById(productId)
-	            						.orElseThrow(() -> new RuntimeException("商品不存在"));
-	    // 3. 商品狀態判斷（必須 `status = 1` 才可加入購物車）
+	            .orElseThrow(() -> new RuntimeException("商品不存在"));
 	    if (product.getStatus() != 1) {
-	    	return false; // 無法加入購物車，回傳 false
+	        throw new RuntimeException("商品未上架，無法加入購物車");
 	    }
-	    // 4. 查詢購物車內的所有該商品的 CartItem（可能有多筆不同狀態的）
-	    List<CartItems> cartItems = cartItemsDao.findByCartCartId(cart.getCartId());
-	    // 5. 找出 **有效的 CartItem（is_valid = 0）**
-	    Optional<CartItems> validCartItem = cartItems.stream()
-	            .filter(item -> item.getProducts().getProductId().equals(productId) && item.getIsValid() == 0)
-	            .findFirst();
-	    if (validCartItem.isPresent()) {
-	        // **如果已有有效 `CartItem`，則合併數量**
-	        CartItems existingItem = validCartItem.get();
+	    // 3. 查詢購物車內的有效 CartItem()
+	    Optional<CartItems> existingItemOpt = cartItemsDao
+	            .findByCartCartIdAndProductsProductIdAndIsValid(cart.getCartId(), productId, 0);
+	    CartItems savedItem;
+	    if (existingItemOpt.isPresent()) {
+	        // 4a. 已存在 → 更新數量與小計
+	        CartItems existingItem = existingItemOpt.get();
 	        existingItem.setQuantity(existingItem.getQuantity() + quantity);
-	        existingItem.setSubtotal(existingItem.getUnitPrice().subtract(existingItem.getDiscount())
-	                .multiply(BigDecimal.valueOf(existingItem.getQuantity()))); // 已經是更新後的數量
-	        cartItemsDao.save(existingItem);
+	        existingItem.setSubtotal(existingItem.getUnitPrice()
+	                .subtract(existingItem.getDiscount())
+	                .multiply(BigDecimal.valueOf(existingItem.getQuantity())));
+	        savedItem = cartItemsDao.save(existingItem);
 	    } else {
-	        // **如果沒有有效 `CartItem`，則新增新紀錄**
-	        createNewCartItem(cart, productId, quantity);
+	        // 4b. 不存在 → 新增購物車明細
+	        savedItem = createNewCartItem(cart, productId, quantity);
 	    }
-	    return true; // 6. 成功加入購物車，回傳 true
+	    // 5. 回傳前端 DTO
+	    return convertToFrontendDTO(savedItem);
 	}
 
 	// --- 取得購物車的所有商品 ---
 	@Override
 	public List<CartItemFrontendDTO> getCartItems(Integer userId) {
-		 // 1. 找到該會員的購物車
-	    Cart cart = cartDao.findByUserId(userId)
-	            .orElseThrow(() -> new RuntimeException("購物車不存在"));
-
-	    // 2. 取得購物車內所有商品
-	    List<CartItems> cartItems = cartItemsDao.findByCartCartId(cart.getCartId());
-
-	    // 3. 過濾無效商品，並檢查商品狀態/價格是否變動
-	    List<CartItemFrontendDTO> result = cartItems.stream()
-	        .peek(item -> {
-	            Products product = item.getProducts();
-
-	            // 商品下架
-	            if (product.getStatus() != 1) {
-	                item.setIsValid(1); // 標記為下架
-	                cartItemsDao.save(item);
-	            } else {
-	                // 檢查單價與折扣
-	                BigDecimal currentUnitPrice = product.getPrice();
-	                BigDecimal currentDiscount = product.getSpecialPrice() != null
-	                        ? product.getPrice().subtract(product.getSpecialPrice())
-	                        : BigDecimal.ZERO;
-
-	                if (item.getUnitPrice().compareTo(currentUnitPrice) != 0
-	                    || item.getDiscount().compareTo(currentDiscount) != 0) {
-	                    item.setIsValid(2); // 標記價格或折扣變動
-	                    cartItemsDao.save(item);
-	                }
-	            }
-	        })
-	        .filter(item -> item.getIsValid() == 0) // 過濾掉無效商品
-	        .map(this::convertToFrontendDTO)       // 轉 DTO
-	        .collect(Collectors.toList());
-
-	    return result;
+		// 1. 找到該會員的購物車
+		Cart cart = cartDao.findByMember_UserId(userId).orElseThrow(() -> new RuntimeException("購物車不存在"));
+		// 2. 取得購物車內所有商品
+		List<CartItems> cartItems = cartItemsDao.findByCartCartId(cart.getCartId());
+		// 3. 過濾無效商品，並檢查商品狀態/價格是否變動
+		List<CartItemFrontendDTO> result = cartItems.stream().peek(item -> {
+			Products product = item.getProducts();
+			// 商品下架檢查
+			if (product.getStatus() == 0) {
+				System.out.println("商品已下架，標記為無效 (is_valid=1)");
+				item.setIsValid(1); // **商品下架**
+				cartItemsDao.save(item);
+			} else {
+				// 確定比較的單價和折扣
+				BigDecimal currentUnitPrice = product.getPrice(); // 單價應該是商品的原價
+				BigDecimal currentDiscount = product.getSpecialPrice() != null
+						&& product.getSpecialPrice().compareTo(BigDecimal.ZERO) > 0
+								? product.getPrice().subtract(product.getSpecialPrice()) // 折扣 = 原價 - 特價
+								: BigDecimal.ZERO; // 無特價時折扣為 0
+				// 比較 `unit_price` 和 `discount`
+				System.out.println("比較單價: 購物車[" + item.getUnitPrice() + "] 商品原價[" + currentUnitPrice + "]");
+				System.out.println("比較折扣: 購物車[" + item.getDiscount() + "] 商品折扣[" + currentDiscount + "]");
+				if (item.getUnitPrice().compareTo(currentUnitPrice) != 0) {
+					System.out.println("商品單價發生變動，標記為無效 (is_valid=2)");
+					item.setIsValid(2);
+					cartItemsDao.save(item);
+				} else if (item.getDiscount().compareTo(currentDiscount) != 0) {
+					System.out.println("商品折扣發生變動，標記為無效 (is_valid=2)");
+					item.setIsValid(2);
+					cartItemsDao.save(item);
+				} else {
+					System.out.println("商品有效，保留");
+				}
+			}
+		}).filter(item -> item.getIsValid() == 0) // 過濾掉無效商品
+				.map(this::convertToFrontendDTO) // 轉 DTO
+				.collect(Collectors.toList());
+		return result;
 	}
 
 	// --- 移除購物車中的單一商品_假刪除IsValid(3) ---
 	@Override
 	public void removeFromCart(Integer userId, Integer productId) {
 		// 1. 查詢購物車
-	    Cart cart = cartDao.findByUserId(userId)
+	    Cart cart = cartDao.findByMember_UserId(userId)
 	            			.orElseThrow(() -> new RuntimeException("購物車不存在"));
 	    // 2. 查詢有效的商品記錄
 	    CartItems cartItem = cartItemsDao.findByCartCartIdAndProductsProductIdAndIsValid(cart.getCartId(), productId, 0)
@@ -196,7 +205,7 @@ public class CartServiceImpl implements CartService {
 	// --- 清空購物車_假刪除IsValid(3)---
 	@Override
 	public void clearCart(Integer userId) {
-		Cart cart = cartDao.findByUserId(userId)
+		Cart cart = cartDao.findByMember_UserId(userId)
                 			.orElseThrow(() -> new RuntimeException("購物車不存在"));
         List<CartItems> cartItems = cartItemsDao.findByCartCartId(cart.getCartId());
         cartItems.forEach(item -> {
@@ -209,7 +218,7 @@ public class CartServiceImpl implements CartService {
 	@Override
 	public CartItemFrontendDTO updateCartItem(Integer userId, Integer productId, int newQuantity) {
 		 // 1. 找購物車
-	    Cart cart = cartDao.findByUserId(userId)
+	    Cart cart = cartDao.findByMember_UserId(userId)
 	            			.orElseThrow(() -> new RuntimeException("購物車不存在"));
 	    // 2. 找該商品且有效
 	    CartItems cartItem = cartItemsDao

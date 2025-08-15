@@ -1,6 +1,8 @@
 package com.cloudSerenityHotel.order.service;
 
 import java.math.BigDecimal;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -14,82 +16,101 @@ import com.cloudSerenityHotel.user.service.UserService;
 @Service
 @Transactional
 public class EmailService {
+	
+	private static final Logger logger = LoggerFactory.getLogger(EmailService.class);
 	@Autowired
     private JavaMailSender mailSender;
-	
 	@Autowired
-    private UserService userService;  // 注入 UserService
+    private UserService userService;
 
-	// 通用的發送郵件方法
+	/** 通用寄信方法 */
     public void sendEmail(String to, String subject, String text) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(to);
-        message.setSubject(subject);
-        message.setText(text);
-        mailSender.send(message);
+    	try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setTo(to);
+            message.setSubject(subject);
+            message.setText(text);
+            mailSender.send(message);
+            logger.info("Email 寄送成功給：{}", to);
+        } catch (Exception e) {
+            logger.error("Email 寄送失敗給 {}，原因：{}", to, e.getMessage(), e);
+        }
+    }
+    
+    /** 訂單成立通知（現金/非線上付款） */
+    public void sendOrderCreatedEmail(Order dbOrder) {
+        sendEmailToRecipientAndUser(dbOrder, false);
+    }
+    
+    /** 訂單付款成功通知（信用卡） */
+    public void sendPaymentSuccessEmail(Order dbOrder) {
+        sendEmailToRecipientAndUser(dbOrder, true);
+    }
+    
+    /** 自動判斷是否寄兩封 email */
+    private void sendEmailToRecipientAndUser(Order dbOrder, boolean isPaid) {
+        User user = userService.findMemberById(dbOrder.getUserId());
+        if (user == null || user.getEmail() == null) {
+            logger.error("使用者不存在或 email 為空，無法寄送郵件");
+            return;}
+        String userEmail = user.getEmail();
+        String recipientEmail = dbOrder.getEmail(); // 訂單收件人 email
+        String subject = isPaid ? "您的伴手禮商城訂單付款成功！" : "您的伴手禮商城訂單已成立！";
+        String content = buildOrderEmailContent(dbOrder, user, isPaid);
+        if (recipientEmail != null && !recipientEmail.equalsIgnoreCase(userEmail)) {
+            // 收件人 email 與使用者不同 → 寄兩封
+            sendEmail(recipientEmail, subject, content);
+            sendEmail(userEmail, subject + "（備份）", content);
+        } else {
+            // 相同 → 只寄一次
+            sendEmail(userEmail, subject, content);
+        }
     }
 
-    // 專門處理訂單付款成功後發送郵件的邏輯
-    public void sendPaymentSuccessEmail(Order dbOrder) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        // 明確指定寄件者
-        message.setFrom("cloud.serenity.hotel@gmail.com");
-        // 使用 UserService 根據 userId 查詢使用者資料
-        User user = userService.findMemberById(dbOrder.getUserId());  // 用 userId 查詢
-        // 設置郵件收件人、主旨和內容
-        String email = user.getEmail();  // 使用查詢到的使用者 email
-        message.setTo(email);
-        message.setSubject("您的伴手禮商城訂單付款成功!");
-        System.out.println("sendPaymentSuccessEmail");
-        System.out.println(dbOrder.getUserId());
-        // 生成商品清單
+    /** 共用方法：生成郵件內容 */
+    private String buildOrderEmailContent(Order dbOrder, User user, boolean isPaid) {
         StringBuilder itemList = new StringBuilder();
-        BigDecimal totalAmount = BigDecimal.ZERO;  // 總金額
-        BigDecimal discountAmount = BigDecimal.ZERO; // 總折扣
+        BigDecimal totalAmount = BigDecimal.ZERO;
+        BigDecimal discountAmount = BigDecimal.ZERO;
         for (OrderItems item : dbOrder.getOrderItems()) {
-            String productName = item.getProducts().getProductName();
-            int quantity = item.getQuantity();
             BigDecimal unitPrice = item.getUnitPrice();
             BigDecimal specialPrice = item.getProducts().getSpecialPrice();
-            BigDecimal discount = unitPrice.subtract(specialPrice != null ? specialPrice : BigDecimal.ZERO);
-            // 計算每個商品的總價和折扣
-            BigDecimal itemTotal = unitPrice.multiply(BigDecimal.valueOf(quantity));
-            BigDecimal itemDiscount = discount.multiply(BigDecimal.valueOf(quantity));
-            // 累加總金額和折扣金額
+            BigDecimal discount = BigDecimal.ZERO;
+            if (specialPrice != null && specialPrice.compareTo(BigDecimal.ZERO) > 0) {
+                discount = unitPrice.subtract(specialPrice);}
+            BigDecimal itemTotal = unitPrice.multiply(BigDecimal.valueOf(item.getQuantity()));
+            BigDecimal itemDiscount = discount.multiply(BigDecimal.valueOf(item.getQuantity()));
             totalAmount = totalAmount.add(itemTotal);
             discountAmount = discountAmount.add(itemDiscount);
-            // 生成每個商品的訊息
             itemList.append(String.format("%s (數量: %d, 單價: %s, 特價: %s, 折扣: %s)\n",
-                    productName, quantity, unitPrice.toString(), specialPrice != null ? specialPrice.toString() : "無", itemDiscount.toString()));
+                    item.getProducts().getProductName(),
+                    item.getQuantity(),
+                    unitPrice.toString(),
+                    specialPrice != null ? specialPrice.toString() : "無",
+                    itemDiscount.toString()));
         }
-        // 計算最終金額
         BigDecimal finalAmount = totalAmount.subtract(discountAmount);
-        // 設置郵件內容
-        String userName = user.getUserName();  // 使用查詢到的使用者 userName
-        String orderId = dbOrder.getOrderId().toString();
-        String orderDate = dbOrder.getOrderDate().toString(); // 訂單成立時間
-        String content = String.format("""
-                親愛的 %s 您好，
-                您的伴手禮商城訂單付款成功！
-                訂單編號：%s
-                商品清單：
-                %s
-                訂單成立時間：%s
-                總金額：%s
-                折扣金額：%s
-                最終金額：%s
-                您可以點擊下方連結至會員中心查看訂單狀態：
-                http://localhost:5173/front/member/Order
-                """, userName, orderId, itemList.toString(), orderDate, totalAmount.toString(), discountAmount.toString(), finalAmount.toString());
-        message.setText(content);
-        //寄給客戶之信箱
-        System.out.println("寄出付款成功通知給：" + dbOrder.getEmail());
-        // 發送郵件
-        try {
-            mailSender.send(message);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        String paymentStatus = isPaid ? "付款已完成" : "待付款";
+        return String.format(
+                "親愛的 %s 您好，\n" +
+                "您的伴手禮商城訂單狀態：%s\n" +
+                "訂單編號：%s\n" +
+                "商品清單：\n%s" +
+                "訂單成立時間：%s\n" +
+                "總金額：%s\n" +
+                "折扣金額：%s\n" +
+                "最終金額：%s\n" +
+                "您可以點擊下方連結至會員中心查看訂單狀態：\n" +
+                "http://localhost:5173/front/member/Order\n",
+                user.getUserName(),
+                paymentStatus,
+                dbOrder.getOrderId(),
+                itemList.toString(),
+                dbOrder.getOrderDate(),
+                totalAmount.toString(),
+                discountAmount.toString(),
+                finalAmount.toString()
+        );
     }
     
 }

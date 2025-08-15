@@ -8,5 +8,6 @@ import com.cloudSerenityHotel.order.model.Cart;
 @Repository
 public interface CartDao extends JpaRepository<Cart, Integer>{
 	// 查詢用戶的購物車
-    Optional<Cart> findByUserId(Integer userId);
+    Optional<Cart> findByMember_UserId(Integer userId);
+
 }

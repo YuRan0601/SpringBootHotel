@@ -18,7 +18,7 @@ public interface CartService {
     // --- 購物車 CRUD ---
     Cart createNewCart(Integer userId);
     CartItems createNewCartItem(Cart cart, Integer productId, int quantity);
-    boolean addToCart(Integer userId, Integer productId, int quantity);
+    CartItemFrontendDTO addToCart(Integer userId, Integer productId, int quantity);
     List<CartItemFrontendDTO> getCartItems(Integer userId);
     void removeFromCart(Integer userId, Integer productId);
     void clearCart(Integer userId);

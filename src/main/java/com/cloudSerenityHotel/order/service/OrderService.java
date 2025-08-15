@@ -21,7 +21,9 @@ public interface OrderService {
     List<OrderBackendDTO> findAllOrders();
     OrderBackendDTO getOrderDetailsAsDTO(Integer orderId);
     List<OrderFrontendDTO> getOrdersForFrontendByUserId(Integer userId);
+    OrderFrontendDTO getOrderDetailForFrontend(Integer userId, Integer orderId);
     List<OrderFrontendDTO> getOrdersByUserIdAndStatus(Integer userId, String status);
+    List<OrderBackendDTO> getOrdersByStatus(String status);
 
     // --- CRUD ---
     OrderBackendDTO insertOrderWithItems(Order order, List<OrderItems> items);
@@ -29,6 +31,7 @@ public interface OrderService {
     boolean deleteOrderById(Integer orderId);
 
     // --- 業務邏輯 ---
+    Order createOrderEntity(CartTurntoOrderDTO orderRequest);
     OrderBackendDTO createOrder(CartTurntoOrderDTO orderRequest);
     void calculateOrderTotal(Order order, List<OrderItems> items);
     void paymentSuccess(Integer orderId);
