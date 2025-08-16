@@ -42,8 +42,8 @@ import com.cloudSerenityHotel.product.service.ProductService;
 //		methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE } // 明確允許的請求方法
 //)
 @RestController // 變為JSON格式
-@RequestMapping("/order") // 設定這個 Controller 處理 /Order 開頭的請求
-// 進入點URL -> http://localhost:8080/CloudSerenityHotel/Order/findAllOrders
+@RequestMapping("/order") // 設定這個 Controller 處理 /order 開頭的請求
+// 進入點URL -> http://localhost:8080/CloudSerenityHotel/order
 public class OrderController extends BaseController {
 	private static final long serialVersionUID = 1L;
 

@@ -14,6 +14,7 @@ import com.cloudSerenityHotel.order.dao.OrderDao;
 import com.cloudSerenityHotel.order.dao.OrderItemsDao;
 import com.cloudSerenityHotel.order.dto.CartItemFrontendDTO;
 import com.cloudSerenityHotel.order.dto.CartTurntoOrderDTO;
+import com.cloudSerenityHotel.order.dto.MemberForCartFrontendDTO;
 import com.cloudSerenityHotel.order.dto.OrderBackendDTO;
 import com.cloudSerenityHotel.order.dto.OrderFrontendDTO;
 import com.cloudSerenityHotel.order.dto.OrderItemBackendDTO;
@@ -25,6 +26,8 @@ import com.cloudSerenityHotel.order.service.OrderService;
 import com.cloudSerenityHotel.product.dao.ProductRepository;
 import com.cloudSerenityHotel.product.model.ProductImages;
 import com.cloudSerenityHotel.product.model.Products;
+import com.cloudSerenityHotel.user.model.User;
+import com.cloudSerenityHotel.user.model.UserRepository;
 
 import jakarta.transaction.Transactional;
 
@@ -38,7 +41,8 @@ public class OrderServiceImpl implements OrderService {
 	private OrderItemsDao orderItemsDao; // 操作訂單明細的 DAO
 	@Autowired
 	private ProductRepository productDao;
-
+	@Autowired
+	private UserRepository userDao; // 查詢會員資訊用
 	@Autowired
 	private EmailService emailService;
 
@@ -179,18 +183,22 @@ public class OrderServiceImpl implements OrderService {
 	@Override
 	public OrderBackendDTO updateOrder(Integer orderId, Order updatedOrder) {
 		return orderDao.findById(orderId).map(existingOrder -> {
-			existingOrder.setReceiveName(updatedOrder.getReceiveName());
-			existingOrder.setEmail(updatedOrder.getEmail());
-			existingOrder.setPhoneNumber(updatedOrder.getPhoneNumber());
-			existingOrder.setAddress(updatedOrder.getAddress());
-			existingOrder.setOrderStatus(updatedOrder.getOrderStatus());
-			existingOrder.setPaymentMethod(updatedOrder.getPaymentMethod());
-			existingOrder.setTotalAmount(updatedOrder.getTotalAmount());
-			existingOrder.setFinalAmount(updatedOrder.getFinalAmount());
-			// 建立時間不動，更新時間交由 @PreUpdate
-			Order saved = orderDao.save(existingOrder);
-			return convertToBackendDTO(saved);
-		}).orElse(null);
+	        // 只能修改可變欄位
+	        existingOrder.setReceiveName(updatedOrder.getReceiveName());
+	        existingOrder.setEmail(updatedOrder.getEmail());
+	        existingOrder.setPhoneNumber(updatedOrder.getPhoneNumber());
+	        existingOrder.setAddress(updatedOrder.getAddress());
+	        existingOrder.setOrderStatus(updatedOrder.getOrderStatus());
+
+	        // 不允許修改paymentMethod、totalAmount 與 finalAmount
+	        // existingOrder.setPaymentMethod(updatedOrder.getPaymentMethod());
+	        // existingOrder.setTotalAmount(updatedOrder.getTotalAmount());
+	        // existingOrder.setFinalAmount(updatedOrder.getFinalAmount());
+
+	        Order saved = orderDao.save(existingOrder);
+	        orderDao.flush(); // 強制同步到資料庫與實體
+	        return convertToBackendDTO(saved);
+	    }).orElseThrow(() -> new RuntimeException("訂單不存在，ID: " + orderId));
 	}
 
 	@Override
@@ -209,15 +217,29 @@ public class OrderServiceImpl implements OrderService {
 	@Override
 	public Order createOrderEntity(CartTurntoOrderDTO orderRequest) {
 		Order order = new Order();
-	    // Step 1: 基本資料
+		// 1) 判斷收件人資料
+		MemberForCartFrontendDTO recipient = orderRequest.getRecipient();
+		if (recipient == null || recipient.getUserid() <= 0) {
+		    // 用會員資料
+		    User user = userDao.findById(orderRequest.getRecipient().getUserid()) // 這邊用 orderRequest 本身的 userId
+		                     .orElseThrow(() -> new RuntimeException("會員不存在"));
+		    recipient = new MemberForCartFrontendDTO();
+		    recipient.setUserid(user.getUserId());
+		    recipient.setUserName(user.getUserName());
+		    recipient.setReceiveName(user.getUserName());
+		    recipient.setEmail(user.getEmail());
+		    recipient.setPhone(user.getMember() != null ? user.getMember().getPhone() : null);
+	        recipient.setAddress(user.getMember() != null ? user.getMember().getAddress() : null);
+		}
+	    // 2) 基本資料
 	    order.setUserId(orderRequest.getRecipient().getUserid());
 	    order.setReceiveName(orderRequest.getRecipient().getReceiveName());
 	    order.setEmail(orderRequest.getRecipient().getEmail());
 	    order.setPhoneNumber(orderRequest.getRecipient().getPhone());
 	    order.setAddress(orderRequest.getRecipient().getAddress());
-	    order.setOrderStatus("Pending");
+	    order.setOrderStatus("Pending"); // 待處理
 	    order.setPaymentMethod(orderRequest.getRecipient().getPaymentMethod());
-	    // Step 2: 明細列表
+	    // 3) 明細列表
 	    List<OrderItems> orderItems = new ArrayList<>();
 	    for (CartItemFrontendDTO cartItem : orderRequest.getOrderItems()) {
 	        OrderItems item = new OrderItems();
@@ -235,11 +257,11 @@ public class OrderServiceImpl implements OrderService {
 	        );
 	        orderItems.add(item);
 	    }
-	    // Step 3: 設定明細
+	    // 4) 設定明細
 	    order.setOrderItems(new HashSet<>(orderItems));
-	    // Step 4: 計算總金額
+	    // 5) 計算總金額
 	    calculateOrderTotal(order, orderItems);
-	    // Step 5: 儲存
+	    // 6) 儲存
 	    orderDao.save(order);
 	    return order; // 回傳完整實體
 	}
