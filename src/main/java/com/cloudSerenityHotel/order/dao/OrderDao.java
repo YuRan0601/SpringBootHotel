@@ -2,11 +2,12 @@ package com.cloudSerenityHotel.order.dao;
 
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 import com.cloudSerenityHotel.order.model.Order;
 
 @Repository
-public interface OrderDao extends JpaRepository<Order, Integer>{
+public interface OrderDao extends JpaRepository<Order, Integer>, JpaSpecificationExecutor<Order>{
 
 	// 根據 UserID 查詢訂單
     List<Order> findByUserId(Integer userId);

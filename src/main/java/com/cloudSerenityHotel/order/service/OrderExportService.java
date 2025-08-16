@@ -2,160 +2,121 @@ package com.cloudSerenityHotel.order.service;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.FileOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.stream.Collectors;
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import com.cloudSerenityHotel.order.dto.OrderBackendDTO;
+import com.cloudSerenityHotel.order.dto.OrderBackendDTOWrapper;
 import com.cloudSerenityHotel.order.dto.OrderItemBackendDTO;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.opencsv.CSVWriter;
-
 import jakarta.transaction.Transactional;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Marshaller;
 
 @Service
 @Transactional // 自動交易管理員
+/**
+ * 匯出訂單_商業邏輯
+ */
 public class OrderExportService {
 	
-	// 根據訂單狀態篩選並匯出資料，並根據格式選擇匯出方式
-    public void exportOrdersByStatus(List<OrderBackendDTO> orders, String status, String format, String filePath) throws Exception {
-        // 篩選出符合狀態的訂單
-        List<OrderBackendDTO> filteredOrders = orders.stream()
-                .filter(order -> status.equals(order.getOrderStatus()))  // 根據狀態篩選
-                .collect(Collectors.toList());
+	@Autowired
+	private OrderService orderService;
+	private final String downloadDir = System.getProperty("user.home") + "/Downloads/cloud_serenity_orders/";
 
-        // 根據篩選的結果進行匯出
-        if (filteredOrders.isEmpty()) {
-            System.out.println("沒有符合條件的訂單");
-            return;
-        }
-        
-        // 處理路徑，這個方法會處理相對路徑並創建目錄
-        String finalFilePath = validateAndPreparePath(filePath);
+	/**
+     * 匯出訂單，可指定狀態，格式 CSV、JSON 或 XML
+     *
+     * @param format   匯出格式：csv / json / xml
+     * @param fileName 檔案名稱
+     * @param status   訂單狀態，可為 null 或空字串表示全部
+	 * @throws JAXBException 
+     */
+	public String exportOrders(String format, String fileName, String status) throws IOException, JAXBException {
+		// 1. 取得資料
+		List<OrderBackendDTO> orders;
+		if (status == null || status.isEmpty()) {
+			orders = orderService.findAllOrders(); // 匯出全部
+		} else {
+			orders = orderService.getOrdersByStatus(status); // 依狀態匯出
+		}
+		if (orders.isEmpty()) {
+			System.out.println("沒有符合條件的訂單，匯出取消");
+		    return null;
+		}
+		// 2. 準備路徑
+		File dir = new File(downloadDir);
+		if (!dir.exists())
+			dir.mkdirs();
+		String filePath = downloadDir + fileName;
+		// 3. 根據格式匯出
+		switch (format.toLowerCase()) {
+		case "csv":
+			exportToCSV(orders, filePath);
+			break;
+		case "json":
+			exportToJSON(orders, filePath);
+			break;
+		case "xml": // 新增 XML 支援
+            exportToXML(orders, filePath);
+            break;
+		default:
+			throw new IllegalArgumentException("不支援的格式: " + format);
+		}
+		System.out.println("匯出完成 → " + filePath);
+		return filePath; // 回傳完整路徑
+	}
 
-        // 根據使用者選擇的格式來決定匯出方式
-        switch (format.toLowerCase()) {
-            case "csv":
-                exportOrdersToCSV(filteredOrders, finalFilePath);  // 匯出 CSV
-                break;
-            case "json":
-                exportOrdersToJSON(filteredOrders, finalFilePath);  // 匯出 JSON
-                break;
-            default:
-                throw new IllegalArgumentException("不支援的格式: " + format);  // 如果格式不支援
-        }
-    }
-    
-    // 匯出所有的訂單
-    public void exportAllOrders(List<OrderBackendDTO> orders, String format, String filePath) throws Exception {
-        // 這裡不進行篩選，直接匯出所有的訂單
-        if (orders.isEmpty()) {
-            System.out.println("目前沒有訂單");
-            return;
-        }
-        
-        // 處理路徑，這個方法會處理相對路徑並創建目錄
-        String finalFilePath = validateAndPreparePath(filePath);
-
-        // 根據使用者選擇的格式來決定匯出方式
-        switch (format.toLowerCase()) {
-            case "csv":
-                exportOrdersToCSV(orders, finalFilePath);  // 匯出 CSV
-                break;
-            case "json":
-                exportOrdersToJSON(orders, finalFilePath);  // 匯出 JSON
-                break;
-            default:
-                throw new IllegalArgumentException("不支援的格式: " + format);  // 如果格式不支援
-        }
-    }
-    
-    // 驗證並準備路徑
-    private String validateAndPreparePath(String filePath) {
-        // 檢查是否包含 drive 路徑，處理相對路徑等情況
-        if (filePath == null || filePath.isEmpty()) {
-            throw new IllegalArgumentException("無效的文件路徑");
-        }
-
-        // 如果是相對路徑，拼接到預設路徑
-        if (!filePath.contains(":")) {
-            filePath = "C:/Users/你的使用者名稱/Desktop/" + filePath; // 默認存到桌面
-        }
-
-        // 檢查文件目錄是否存在，如果不存在，則創建
-        File file = new File(filePath);
-        File parentDir = file.getParentFile();
-        if (!parentDir.exists()) {
-            parentDir.mkdirs();
-        }
-        return filePath;
-    }
-	
 	// CSV
-	public void exportOrdersToCSV(List<OrderBackendDTO> orders, String filePath) throws Exception {
-		// 使用 UTF-8 編碼寫入 CSV
-	    try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filePath), StandardCharsets.UTF_8));
-	         CSVWriter csvWriter = new CSVWriter(writer)) {
-	        // 寫入標題行
-	        csvWriter.writeNext(new String[]{
-	                "OrderID", "UserID", "ReceiveName", "Email", "PhoneNumber", "Address",
-	                "OrderStatus", "PaymentMethod", "TotalAmount", "FinalAmount",
-	                "OrderDate", "UpdatedAt", "ProductName", "Quantity", "UnitPrice", "Discount", "Subtotal"
-	        });
+	private void exportToCSV(List<OrderBackendDTO> orders, String filePath) throws IOException {
+		try (BufferedWriter writer = new BufferedWriter(
+				new OutputStreamWriter(new FileOutputStream(filePath), StandardCharsets.UTF_8));
+				CSVWriter csvWriter = new CSVWriter(writer)) {
+			writer.write('\uFEFF'); // UTF-8 BOM，防 Excel 中文亂碼
+			csvWriter.writeNext(new String[] { "OrderID", "UserID", "ReceiveName", "Email", "PhoneNumber", "Address",
+					"OrderStatus", "PaymentMethod", "TotalAmount", "FinalAmount", "OrderDate", "UpdatedAt",
+					"ProductName", "Quantity", "UnitPrice", "Discount", "Subtotal" });
+			for (OrderBackendDTO order : orders) {
+				for (OrderItemBackendDTO item : order.getOrderItemsDtos()) {
+					csvWriter.writeNext(new String[] { String.valueOf(order.getOrderId()),
+							String.valueOf(order.getUserId()), order.getReceiveName(), order.getEmail(),
+							order.getPhoneNumber(), order.getAddress(), order.getOrderStatus(),
+							order.getPaymentMethod(), order.getTotalAmount(), order.getFinalAmount(),
+							order.getOrderDate(), order.getUpdatedAt(), item.getProductName(),
+							String.valueOf(item.getQuantity()), String.valueOf(item.getUnitPrice()),
+							String.valueOf(item.getDiscount()), String.valueOf(item.getSubtotal()) });
+				}
+			}
+		}
+	}
 
-	        // 寫入訂單資料
-	        for (OrderBackendDTO order : orders) {
-	            for (OrderItemBackendDTO item : order.getOrderItemsDtos()) {
-	                csvWriter.writeNext(new String[]{
-	                        String.valueOf(order.getOrderId()),
-	                        String.valueOf(order.getUserId()),
-	                        order.getReceiveName(),
-	                        order.getEmail(),
-	                        order.getPhoneNumber(),
-	                        order.getAddress(),
-	                        order.getOrderStatus(),
-	                        order.getPaymentMethod(),
-	                        order.getTotalAmount(),
-	                        order.getFinalAmount(),
-	                        order.getOrderDate(),
-	                        order.getUpdatedAt(),
-	                        item.getProductName(),
-	                        String.valueOf(item.getQuantity()),
-	                        String.valueOf(item.getUnitPrice()),
-	                        String.valueOf(item.getDiscount()),
-	                        String.valueOf(item.getSubtotal())
-	                });
-	            }
-	        }
-	    }
-	}
-	
 	// JSON
-	public void exportOrdersToJSON(List<OrderBackendDTO> orders, String filePath) throws IOException {
-	    Gson gson = new Gson();
-	    try (FileWriter writer = new FileWriter(filePath)) {
-	        gson.toJson(orders, writer); // Gson 會處理整個 List 和其中的 OrderItemBackendDTO
-	    }
+	private void exportToJSON(List<OrderBackendDTO> orders, String filePath) throws IOException {
+		Gson gson = new GsonBuilder().setPrettyPrinting().create();
+		try (FileWriter writer = new FileWriter(filePath)) {
+			gson.toJson(orders, writer);
+		}
 	}
-	
-	// XML_試不出來
-	/*public void exportOrdersToXML(List<OrderBackendDTO> orders, String filePath) throws JAXBException {
-	    // 創建 JAXBContext 並指定需要轉換的類型
-	    JAXBContext context = JAXBContext.newInstance(OrderBackendDTO.class, OrderItemBackendDTO.class);
-	    
-	    // 創建 Marshaller
-	    Marshaller marshaller = context.createMarshaller();
-	    
-	    // 設置 Marshaller 格式化輸出
-	    marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-	    
-	    // 使用 marshal 將對象轉換為 XML 並寫入檔案
-	    marshaller.marshal(orders, new File(filePath));  // 確保 orders 是 OrderBackendDTO 的集合
-	}*/
+
+	// XML
+	private void exportToXML(List<OrderBackendDTO> orders, String filePath) throws JAXBException {
+		// 1. 建立 JAXBContext
+		JAXBContext context = JAXBContext.newInstance(OrderBackendDTOWrapper.class);
+		// 2. 建立 Marshaller
+		Marshaller marshaller = context.createMarshaller();
+		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true); // 美化輸出
+		// 3. 將 List 包成 Wrapper
+		OrderBackendDTOWrapper wrapper = new OrderBackendDTOWrapper();
+		wrapper.setOrders(orders);
+		// 4. 寫入檔案
+		marshaller.marshal(wrapper, new File(filePath));
+	}
 }

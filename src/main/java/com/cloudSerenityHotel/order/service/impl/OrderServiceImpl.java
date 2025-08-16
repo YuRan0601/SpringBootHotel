@@ -2,19 +2,20 @@ package com.cloudSerenityHotel.order.service.impl;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.cloudSerenityHotel.order.dao.OrderDao;
 import com.cloudSerenityHotel.order.dao.OrderItemsDao;
 import com.cloudSerenityHotel.order.dto.CartItemFrontendDTO;
 import com.cloudSerenityHotel.order.dto.CartTurntoOrderDTO;
-import com.cloudSerenityHotel.order.dto.MemberForCartFrontendDTO;
 import com.cloudSerenityHotel.order.dto.OrderBackendDTO;
 import com.cloudSerenityHotel.order.dto.OrderFrontendDTO;
 import com.cloudSerenityHotel.order.dto.OrderItemBackendDTO;
@@ -26,9 +27,8 @@ import com.cloudSerenityHotel.order.service.OrderService;
 import com.cloudSerenityHotel.product.dao.ProductRepository;
 import com.cloudSerenityHotel.product.model.ProductImages;
 import com.cloudSerenityHotel.product.model.Products;
-import com.cloudSerenityHotel.user.model.User;
-import com.cloudSerenityHotel.user.model.UserRepository;
 
+import jakarta.persistence.criteria.Predicate;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -42,9 +42,9 @@ public class OrderServiceImpl implements OrderService {
 	@Autowired
 	private ProductRepository productDao;
 	@Autowired
-	private UserRepository userDao; // 查詢會員資訊用
-	@Autowired
 	private EmailService emailService;
+//	@Autowired
+//	private UserRepository userDao; // 查詢會員資訊用(因為Order 有關聯，用orderDao)
 
 	// --- 後台 / 前台 DTO 轉換 ---
 	@Override
@@ -136,17 +136,6 @@ public class OrderServiceImpl implements OrderService {
 
 	// --- 查詢 ---
 	@Override
-	public List<OrderBackendDTO> findAllOrders() {
-		return orderDao.findAll().stream().map(this::convertToBackendDTO) // 呼叫剛才寫的轉換方法
-				.collect(Collectors.toList());
-	}
-
-	@Override
-	public OrderBackendDTO getOrderDetailsAsDTO(Integer orderId) {
-		return orderDao.findById(orderId).map(this::convertToBackendDTO).orElse(null);
-	}
-
-	@Override
 	public List<OrderFrontendDTO> getOrdersForFrontendByUserId(Integer userId) {
 		return orderDao.findByUserId(userId).stream().map(this::convertToFrontendDTO).collect(Collectors.toList());
 	}
@@ -163,6 +152,7 @@ public class OrderServiceImpl implements OrderService {
 				.collect(Collectors.toList());
 	}
 	
+	// 過渡 / legacy
 	@Override
 	public List<OrderBackendDTO> getOrdersByStatus(String status) {
 	    return orderDao.findByOrderStatus(status)
@@ -170,7 +160,57 @@ public class OrderServiceImpl implements OrderService {
 	                   .map(this::convertToBackendDTO)
 	                   .collect(Collectors.toList());
 	}
+	
+	// 過渡 / legacy
+	@Override
+	public List<OrderBackendDTO> findAllOrders() {
+		return orderDao.findAll().stream().map(this::convertToBackendDTO) // 呼叫剛才寫的轉換方法
+				.collect(Collectors.toList());
+	}
 
+	// 過渡 / legacy
+	@Override
+	public OrderBackendDTO getOrderDetailsAsDTO(Integer orderId) {
+		return orderDao.findById(orderId).map(this::convertToBackendDTO).orElse(null);
+	}
+
+	// 條件組合查詢
+	@Override
+	public List<OrderBackendDTO> findOrders(
+			Integer orderId,
+	        Integer userId,
+	        LocalDate startDate,
+	        LocalDate endDate,
+	        String paymentMethod,
+	        String orderStatus){
+		Specification<Order> spec = (root, query, cb) -> {
+			List<Predicate> predicates = new ArrayList<>();
+			if (orderId != null) {
+				predicates.add(cb.equal(root.get("orderId"), orderId));
+			}
+			if (userId != null) {
+				predicates.add(cb.equal(root.get("userId"), userId));
+			}
+			if (startDate != null) {
+				predicates.add(cb.greaterThanOrEqualTo(root.get("orderDate"), startDate));
+			}
+			if (endDate != null) {
+				predicates.add(cb.lessThanOrEqualTo(root.get("orderDate"), endDate));
+			}
+			if (paymentMethod != null && !paymentMethod.isEmpty()) {
+				predicates.add(cb.equal(root.get("paymentMethod"), paymentMethod));
+			}
+			if (orderStatus != null && !orderStatus.isEmpty()) {
+				predicates.add(cb.equal(root.get("orderStatus"), orderStatus));
+			}
+			return cb.and(predicates.toArray(new Predicate[0]));
+		};
+		List<Order> orders = orderDao.findAll(spec);
+		return orders.stream()
+	             .map(this::convertToBackendDTO)
+	             .collect(Collectors.toList());
+	}
+	
 	// --- CRUD ---
 	@Override
 	public OrderBackendDTO insertOrderWithItems(Order order, List<OrderItems> items) {
@@ -217,21 +257,7 @@ public class OrderServiceImpl implements OrderService {
 	@Override
 	public Order createOrderEntity(CartTurntoOrderDTO orderRequest) {
 		Order order = new Order();
-		// 1) 判斷收件人資料
-		MemberForCartFrontendDTO recipient = orderRequest.getRecipient();
-		if (recipient == null || recipient.getUserid() <= 0) {
-		    // 用會員資料
-		    User user = userDao.findById(orderRequest.getRecipient().getUserid()) // 這邊用 orderRequest 本身的 userId
-		                     .orElseThrow(() -> new RuntimeException("會員不存在"));
-		    recipient = new MemberForCartFrontendDTO();
-		    recipient.setUserid(user.getUserId());
-		    recipient.setUserName(user.getUserName());
-		    recipient.setReceiveName(user.getUserName());
-		    recipient.setEmail(user.getEmail());
-		    recipient.setPhone(user.getMember() != null ? user.getMember().getPhone() : null);
-	        recipient.setAddress(user.getMember() != null ? user.getMember().getAddress() : null);
-		}
-	    // 2) 基本資料
+	    // 1) 基本資料
 	    order.setUserId(orderRequest.getRecipient().getUserid());
 	    order.setReceiveName(orderRequest.getRecipient().getReceiveName());
 	    order.setEmail(orderRequest.getRecipient().getEmail());
@@ -239,7 +265,7 @@ public class OrderServiceImpl implements OrderService {
 	    order.setAddress(orderRequest.getRecipient().getAddress());
 	    order.setOrderStatus("Pending"); // 待處理
 	    order.setPaymentMethod(orderRequest.getRecipient().getPaymentMethod());
-	    // 3) 明細列表
+	    // 2) 明細列表
 	    List<OrderItems> orderItems = new ArrayList<>();
 	    for (CartItemFrontendDTO cartItem : orderRequest.getOrderItems()) {
 	        OrderItems item = new OrderItems();
@@ -257,20 +283,13 @@ public class OrderServiceImpl implements OrderService {
 	        );
 	        orderItems.add(item);
 	    }
-	    // 4) 設定明細
+	    // 3) 設定明細
 	    order.setOrderItems(new HashSet<>(orderItems));
-	    // 5) 計算總金額
+	    // 4) 計算總金額
 	    calculateOrderTotal(order, orderItems);
-	    // 6) 儲存
+	    // 5) 儲存
 	    orderDao.save(order);
 	    return order; // 回傳完整實體
-	}
-	
-	// 給 Controller 調用的版本
-	@Override
-	public OrderBackendDTO createOrder(CartTurntoOrderDTO orderRequest) {
-	    Order order = createOrderEntity(orderRequest); // 建立並拿到實體
-	    return convertToBackendDTO(order); // 轉 DTO 回給前端
 	}
 
 		@Override

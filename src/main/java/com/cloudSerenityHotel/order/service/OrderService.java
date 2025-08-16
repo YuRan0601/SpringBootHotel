@@ -1,5 +1,6 @@
 package com.cloudSerenityHotel.order.service;
 
+import java.time.LocalDate;
 import java.util.List;
 import com.cloudSerenityHotel.order.dto.CartTurntoOrderDTO;
 import com.cloudSerenityHotel.order.dto.OrderBackendDTO;
@@ -18,12 +19,21 @@ public interface OrderService {
     OrderFrontendDTO convertToFrontendDTO(Order order);
 
     // --- 查詢 ---
-    List<OrderBackendDTO> findAllOrders();
-    OrderBackendDTO getOrderDetailsAsDTO(Integer orderId);
     List<OrderFrontendDTO> getOrdersForFrontendByUserId(Integer userId);
     OrderFrontendDTO getOrderDetailForFrontend(Integer userId, Integer orderId);
     List<OrderFrontendDTO> getOrdersByUserIdAndStatus(Integer userId, String status);
+    // 過渡 / legacy
     List<OrderBackendDTO> getOrdersByStatus(String status);
+    List<OrderBackendDTO> findAllOrders();
+    OrderBackendDTO getOrderDetailsAsDTO(Integer orderId);
+    // 條件組合查詢
+    List<OrderBackendDTO> findOrders(
+	        Integer orderId,
+	        Integer userId,
+	        LocalDate startDate,
+	        LocalDate endDate,
+	        String paymentMethod,
+	        String orderStatus);
 
     // --- CRUD ---
     OrderBackendDTO insertOrderWithItems(Order order, List<OrderItems> items);
@@ -32,7 +42,6 @@ public interface OrderService {
 
     // --- 業務邏輯 ---
     Order createOrderEntity(CartTurntoOrderDTO orderRequest);
-    OrderBackendDTO createOrder(CartTurntoOrderDTO orderRequest);
     void calculateOrderTotal(Order order, List<OrderItems> items);
     void paymentSuccess(Integer orderId);
 }

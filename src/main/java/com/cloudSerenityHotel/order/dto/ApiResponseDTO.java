@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-// 不確定會不會用到
 /*
  * 統一的 API 回應類
  * @param <T> 泛型類型，適用於返回任意數據

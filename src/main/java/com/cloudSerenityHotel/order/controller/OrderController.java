@@ -1,18 +1,11 @@
 package com.cloudSerenityHotel.order.controller;
 
-import java.math.BigDecimal;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,9 +13,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
 import com.cloudSerenityHotel.base.BaseController;
 import com.cloudSerenityHotel.order.dto.ApiResponseDTO;
 import com.cloudSerenityHotel.order.dto.CartTurntoOrderDTO;
@@ -30,13 +23,10 @@ import com.cloudSerenityHotel.order.dto.OrderBackendDTO;
 import com.cloudSerenityHotel.order.dto.OrderFrontendDTO;
 import com.cloudSerenityHotel.order.dto.PaymentDTO;
 import com.cloudSerenityHotel.order.model.Order;
-import com.cloudSerenityHotel.order.model.OrderItems;
 import com.cloudSerenityHotel.order.service.EmailService;
 import com.cloudSerenityHotel.order.service.OrderExportService;
 import com.cloudSerenityHotel.order.service.OrderService;
 import com.cloudSerenityHotel.order.service.PaymentService;
-import com.cloudSerenityHotel.product.model.Products;
-import com.cloudSerenityHotel.product.service.ProductService;
 
 //@CrossOrigin(origins = { "http://localhost:5173" }, // Vue 的本地開發環境域名
 //		methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE } // 明確允許的請求方法
@@ -53,8 +43,6 @@ public class OrderController extends BaseController {
     private PaymentService paymentService;
     @Autowired
     private EmailService emailService;
-    @Autowired
-    private ProductService productService;
 	@Autowired
     private OrderExportService orderExportService;
 
@@ -99,65 +87,25 @@ public class OrderController extends BaseController {
                     .body(new ApiResponseDTO<>(false, e.getMessage(), null));
         }
     }
+    
+    @GetMapping("/export")
+    public ResponseEntity<ApiResponseDTO<String>> exportOrders(
+            @RequestParam String format,
+            @RequestParam(required = false) String status) {
+        try {
+            String fileName = "orders_" + System.currentTimeMillis() + "." + format.toLowerCase();
+            String filePath = orderExportService.exportOrders(format, fileName, status);
+
+            if (filePath == null) { // 沒有資料
+                return ResponseEntity.ok(new ApiResponseDTO<>(true, "沒有符合條件的訂單，匯出取消", null));
+            }
+            return ResponseEntity.ok(new ApiResponseDTO<>(true, "匯出成功", filePath));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponseDTO<>(false, e.getMessage(), null));
+        }
+    }
 	
-	/** 
-     * 1️⃣ 純訂單（現金或非線上支付）
-     * POST /orders
-     */
-    @PostMapping
-    public ResponseEntity<ApiResponseDTO<OrderBackendDTO>> createOrder(
-    		@RequestBody CartTurntoOrderDTO dto) {
-        try {
-        	Order dbOrder = orderService.createOrderEntity(dto); // 拿到 Order 實體
-            emailService.sendOrderCreatedEmail(dbOrder);         // 用實體寄信
-            OrderBackendDTO responseDto = orderService.convertToBackendDTO(dbOrder); // 再轉 DTO
-            return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(new ApiResponseDTO<>(true, "訂單新增成功", responseDto));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new ApiResponseDTO<>(false, e.getMessage(), null));
-        }
-    }
-    
-    /**
-     * 2️⃣ 信用卡付款（生成訂單 + 付款表單）
-     * POST /orders/payment
-     */
-    @PostMapping("/payment")
-    public ResponseEntity<ApiResponseDTO<String>> createOrderWithPayment(
-            @RequestBody CartTurntoOrderDTO dto) {
-        try {
-            // Step 1: 先生成訂單
-            OrderBackendDTO order = orderService.createOrder(dto);
-            // Step 2: 生成付款表單
-            PaymentDTO paymentDTO = new PaymentDTO();
-            paymentDTO.setOrderId(order.getOrderId());
-            paymentDTO.setFinalAmount(new BigDecimal(order.getFinalAmount()));
-            paymentDTO.setProductName("CloudSerenity_Hotel伴手禮商城商品");
-            paymentDTO.setPaymentMethod("Credit"); // 信用卡
-            String paymentForm = paymentService.createPayment(paymentDTO);
-            // 注意：寄信要等付款成功才寄，所以此處不寄信
-            return ResponseEntity.ok(new ApiResponseDTO<>(true, "訂單已生成，請完成支付", paymentForm));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new ApiResponseDTO<>(false, e.getMessage(), null));
-        }
-    }
-    
-    /**
-     * 3️⃣ 金流回調
-     * POST /orders/payment/return
-     */
-    @PostMapping("/payment/return")
-    public ResponseEntity<String> paymentReturn(@RequestParam Map<String, String> allParams) {
-        try {
-            paymentService.processPaymentReturn(allParams);
-            return ResponseEntity.ok("OK"); // 金流平台通常需要回傳 OK
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
-    }
-    
 	// 更新訂單
 	@PutMapping("/{orderId}")
 	public ResponseEntity<ApiResponseDTO<OrderBackendDTO>> updateOrder(
@@ -230,6 +178,64 @@ public class OrderController extends BaseController {
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ApiResponseDTO<>(false, e.getMessage(), null));
+        }
+    }
+    
+    /** 
+     * 1️⃣ 純訂單（現金或非線上支付）
+     * POST /orders
+     */
+    @PostMapping
+    public ResponseEntity<ApiResponseDTO<OrderFrontendDTO>> createOrder(
+    		@RequestBody CartTurntoOrderDTO dto) {
+        try {
+        	Order dbOrder = orderService.createOrderEntity(dto); // 拿到 Order 實體
+            emailService.sendOrderCreatedEmail(dbOrder);         // 用實體寄信
+            OrderFrontendDTO responseDto = orderService.convertToFrontendDTO(dbOrder); // 再轉 DTO
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(new ApiResponseDTO<>(true, "訂單新增成功", responseDto));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ApiResponseDTO<>(false, e.getMessage(), null));
+        }
+    }
+    
+    /**
+     * 2️⃣ 信用卡付款（生成訂單 + 付款表單）
+     * POST /orders/payment
+     */
+    @PostMapping("/payment")
+    public ResponseEntity<ApiResponseDTO<String>> createOrderWithPayment(
+            @RequestBody CartTurntoOrderDTO dto) {
+        try {
+            // Step 1: 先生成訂單
+        	Order dbOrder = orderService.createOrderEntity(dto);
+            // Step 2: 生成付款表單
+            PaymentDTO paymentDTO = new PaymentDTO();
+            paymentDTO.setOrderId(dbOrder.getOrderId());
+            paymentDTO.setFinalAmount(dbOrder.getFinalAmount());
+            paymentDTO.setProductName("CloudSerenity_Hotel伴手禮商城商品");
+            paymentDTO.setPaymentMethod("Credit"); // 信用卡
+            String paymentForm = paymentService.createPayment(paymentDTO);
+            // 注意：寄信要等付款成功才寄，所以此處不寄信
+            return ResponseEntity.ok(new ApiResponseDTO<>(true, "訂單已生成，請完成支付", paymentForm));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ApiResponseDTO<>(false, e.getMessage(), null));
+        }
+    }
+    
+    /**
+     * 3️⃣ 金流回調
+     * POST /orders/payment/return
+     */
+    @PostMapping("/payment/return")
+    public ResponseEntity<String> paymentReturn(@RequestParam Map<String, String> allParams) {
+        try {
+            paymentService.processPaymentReturn(allParams);
+            return ResponseEntity.ok("OK"); // 金流平台通常需要回傳 OK
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
     
