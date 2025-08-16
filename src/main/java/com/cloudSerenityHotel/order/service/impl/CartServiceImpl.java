@@ -17,6 +17,7 @@ import com.cloudSerenityHotel.order.model.Cart;
 import com.cloudSerenityHotel.order.model.CartItems;
 import com.cloudSerenityHotel.order.service.CartService;
 import com.cloudSerenityHotel.product.dao.ProductRepository;
+import com.cloudSerenityHotel.product.model.ProductImages;
 import com.cloudSerenityHotel.product.model.Products;
 import com.cloudSerenityHotel.user.model.Member;
 import com.cloudSerenityHotel.user.model.User;
@@ -54,8 +55,13 @@ public class CartServiceImpl implements CartService {
 		BigDecimal discount = originalPrice.subtract((specialPrice != null) ? specialPrice : originalPrice);
 		// 小計 = (特價或原價) × 數量
 		dto.setSubtotal(originalPrice.subtract(discount).multiply(BigDecimal.valueOf(cartItem.getQuantity())));
-		// 這裡要確保 imageUrl 有取到
-//	    dto.setImageUrl(item.getProducts().getImageUrl()); // <-- 確認這個欄位存在於 Products
+		// 商品主要圖片
+		dto.setImageUrl(cartItem.getProducts().getProductImages().stream()
+		        .filter(ProductImages::getIsPrimary)   // 篩選出 isPrimary = true
+		        .findFirst()                           // 找到第一張主圖
+		        .map(ProductImages::getImageUrl)       // 取出 URL
+		        .orElse(null)                          // 如果沒有主圖就回傳 null
+				);
 		return dto;
 	}
 

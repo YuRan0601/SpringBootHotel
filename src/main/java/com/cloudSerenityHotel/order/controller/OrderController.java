@@ -50,11 +50,11 @@ public class OrderController extends BaseController {
 	@Autowired
 	private OrderService orderService;
 	@Autowired
-	private ProductService productService;
-	@Autowired
     private PaymentService paymentService;
     @Autowired
     private EmailService emailService;
+    @Autowired
+    private ProductService productService;
 	@Autowired
     private OrderExportService orderExportService;
 
