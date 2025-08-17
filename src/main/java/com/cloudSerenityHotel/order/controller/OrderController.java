@@ -24,6 +24,7 @@ import com.cloudSerenityHotel.order.dto.OrderFrontendDTO;
 import com.cloudSerenityHotel.order.dto.PaymentDTO;
 import com.cloudSerenityHotel.order.model.Order;
 import com.cloudSerenityHotel.order.service.EmailService;
+import com.cloudSerenityHotel.order.service.OrderChartService;
 import com.cloudSerenityHotel.order.service.OrderExportService;
 import com.cloudSerenityHotel.order.service.OrderService;
 import com.cloudSerenityHotel.order.service.PaymentService;
@@ -45,13 +46,14 @@ public class OrderController extends BaseController {
     private EmailService emailService;
 	@Autowired
     private OrderExportService orderExportService;
+	@Autowired
+    private OrderChartService orderChartService;
 
 	// ===========================
     // 後台訂單管理
     // ===========================
 	
 	// 查所有訂單
-	// @GetMapping("/findAllOrders")
 	@GetMapping
 	public ResponseEntity<ApiResponseDTO<List<OrderBackendDTO>>> findAllOrders() {
 		try {
@@ -130,6 +132,33 @@ public class OrderController extends BaseController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new ApiResponseDTO<>(false, e.getMessage(), null));
         }
+    }
+    
+    // ===========================
+    // 後台訂單「圖表」查詢
+    // ===========================
+    // 訂單總數
+    @GetMapping("/order/total-count")
+    public Long getTotalOrderCount() {
+        return orderChartService.getTotalOrderCount();
+    }
+
+    // 每月訂單數量 (回傳 [{month: "2025-01", bookingCount: 20}, ...])
+    @GetMapping("/order/monthly-count")
+    public ResponseEntity<List<Map<String, Object>>> getMonthlyOrderCount() {
+        return ResponseEntity.ok(orderChartService.findMonthlyOrderCount());
+    }
+
+    // 訂單狀態分布 (回傳 [{status: "已完成", count: 50}, ...])
+    @GetMapping("/order/status-distribution")
+    public ResponseEntity<List<Map<String, Object>>> getOrderStatusDistribution() {
+        return ResponseEntity.ok(orderChartService.findOrderStatusDistribution());
+    }
+
+    // 熱銷商品 (回傳 [{productName: "紅茶", sales: 100}, ...])
+    @GetMapping("/order/top-products")
+    public ResponseEntity<List<Map<String, Object>>> getTopProductSales() {
+        return ResponseEntity.ok(orderChartService.findTopProductSales());
     }
 
     // ===========================

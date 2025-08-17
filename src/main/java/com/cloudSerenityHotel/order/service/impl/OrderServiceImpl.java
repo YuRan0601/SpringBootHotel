@@ -7,11 +7,10 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-
+import com.cloudSerenityHotel.order.dao.CartItemsDao;
 import com.cloudSerenityHotel.order.dao.OrderDao;
 import com.cloudSerenityHotel.order.dao.OrderItemsDao;
 import com.cloudSerenityHotel.order.dto.CartItemFrontendDTO;
@@ -20,6 +19,7 @@ import com.cloudSerenityHotel.order.dto.OrderBackendDTO;
 import com.cloudSerenityHotel.order.dto.OrderFrontendDTO;
 import com.cloudSerenityHotel.order.dto.OrderItemBackendDTO;
 import com.cloudSerenityHotel.order.dto.OrderItemFrontendDTO;
+import com.cloudSerenityHotel.order.model.CartItems;
 import com.cloudSerenityHotel.order.model.Order;
 import com.cloudSerenityHotel.order.model.OrderItems;
 import com.cloudSerenityHotel.order.service.EmailService;
@@ -27,7 +27,6 @@ import com.cloudSerenityHotel.order.service.OrderService;
 import com.cloudSerenityHotel.product.dao.ProductRepository;
 import com.cloudSerenityHotel.product.model.ProductImages;
 import com.cloudSerenityHotel.product.model.Products;
-
 import jakarta.persistence.criteria.Predicate;
 import jakarta.transaction.Transactional;
 
@@ -39,6 +38,8 @@ public class OrderServiceImpl implements OrderService {
 	private OrderDao orderDao; // 操作訂單主檔的 DAO
 	@Autowired
 	private OrderItemsDao orderItemsDao; // 操作訂單明細的 DAO
+	@Autowired
+	private CartItemsDao cartItemsDao; // 操作購物車明細的 DAO
 	@Autowired
 	private ProductRepository productDao;
 	@Autowired
@@ -263,7 +264,7 @@ public class OrderServiceImpl implements OrderService {
 	    order.setEmail(orderRequest.getRecipient().getEmail());
 	    order.setPhoneNumber(orderRequest.getRecipient().getPhone());
 	    order.setAddress(orderRequest.getRecipient().getAddress());
-	    order.setOrderStatus("Pending"); // 待處理
+	    order.setOrderStatus("處理中"); // Pending=待辦的、處理中
 	    order.setPaymentMethod(orderRequest.getRecipient().getPaymentMethod());
 	    // 2) 明細列表
 	    List<OrderItems> orderItems = new ArrayList<>();
@@ -289,7 +290,15 @@ public class OrderServiceImpl implements OrderService {
 	    calculateOrderTotal(order, orderItems);
 	    // 5) 儲存
 	    orderDao.save(order);
-	    return order; // 回傳完整實體
+	    // 6) 更新購物車狀態為「結帳」
+	    for (CartItemFrontendDTO cartItemDTO : orderRequest.getOrderItems()) {
+	        CartItems cartItem = cartItemsDao.findById(cartItemDTO.getCartItemId())
+	            .orElseThrow(() -> new RuntimeException("CartItem not found"));
+	        cartItem.setIsValid(4); // 4 = 結帳
+	        cartItemsDao.save(cartItem);
+	    }
+	    // 7) 回傳完整訂單
+	    return order;
 	}
 
 		@Override
@@ -334,7 +343,7 @@ public class OrderServiceImpl implements OrderService {
 		        System.out.println("訂單已標記為已付款，略過更新與寄信");
 		        return;}
 		    // 更新訂單狀態
-		    dbOrder.setOrderStatus("Paid"); // 訂單狀態: Paid = 已付款
+		    dbOrder.setOrderStatus("已付款"); // 訂單狀態: Paid = 已付款
 		    orderDao.save(dbOrder);
 		    // 呼叫 EmailService直接給完整的訂單資料， 發送付款成功通知
 		    emailService.sendPaymentSuccessEmail(dbOrder);

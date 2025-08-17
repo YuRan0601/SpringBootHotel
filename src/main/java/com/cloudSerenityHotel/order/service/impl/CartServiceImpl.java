@@ -53,6 +53,7 @@ public class CartServiceImpl implements CartService {
 		dto.setUnitPrice(originalPrice);
 		// 折扣金額 = 原價 - (有特價就用特價，否則用原價 → 變成 0)
 		BigDecimal discount = originalPrice.subtract((specialPrice != null) ? specialPrice : originalPrice);
+		dto.setDiscount(discount);
 		// 小計 = (特價或原價) × 數量
 		dto.setSubtotal(originalPrice.subtract(discount).multiply(BigDecimal.valueOf(cartItem.getQuantity())));
 		// 商品主要圖片

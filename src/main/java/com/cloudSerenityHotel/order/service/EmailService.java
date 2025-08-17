@@ -6,12 +6,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.cloudSerenityHotel.order.model.Order;
 import com.cloudSerenityHotel.order.model.OrderItems;
 import com.cloudSerenityHotel.user.model.User;
 import com.cloudSerenityHotel.user.service.UserService;
+
+import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.internet.MimeMessage;
 
 @Service
 @Transactional
@@ -24,18 +28,34 @@ public class EmailService {
     private UserService userService;
 
 	/** 通用寄信方法 */
-    public void sendEmail(String to, String subject, String text) {
-    	try {
-            SimpleMailMessage message = new SimpleMailMessage();
-            message.setTo(to);
-            message.setSubject(subject);
-            message.setText(text);
-            mailSender.send(message);
-            logger.info("Email 寄送成功給：{}", to);
-        } catch (Exception e) {
-            logger.error("Email 寄送失敗給 {}，原因：{}", to, e.getMessage(), e);
-        }
-    }
+//    public void sendEmail(String to, String subject, String text) {
+//    	try {
+//            SimpleMailMessage message = new SimpleMailMessage();
+//            message.setTo(to);
+//            message.setSubject(subject);
+//            message.setText(text);
+//            mailSender.send(message);
+//            logger.info("Email 寄送成功給：{}", to);
+//        } catch (Exception e) {
+//            logger.error("Email 寄送失敗給 {}，原因：{}", to, e.getMessage(), e);
+//        }
+//    }
+	public void sendEmail(String to, String subject, String text) {
+	    try {
+	        MimeMessage message = mailSender.createMimeMessage();
+	        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+	        helper.setTo(to);
+	        // ✅ 這裡一定要換成你的 Gmail，並可加中文顯示名稱
+	        helper.setFrom(new InternetAddress("cloud.serenity.hotel@gmail.com", "伴手禮商城"));
+	        helper.setSubject(subject);
+	        helper.setText(text, false); // false = 純文字, true = HTML
+	        mailSender.send(message);
+	        logger.info("Email 寄送成功給：{}", to);
+	    } catch (Exception e) {
+	        logger.error("Email 寄送失敗給 {}，原因：{}", to, e.getMessage(), e);
+	    }
+	}
+
     
     /** 訂單成立通知（現金/非線上付款） */
     public void sendOrderCreatedEmail(Order dbOrder) {
@@ -60,7 +80,7 @@ public class EmailService {
         if (recipientEmail != null && !recipientEmail.equalsIgnoreCase(userEmail)) {
             // 收件人 email 與使用者不同 → 寄兩封
             sendEmail(recipientEmail, subject, content);
-            sendEmail(userEmail, subject + "（備份）", content);
+            sendEmail(userEmail, subject + "_備份", content);
         } else {
             // 相同 → 只寄一次
             sendEmail(userEmail, subject, content);
