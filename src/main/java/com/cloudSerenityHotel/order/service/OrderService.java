@@ -2,6 +2,8 @@ package com.cloudSerenityHotel.order.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
+
 import com.cloudSerenityHotel.order.dto.CartTurntoOrderDTO;
 import com.cloudSerenityHotel.order.dto.OrderBackendDTO;
 import com.cloudSerenityHotel.order.dto.OrderFrontendDTO;
@@ -19,6 +21,8 @@ public interface OrderService {
     OrderFrontendDTO convertToFrontendDTO(Order order);
 
     // --- 查詢 ---
+    /** 根據 orderId 查詢 Order 實體 */
+    Optional<Order> findById(Integer orderId);
     List<OrderFrontendDTO> getOrdersForFrontendByUserId(Integer userId);
     OrderFrontendDTO getOrderDetailForFrontend(Integer userId, Integer orderId);
     List<OrderFrontendDTO> getOrdersByUserIdAndStatus(Integer userId, String status);

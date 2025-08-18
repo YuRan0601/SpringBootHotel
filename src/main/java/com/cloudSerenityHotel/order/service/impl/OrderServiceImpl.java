@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
@@ -137,6 +138,11 @@ public class OrderServiceImpl implements OrderService {
 
 	// --- 查詢 ---
 	@Override
+	public Optional<Order> findById(Integer orderId) {
+	    return orderDao.findById(orderId);
+	}
+	
+	@Override
 	public List<OrderFrontendDTO> getOrdersForFrontendByUserId(Integer userId) {
 		return orderDao.findByUserId(userId).stream().map(this::convertToFrontendDTO).collect(Collectors.toList());
 	}
@@ -264,8 +270,14 @@ public class OrderServiceImpl implements OrderService {
 	    order.setEmail(orderRequest.getRecipient().getEmail());
 	    order.setPhoneNumber(orderRequest.getRecipient().getPhone());
 	    order.setAddress(orderRequest.getRecipient().getAddress());
-	    order.setOrderStatus("處理中"); // Pending=待辦的、處理中
 	    order.setPaymentMethod(orderRequest.getRecipient().getPaymentMethod());
+	    // 根據付款方式決定訂單狀態
+	    if ("信用卡".equals(order.getPaymentMethod())) {
+	        order.setOrderStatus("未付款"); // 生成待付款訂單
+	    } else {
+	        order.setOrderStatus("處理中"); // 現金/貨到付款
+	    }
+	    
 	    // 2) 明細列表
 	    List<OrderItems> orderItems = new ArrayList<>();
 	    for (CartItemFrontendDTO cartItem : orderRequest.getOrderItems()) {
@@ -290,6 +302,8 @@ public class OrderServiceImpl implements OrderService {
 	    calculateOrderTotal(order, orderItems);
 	    // 5) 儲存
 	    orderDao.save(order);
+	    // ✅ 寄信：訂單建立完成，不論付款是否成功
+	    emailService.sendOrderCreatedEmail(order);
 	    // 6) 更新購物車狀態為「結帳」
 	    for (CartItemFrontendDTO cartItemDTO : orderRequest.getOrderItems()) {
 	        CartItems cartItem = cartItemsDao.findById(cartItemDTO.getCartItemId())

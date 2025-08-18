@@ -8,11 +8,12 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.cloudSerenityHotel.order.dao.OrderDao;
+
 import com.cloudSerenityHotel.order.dto.PaymentDTO;
 import com.cloudSerenityHotel.order.model.Order;
 
@@ -20,8 +21,6 @@ import com.cloudSerenityHotel.order.model.Order;
 @Transactional
 public class PaymentService {
 
-    @Autowired
-    private OrderDao orderDao;
     @Autowired
     private OrderService orderService; 
 
@@ -71,18 +70,21 @@ public class PaymentService {
      * 產生付款表單
      */
     public String createPayment(PaymentDTO paymentDTO) {
-    	Order dbOrder = orderDao.findById(paymentDTO.getOrderId())
+    	Order dbOrder = orderService.findById(paymentDTO.getOrderId())
                 .orElseThrow(() -> new RuntimeException("訂單不存在，ID: " + paymentDTO.getOrderId()));
+    	// 防呆：只有「未付款」的訂單才能生成付款表單
         if (!"未付款".equals(dbOrder.getOrderStatus())) {
-            return "訂單狀態無法進行付款";}
+        	throw new RuntimeException("訂單狀態無法進行付款");}
+        // ...生成 ECPay 表單的程式碼保持不變
         Map<String, String> params = new HashMap<>();
-        String RETURN_URL = NGROK_BASEURL + "/CloudSerenityHotel/Order/paymentResult";
+        // 與金流回調URL相同
+        String RETURN_URL = NGROK_BASEURL + "/CloudSerenityHotel/order/payment/return";
         String merchantTradeNo = paymentDTO.getOrderId() + "t" + System.currentTimeMillis();
         params.put("MerchantID", MERCHANT_ID);
         params.put("MerchantTradeNo", merchantTradeNo);
         params.put("MerchantTradeDate", new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(new Date()));
         params.put("PaymentType", "aio");
-        params.put("TotalAmount", paymentDTO.getFinalAmount().toString());
+        params.put("TotalAmount", String.valueOf(paymentDTO.getFinalAmount().intValue()));
         params.put("TradeDesc", "信用卡支付");
         params.put("ItemName", paymentDTO.getProductName());
         params.put("ChoosePayment", "Credit");

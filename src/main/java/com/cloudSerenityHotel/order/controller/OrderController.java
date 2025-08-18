@@ -230,13 +230,14 @@ public class OrderController extends BaseController {
     }
     
     /**
-     * 2️⃣ 信用卡付款（生成訂單 + 付款表單）
+     * 2️⃣ 信用卡付款（生成訂單 + 付款表單） ngrok http http://localhost:8080
      * POST /orders/payment
      */
     @PostMapping("/payment")
     public ResponseEntity<ApiResponseDTO<String>> createOrderWithPayment(
             @RequestBody CartTurntoOrderDTO dto) {
         try {
+//        	System.out.println("接收到的 DTO: " + dto);
             // Step 1: 先生成訂單
         	Order dbOrder = orderService.createOrderEntity(dto);
             // Step 2: 生成付款表單
@@ -244,8 +245,9 @@ public class OrderController extends BaseController {
             paymentDTO.setOrderId(dbOrder.getOrderId());
             paymentDTO.setFinalAmount(dbOrder.getFinalAmount());
             paymentDTO.setProductName("CloudSerenity_Hotel伴手禮商城商品");
-            paymentDTO.setPaymentMethod("Credit"); // 信用卡
+            paymentDTO.setPaymentMethod("信用卡"); // 信用卡
             String paymentForm = paymentService.createPayment(paymentDTO);
+//            System.out.println("生成的付款表單: " + paymentForm.substring(0, Math.min(200, paymentForm.length())) + "...");
             // 注意：寄信要等付款成功才寄，所以此處不寄信
             return ResponseEntity.ok(new ApiResponseDTO<>(true, "訂單已生成，請完成支付", paymentForm));
         } catch (RuntimeException e) {
@@ -266,6 +268,28 @@ public class OrderController extends BaseController {
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
+    }
+    
+    /**
+     * 4️⃣ 重新付款
+     * POST /orders/payment/retry
+     */
+    @PostMapping("/payment/retry")
+    public ResponseEntity<ApiResponseDTO<String>> retryPayment(@RequestBody Map<String, Integer> data) {
+        Integer orderId = data.get("orderId");
+        if (orderId == null) throw new RuntimeException("orderId 不可為空");
+        
+        Order dbOrder = orderService.findById(orderId)
+                          .orElseThrow(() -> new RuntimeException("訂單不存在"));
+        
+        PaymentDTO paymentDTO = new PaymentDTO();
+        paymentDTO.setOrderId(dbOrder.getOrderId());
+        paymentDTO.setFinalAmount(dbOrder.getFinalAmount());
+        paymentDTO.setProductName("CloudSerenity_Hotel伴手禮商城商品");
+        paymentDTO.setPaymentMethod("信用卡");
+        
+        String paymentForm = paymentService.createPayment(paymentDTO);
+        return ResponseEntity.ok(new ApiResponseDTO<>(true, "生成付款表單成功", paymentForm));
     }
     
     // ===========================

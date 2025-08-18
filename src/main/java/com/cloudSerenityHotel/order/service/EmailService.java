@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -13,7 +12,6 @@ import com.cloudSerenityHotel.order.model.Order;
 import com.cloudSerenityHotel.order.model.OrderItems;
 import com.cloudSerenityHotel.user.model.User;
 import com.cloudSerenityHotel.user.service.UserService;
-
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 
@@ -27,19 +25,6 @@ public class EmailService {
 	@Autowired
     private UserService userService;
 
-	/** 通用寄信方法 */
-//    public void sendEmail(String to, String subject, String text) {
-//    	try {
-//            SimpleMailMessage message = new SimpleMailMessage();
-//            message.setTo(to);
-//            message.setSubject(subject);
-//            message.setText(text);
-//            mailSender.send(message);
-//            logger.info("Email 寄送成功給：{}", to);
-//        } catch (Exception e) {
-//            logger.error("Email 寄送失敗給 {}，原因：{}", to, e.getMessage(), e);
-//        }
-//    }
 	public void sendEmail(String to, String subject, String text) {
 	    try {
 	        MimeMessage message = mailSender.createMimeMessage();
@@ -76,7 +61,8 @@ public class EmailService {
         String userEmail = user.getEmail();
         String recipientEmail = dbOrder.getEmail(); // 訂單收件人 email
         String subject = isPaid ? "您的伴手禮商城訂單付款成功！" : "您的伴手禮商城訂單已成立！";
-        String content = buildOrderEmailContent(dbOrder, user, isPaid);
+        // 內容永遠用訂單本身狀態生成
+        String content = buildOrderEmailContent(dbOrder, user);
         if (recipientEmail != null && !recipientEmail.equalsIgnoreCase(userEmail)) {
             // 收件人 email 與使用者不同 → 寄兩封
             sendEmail(recipientEmail, subject, content);
@@ -88,7 +74,7 @@ public class EmailService {
     }
 
     /** 共用方法：生成郵件內容 */
-    private String buildOrderEmailContent(Order dbOrder, User user, boolean isPaid) {
+    private String buildOrderEmailContent(Order dbOrder, User user) {
         StringBuilder itemList = new StringBuilder();
         BigDecimal totalAmount = BigDecimal.ZERO;
         BigDecimal discountAmount = BigDecimal.ZERO;
@@ -110,10 +96,11 @@ public class EmailService {
                     itemDiscount.toString()));
         }
         BigDecimal finalAmount = totalAmount.subtract(discountAmount);
-        String paymentStatus = isPaid ? "付款已完成" : "待付款";
+        String orderStatus = dbOrder.getOrderStatus();
         return String.format(
                 "親愛的 %s 您好，\n" +
-                "您的伴手禮商城訂單狀態：%s\n" +
+        		"訂單狀態：%s\n"+  // 直接使用訂單狀態
+				"付款方式：%s\n" + // 正確顯示付款方式
                 "訂單編號：%s\n" +
                 "商品清單：\n%s" +
                 "訂單成立時間：%s\n" +
@@ -123,7 +110,8 @@ public class EmailService {
                 "您可以點擊下方連結至會員中心查看訂單狀態：\n" +
                 "http://localhost:5173/front/member/Order\n",
                 user.getUserName(),
-                paymentStatus,
+                orderStatus,
+                dbOrder.getPaymentMethod(),  // 改為訂單的付款方式
                 dbOrder.getOrderId(),
                 itemList.toString(),
                 dbOrder.getOrderDate(),
