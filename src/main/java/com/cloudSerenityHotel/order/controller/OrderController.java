@@ -89,6 +89,44 @@ public class OrderController extends BaseController {
                     .body(new ApiResponseDTO<>(false, e.getMessage(), null));
         }
     }
+
+	// 更新訂單
+	@PutMapping("/{orderId}")
+	public ResponseEntity<ApiResponseDTO<OrderBackendDTO>> updateOrder(
+			@PathVariable Integer orderId, @RequestBody OrderBackendDTO updatedOrderDTO) {
+		try {
+			Order updatedOrder = convertToEntity(updatedOrderDTO);
+			OrderBackendDTO result = orderService.updateOrder(orderId, updatedOrder);
+			return ResponseEntity.ok(new ApiResponseDTO<>(true, "更新成功", result));
+		} catch (RuntimeException e) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND)
+					.body(new ApiResponseDTO<>(false, e.getMessage(), null));
+		}
+	}
+	
+	// 假刪除訂單(作廢)
+	@PutMapping("/{orderId}/void")
+	public ResponseEntity<ApiResponseDTO<OrderBackendDTO>> voidOrder(@PathVariable Integer orderId) {
+	    try {
+	        OrderBackendDTO updatedOrder = orderService.voidOrder(orderId); // Service 內只改狀態
+	        return ResponseEntity.ok(new ApiResponseDTO<>(true, "訂單已作廢", updatedOrder));
+	    } catch (RuntimeException e) {
+	        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+	                .body(new ApiResponseDTO<>(false, e.getMessage(), null));
+	    }
+	}
+	
+    // 刪除訂單
+    @DeleteMapping("/{orderId}")
+	public ResponseEntity<ApiResponseDTO<String>> deleteOrder(@PathVariable int orderId) {
+    	try {
+            orderService.deleteOrderById(orderId);
+            return ResponseEntity.ok(new ApiResponseDTO<>(true, "刪除成功", null));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ApiResponseDTO<>(false, e.getMessage(), null));
+        }
+    }
     
     @GetMapping("/export")
     public ResponseEntity<ApiResponseDTO<String>> exportOrders(
@@ -108,32 +146,6 @@ public class OrderController extends BaseController {
         }
     }
 	
-	// 更新訂單
-	@PutMapping("/{orderId}")
-	public ResponseEntity<ApiResponseDTO<OrderBackendDTO>> updateOrder(
-			@PathVariable Integer orderId, @RequestBody OrderBackendDTO updatedOrderDTO) {
-		try {
-			Order updatedOrder = convertToEntity(updatedOrderDTO);
-			OrderBackendDTO result = orderService.updateOrder(orderId, updatedOrder);
-			return ResponseEntity.ok(new ApiResponseDTO<>(true, "更新成功", result));
-		} catch (RuntimeException e) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND)
-					.body(new ApiResponseDTO<>(false, e.getMessage(), null));
-		}
-	}
-	
-    // 刪除訂單
-    @DeleteMapping("/{orderId}")
-	public ResponseEntity<ApiResponseDTO<String>> deleteOrder(@PathVariable int orderId) {
-    	try {
-            orderService.deleteOrderById(orderId);
-            return ResponseEntity.ok(new ApiResponseDTO<>(true, "刪除成功", null));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ApiResponseDTO<>(false, e.getMessage(), null));
-        }
-    }
-    
     // ===========================
     // 後台訂單「圖表」查詢
     // ===========================

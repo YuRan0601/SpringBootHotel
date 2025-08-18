@@ -247,6 +247,16 @@ public class OrderServiceImpl implements OrderService {
 	        return convertToBackendDTO(saved);
 	    }).orElseThrow(() -> new RuntimeException("訂單不存在，ID: " + orderId));
 	}
+	
+	// 假刪除 / 作廢訂單
+	@Override
+    public OrderBackendDTO voidOrder(Integer orderId) {
+        Order order = orderDao.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("訂單不存在"));
+        order.setOrderStatus("作廢"); // 將狀態改為作廢
+        orderDao.save(order);          // 儲存修改
+        return convertToBackendDTO(order);           // 回傳 DTO
+    }
 
 	@Override
 	public boolean deleteOrderById(Integer orderId) {

@@ -42,6 +42,7 @@ public interface OrderService {
     // --- CRUD ---
     OrderBackendDTO insertOrderWithItems(Order order, List<OrderItems> items);
     OrderBackendDTO updateOrder(Integer orderId, Order updatedOrder);
+    OrderBackendDTO voidOrder(Integer orderId); // 假刪除(作廢)
     boolean deleteOrderById(Integer orderId);
 
     // --- 業務邏輯 ---
