@@ -230,18 +230,20 @@ public class OrderServiceImpl implements OrderService {
 	@Override
 	public OrderBackendDTO updateOrder(Integer orderId, Order updatedOrder) {
 		return orderDao.findById(orderId).map(existingOrder -> {
+			// 檢查是否已作廢
+	        if ("作廢".equals(existingOrder.getOrderStatus())) {
+	            throw new RuntimeException("已作廢的訂單不可修改");
+	        }
 	        // 只能修改可變欄位
 	        existingOrder.setReceiveName(updatedOrder.getReceiveName());
 	        existingOrder.setEmail(updatedOrder.getEmail());
 	        existingOrder.setPhoneNumber(updatedOrder.getPhoneNumber());
 	        existingOrder.setAddress(updatedOrder.getAddress());
 	        existingOrder.setOrderStatus(updatedOrder.getOrderStatus());
-
-	        // 不允許修改paymentMethod、totalAmount 與 finalAmount
+	        // 不允許修改的欄位 (paymentMethod、totalAmount、finalAmount) 不動
 	        // existingOrder.setPaymentMethod(updatedOrder.getPaymentMethod());
 	        // existingOrder.setTotalAmount(updatedOrder.getTotalAmount());
 	        // existingOrder.setFinalAmount(updatedOrder.getFinalAmount());
-
 	        Order saved = orderDao.save(existingOrder);
 	        orderDao.flush(); // 強制同步到資料庫與實體
 	        return convertToBackendDTO(saved);

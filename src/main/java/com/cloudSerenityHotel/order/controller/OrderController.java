@@ -2,6 +2,7 @@ package com.cloudSerenityHotel.order.controller;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -95,6 +96,18 @@ public class OrderController extends BaseController {
 	public ResponseEntity<ApiResponseDTO<OrderBackendDTO>> updateOrder(
 			@PathVariable Integer orderId, @RequestBody OrderBackendDTO updatedOrderDTO) {
 		try {
+			// 先查詢訂單
+	        OrderBackendDTO existingOrder = orderService.getOrderDetailsAsDTO(orderId);
+	        if (existingOrder == null) {
+	            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+	                    .body(new ApiResponseDTO<>(false, "查無此訂單：" + orderId, null));
+	        }
+	        // 已作廢的訂單不允許修改
+	        if ("VOID".equals(existingOrder.getOrderStatus())) {
+	            return ResponseEntity.badRequest()
+	                    .body(new ApiResponseDTO<>(false, "已作廢的訂單不可修改", existingOrder));
+	        }
+			// 執行更新
 			Order updatedOrder = convertToEntity(updatedOrderDTO);
 			OrderBackendDTO result = orderService.updateOrder(orderId, updatedOrder);
 			return ResponseEntity.ok(new ApiResponseDTO<>(true, "更新成功", result));
@@ -107,15 +120,20 @@ public class OrderController extends BaseController {
 	// 假刪除訂單(作廢)
 	@PutMapping("/{orderId}/void")
 	public ResponseEntity<ApiResponseDTO<OrderBackendDTO>> voidOrder(@PathVariable Integer orderId) {
-	    try {
-	        OrderBackendDTO updatedOrder = orderService.voidOrder(orderId); // Service 內只改狀態
-	        return ResponseEntity.ok(new ApiResponseDTO<>(true, "訂單已作廢", updatedOrder));
-	    } catch (RuntimeException e) {
+	    OrderBackendDTO order = orderService.getOrderDetailsAsDTO(orderId);
+	    if (order == null) {
 	        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-	                .body(new ApiResponseDTO<>(false, e.getMessage(), null));
+	                .body(new ApiResponseDTO<>(false, "查無此訂單：" + orderId, null));
 	    }
+	    if ("作廢".equals(order.getOrderStatus())) {
+	        return ResponseEntity.badRequest()
+	                .body(new ApiResponseDTO<>(false, "訂單已作廢，無法重複操作", order));
+	    }
+	    OrderBackendDTO updatedOrder = orderService.voidOrder(orderId);
+	    return ResponseEntity.ok(new ApiResponseDTO<>(true, "訂單已作廢", updatedOrder));
 	}
-	
+
+
     // 刪除訂單
     @DeleteMapping("/{orderId}")
 	public ResponseEntity<ApiResponseDTO<String>> deleteOrder(@PathVariable int orderId) {
@@ -128,6 +146,7 @@ public class OrderController extends BaseController {
         }
     }
     
+    // 匯出
     @GetMapping("/export")
     public ResponseEntity<ApiResponseDTO<String>> exportOrders(
             @RequestParam String format,
