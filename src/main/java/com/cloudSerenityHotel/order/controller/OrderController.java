@@ -1,14 +1,18 @@
 package com.cloudSerenityHotel.order.controller;
 
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
 import com.cloudSerenityHotel.base.BaseController;
 import com.cloudSerenityHotel.order.dto.ApiResponseDTO;
 import com.cloudSerenityHotel.order.dto.CartTurntoOrderDTO;
@@ -31,6 +36,8 @@ import com.cloudSerenityHotel.order.service.OrderChartService;
 import com.cloudSerenityHotel.order.service.OrderExportService;
 import com.cloudSerenityHotel.order.service.OrderService;
 import com.cloudSerenityHotel.order.service.PaymentService;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 //@CrossOrigin(origins = { "http://localhost:5173" }, // Vue 的本地開發環境域名
 //		methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE } // 明確允許的請求方法
@@ -161,7 +168,7 @@ public class OrderController extends BaseController {
         }
     }
     
-    // 匯出_1
+    // 匯出 + 條件查詢 (共用 findOrders)
 //    @GetMapping("/export")
 //    public ResponseEntity<ApiResponseDTO<String>> exportOrders(
 //            @RequestParam String format,
@@ -180,39 +187,118 @@ public class OrderController extends BaseController {
 //        }
 //    }
     
- // 匯出 + 條件查詢 (共用 findOrders)
-    @GetMapping("/export")
-    public ResponseEntity<ApiResponseDTO<String>> exportOrders(
-            @RequestParam String format,
-            @RequestParam(required = false) Integer orderId,
-            @RequestParam(required = false) Integer userId,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
-            @RequestParam(required = false) String paymentMethod,
-            @RequestParam(required = false) List<String> orderStatuses) {
-        try {
-            // ✅ 1. 驗證 format
-            List<String> supportedFormats = Arrays.asList("csv", "json", "xml");
-            if (!supportedFormats.contains(format.toLowerCase())) {
-                return ResponseEntity.badRequest()
-                        .body(new ApiResponseDTO<>(false, "不支援的匯出格式: " + format, null));
-            }
-            // ✅ 2. 查詢 (不給參數 = 全部訂單)
-            List<OrderBackendDTO> orders = orderService.findOrders(orderId, userId, startDate, endDate, paymentMethod, orderStatuses);
-            if (orders == null || orders.isEmpty()) {
-                return ResponseEntity.ok(new ApiResponseDTO<>(true, "沒有符合條件的訂單，匯出取消", null));
-            }
-            // ✅ 3. 產生檔名 (用 yyyyMMdd_HHmmss 比較好辨識)
-            String fileName = "orders_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"))
-                            + "." + format.toLowerCase();
-            // ✅ 4. 匯出檔案
-            String filePath = orderExportService.exportOrders(format, fileName, orders);
-            return ResponseEntity.ok(new ApiResponseDTO<>(true, "匯出成功", filePath));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ApiResponseDTO<>(false, e.getMessage(), null));
-        }
-    }
+    // 匯出1 + 條件查詢 (共用 findOrders)
+//    @GetMapping("/export")
+//    public ResponseEntity<ApiResponseDTO<String>> exportOrders(
+//            @RequestParam String format,
+//            @RequestParam(required = false) Integer orderId,
+//            @RequestParam(required = false) Integer userId,
+//            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+//            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+//            @RequestParam(required = false) String paymentMethod,
+//            @RequestParam(required = false) List<String> orderStatuses) {
+//        try {
+//            // ✅ 1. 驗證 format
+//            List<String> supportedFormats = Arrays.asList("csv", "json", "xml");
+//            if (!supportedFormats.contains(format.toLowerCase())) {
+//                return ResponseEntity.badRequest()
+//                        .body(new ApiResponseDTO<>(false, "不支援的匯出格式: " + format, null));
+//            }
+//            // ✅ 2. 查詢 (不給參數 = 全部訂單)
+//            List<OrderBackendDTO> orders = orderService.findOrders(orderId, userId, startDate, endDate, paymentMethod, orderStatuses);
+//            if (orders == null || orders.isEmpty()) {
+//                return ResponseEntity.ok(new ApiResponseDTO<>(true, "沒有符合條件的訂單，匯出取消", null));
+//            }
+//            // ✅ 3. 產生檔名 (用 yyyyMMdd_HHmmss 比較好辨識)
+//            String fileName = "orders_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"))
+//                            + "." + format.toLowerCase();
+//            // ✅ 4. 匯出檔案
+//            String filePath = orderExportService.exportOrders(format, fileName, orders);
+//            return ResponseEntity.ok(new ApiResponseDTO<>(true, "匯出成功", filePath));
+//        } catch (Exception e) {
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                    .body(new ApiResponseDTO<>(false, e.getMessage(), null));
+//        }
+//    }
+    
+    // 匯出2 + 條件查詢 (共用 findOrders)
+//    @GetMapping("/export")
+//    public ResponseEntity<?> exportOrders(
+//            @RequestParam String format,
+//            @RequestParam(required = false) Integer orderId,
+//            @RequestParam(required = false) Integer userId,
+//            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+//            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+//            @RequestParam(required = false) String paymentMethod,
+//            @RequestParam(required = false) List<String> orderStatuses) throws IOException, JAXBException {
+//
+//        List<String> supportedFormats = Arrays.asList("csv", "json", "xml");
+//        if (!supportedFormats.contains(format.toLowerCase())) {
+//            return ResponseEntity.badRequest()
+//                    .body(new ApiResponseDTO<>(false, "不支援的匯出格式: " + format, null));
+//        }
+//
+//        List<OrderBackendDTO> orders = orderService.findOrders(orderId, userId, startDate, endDate, paymentMethod, orderStatuses);
+//        if (orders == null || orders.isEmpty()) {
+//            return ResponseEntity.ok(new ApiResponseDTO<>(true, "沒有符合條件的訂單，匯出取消", null));
+//        }
+//
+//        String fileName = "orders_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"))
+//                + "." + format.toLowerCase();
+//
+//        if ("json".equalsIgnoreCase(format)) {
+//            // JSON -> 前端直接下載
+//            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+//            String jsonContent = gson.toJson(orders);
+//            byte[] outputBytes = jsonContent.getBytes(StandardCharsets.UTF_8);
+//
+//            return ResponseEntity.ok()
+//                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName)
+//                    .contentType(MediaType.APPLICATION_JSON)
+//                    .body(outputBytes);
+//        } else {
+//            // CSV / XML -> 原本流程，回傳檔案路徑
+//            String filePath = orderExportService.exportOrders(format, fileName, orders);
+//            return ResponseEntity.ok(new ApiResponseDTO<>(true, "匯出成功", filePath));
+//        }
+//    }
+    
+    // 匯出3 + 條件查詢 (共用 findOrders)
+	@GetMapping("/export")
+	public ResponseEntity<?> exportOrders(@RequestParam String format, @RequestParam(required = false) Integer orderId,
+			@RequestParam(required = false) Integer userId,
+			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+			@RequestParam(required = false) String paymentMethod,
+			@RequestParam(required = false) List<String> orderStatuses) {
+		try {
+			// 1️⃣ 驗證格式
+			List<String> supportedFormats = Arrays.asList("csv", "json", "xml");
+			if (!supportedFormats.contains(format.toLowerCase())) {
+				return ResponseEntity.badRequest().body(new ApiResponseDTO<>(false, "不支援的匯出格式: " + format, null));
+			}
+			// 2️⃣ 查詢訂單
+			List<OrderBackendDTO> orders = orderService.findOrders(orderId, userId, startDate, endDate, paymentMethod,
+					orderStatuses);
+			if (orders == null || orders.isEmpty()) {
+				return ResponseEntity.ok(new ApiResponseDTO<>(true, "沒有符合條件的訂單，匯出取消", null));
+			}
+			// 3️⃣ 產生檔名
+			String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+			String fileName = "orders_" + timestamp + "." + format.toLowerCase();
+			// 4️⃣ 直接產生檔案內容（不備份）
+			byte[] fileContent = orderExportService.exportOrdersToBytes(format, orders);
+			// 5️⃣ 設定 MediaType
+			MediaType mediaType = "csv".equalsIgnoreCase(format) ? MediaType.parseMediaType("text/csv")
+					: "xml".equalsIgnoreCase(format) ? MediaType.APPLICATION_XML : MediaType.APPLICATION_JSON;
+			// 6️⃣ 回傳前端下載
+			return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName)
+					.contentType(mediaType).body(fileContent);
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body(new ApiResponseDTO<>(false, e.getMessage(), null));
+		}
+	}
 	
     // ===========================
     // 後台訂單「圖表」查詢

@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
@@ -67,6 +68,49 @@ public class OrderExportService {
         System.out.println("匯出完成 → " + filePath);
         return filePath;
     }
+	
+	// 只是 不寫檔案而已??
+	public byte[] exportOrdersToBytes(String format, List<OrderBackendDTO> orders) throws IOException, JAXBException {
+		if (orders == null || orders.isEmpty()) {
+			return new byte[0];
+		}
+		switch (format.toLowerCase()) {
+		case "csv":
+			try (StringWriter sw = new StringWriter(); CSVWriter csvWriter = new CSVWriter(sw)) {
+				sw.write('\uFEFF'); // UTF-8 BOM，防 Excel 中文亂碼
+				csvWriter.writeNext(new String[] { "OrderID", "UserID", "ReceiveName", "Email", "PhoneNumber",
+						"Address", "OrderStatus", "PaymentMethod", "TotalAmount", "FinalAmount", "OrderDate",
+						"UpdatedAt", "ProductName", "Quantity", "UnitPrice", "Discount", "Subtotal" });
+				for (OrderBackendDTO order : orders) {
+					for (OrderItemBackendDTO item : order.getOrderItemsDtos()) {
+						csvWriter.writeNext(new String[] { String.valueOf(order.getOrderId()),
+								String.valueOf(order.getUserId()), order.getReceiveName(), order.getEmail(),
+								order.getPhoneNumber(), order.getAddress(), order.getOrderStatus(),
+								order.getPaymentMethod(), order.getTotalAmount(), order.getFinalAmount(),
+								order.getOrderDate(), order.getUpdatedAt(), item.getProductName(),
+								String.valueOf(item.getQuantity()), String.valueOf(item.getUnitPrice()),
+								String.valueOf(item.getDiscount()), String.valueOf(item.getSubtotal()) });
+					}
+				}
+				return sw.toString().getBytes(StandardCharsets.UTF_8);
+			}
+		case "json":
+			Gson gson = new GsonBuilder().setPrettyPrinting().create();
+			String jsonStr = gson.toJson(orders);
+			return jsonStr.getBytes(StandardCharsets.UTF_8);
+		case "xml":
+			JAXBContext context = JAXBContext.newInstance(OrderBackendDTOWrapper.class);
+			Marshaller marshaller = context.createMarshaller();
+			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+			OrderBackendDTOWrapper wrapper = new OrderBackendDTOWrapper();
+			wrapper.setOrders(orders);
+			StringWriter xmlWriter = new StringWriter();
+			marshaller.marshal(wrapper, xmlWriter);
+			return xmlWriter.toString().getBytes(StandardCharsets.UTF_8);
+		default:
+			throw new IllegalArgumentException("不支援的格式: " + format);
+		}
+	}
 
 	// CSV
 	private void exportToCSV(List<OrderBackendDTO> orders, String filePath) throws IOException {
