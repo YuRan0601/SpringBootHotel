@@ -189,7 +189,7 @@ public class OrderServiceImpl implements OrderService {
 	        LocalDate startDate,
 	        LocalDate endDate,
 	        String paymentMethod,
-	        String orderStatus){
+	        List<String> orderStatuses){ // 改成 List<String>
 		Specification<Order> spec = (root, query, cb) -> {
 			List<Predicate> predicates = new ArrayList<>();
 			if (orderId != null) {
@@ -199,23 +199,25 @@ public class OrderServiceImpl implements OrderService {
 				predicates.add(cb.equal(root.get("userId"), userId));
 			}
 			if (startDate != null) {
-				predicates.add(cb.greaterThanOrEqualTo(root.get("orderDate"), startDate));
+			    predicates.add(cb.greaterThanOrEqualTo(root.get("orderDate"), startDate.atStartOfDay()));
 			}
+			// 結束日期 +1 天，然後用 <
 			if (endDate != null) {
-				predicates.add(cb.lessThanOrEqualTo(root.get("orderDate"), endDate));
+			    predicates.add(cb.lessThan(root.get("orderDate"), endDate.plusDays(1).atStartOfDay()));
 			}
 			if (paymentMethod != null && !paymentMethod.isEmpty()) {
 				predicates.add(cb.equal(root.get("paymentMethod"), paymentMethod));
 			}
-			if (orderStatus != null && !orderStatus.isEmpty()) {
-				predicates.add(cb.equal(root.get("orderStatus"), orderStatus));
-			}
-			return cb.and(predicates.toArray(new Predicate[0]));
-		};
-		List<Order> orders = orderDao.findAll(spec);
-		return orders.stream()
-	             .map(this::convertToBackendDTO)
-	             .collect(Collectors.toList());
+			// orderStatus應該要可以多選/單選
+			if (orderStatuses != null && !orderStatuses.isEmpty()) {
+	            predicates.add(root.get("orderStatus").in(orderStatuses)); // 改成 in
+	        }
+	        return cb.and(predicates.toArray(new Predicate[0]));
+	    };
+	    List<Order> orders = orderDao.findAll(spec);
+	    return orders.stream()
+	                 .map(this::convertToBackendDTO)
+	                 .collect(Collectors.toList());
 	}
 	
 	// --- CRUD ---

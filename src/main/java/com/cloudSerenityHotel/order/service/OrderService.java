@@ -37,7 +37,7 @@ public interface OrderService {
 	        LocalDate startDate,
 	        LocalDate endDate,
 	        String paymentMethod,
-	        String orderStatus);
+	        List<String> orderStatuses); // 改成 List<String>
 
     // --- CRUD ---
     OrderBackendDTO insertOrderWithItems(Order order, List<OrderItems> items);

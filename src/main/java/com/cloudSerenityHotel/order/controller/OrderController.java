@@ -1,10 +1,13 @@
 package com.cloudSerenityHotel.order.controller;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -16,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.cloudSerenityHotel.base.BaseController;
 import com.cloudSerenityHotel.order.dto.ApiResponseDTO;
 import com.cloudSerenityHotel.order.dto.CartTurntoOrderDTO;
@@ -90,6 +92,19 @@ public class OrderController extends BaseController {
                     .body(new ApiResponseDTO<>(false, e.getMessage(), null));
         }
     }
+    
+	// 條件查詢
+	@GetMapping("/search")
+	public ResponseEntity<List<OrderBackendDTO>> searchOrders(@RequestParam(required = false) Integer orderId,
+			@RequestParam(required = false) Integer userId,
+			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+			@RequestParam(required = false) String paymentMethod, 
+			@RequestParam(required = false) List<String> orderStatuses) {
+
+		List<OrderBackendDTO> orders = orderService.findOrders(orderId, userId, startDate, endDate, paymentMethod, orderStatuses);
+	    return ResponseEntity.ok(orders);
+	}
 
 	// 更新訂單
 	@PutMapping("/{orderId}")
@@ -134,7 +149,7 @@ public class OrderController extends BaseController {
 	}
 
 
-    // 刪除訂單
+    // 刪除訂單_訂單正常來說是不能刪除的
     @DeleteMapping("/{orderId}")
 	public ResponseEntity<ApiResponseDTO<String>> deleteOrder(@PathVariable int orderId) {
     	try {
@@ -146,18 +161,52 @@ public class OrderController extends BaseController {
         }
     }
     
-    // 匯出
+    // 匯出_1
+//    @GetMapping("/export")
+//    public ResponseEntity<ApiResponseDTO<String>> exportOrders(
+//            @RequestParam String format,
+//            @RequestParam(required = false) String status) {
+//        try {
+//            String fileName = "orders_" + System.currentTimeMillis() + "." + format.toLowerCase();
+//            String filePath = orderExportService.exportOrders(format, fileName, status);
+//
+//            if (filePath == null) { // 沒有資料
+//                return ResponseEntity.ok(new ApiResponseDTO<>(true, "沒有符合條件的訂單，匯出取消", null));
+//            }
+//            return ResponseEntity.ok(new ApiResponseDTO<>(true, "匯出成功", filePath));
+//        } catch (Exception e) {
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                    .body(new ApiResponseDTO<>(false, e.getMessage(), null));
+//        }
+//    }
+    
+ // 匯出 + 條件查詢 (共用 findOrders)
     @GetMapping("/export")
     public ResponseEntity<ApiResponseDTO<String>> exportOrders(
             @RequestParam String format,
-            @RequestParam(required = false) String status) {
+            @RequestParam(required = false) Integer orderId,
+            @RequestParam(required = false) Integer userId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam(required = false) String paymentMethod,
+            @RequestParam(required = false) List<String> orderStatuses) {
         try {
-            String fileName = "orders_" + System.currentTimeMillis() + "." + format.toLowerCase();
-            String filePath = orderExportService.exportOrders(format, fileName, status);
-
-            if (filePath == null) { // 沒有資料
+            // ✅ 1. 驗證 format
+            List<String> supportedFormats = Arrays.asList("csv", "json", "xml");
+            if (!supportedFormats.contains(format.toLowerCase())) {
+                return ResponseEntity.badRequest()
+                        .body(new ApiResponseDTO<>(false, "不支援的匯出格式: " + format, null));
+            }
+            // ✅ 2. 查詢 (不給參數 = 全部訂單)
+            List<OrderBackendDTO> orders = orderService.findOrders(orderId, userId, startDate, endDate, paymentMethod, orderStatuses);
+            if (orders == null || orders.isEmpty()) {
                 return ResponseEntity.ok(new ApiResponseDTO<>(true, "沒有符合條件的訂單，匯出取消", null));
             }
+            // ✅ 3. 產生檔名 (用 yyyyMMdd_HHmmss 比較好辨識)
+            String fileName = "orders_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"))
+                            + "." + format.toLowerCase();
+            // ✅ 4. 匯出檔案
+            String filePath = orderExportService.exportOrders(format, fileName, orders);
             return ResponseEntity.ok(new ApiResponseDTO<>(true, "匯出成功", filePath));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -261,7 +310,7 @@ public class OrderController extends BaseController {
     }
     
     /**
-     * 2️⃣ 信用卡付款（生成訂單 + 付款表單） ngrok http http://localhost:8080
+     * 2️⃣ 信用卡付款（生成訂單 + 付款表單）->  ngrok http http://localhost:8080
      * POST /orders/payment
      */
     @PostMapping("/payment")

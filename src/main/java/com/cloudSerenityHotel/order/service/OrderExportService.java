@@ -2,20 +2,22 @@ package com.cloudSerenityHotel.order.service;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.io.FileOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.stereotype.Service;
+
 import com.cloudSerenityHotel.order.dto.OrderBackendDTO;
 import com.cloudSerenityHotel.order.dto.OrderBackendDTOWrapper;
 import com.cloudSerenityHotel.order.dto.OrderItemBackendDTO;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.opencsv.CSVWriter;
+
 import jakarta.transaction.Transactional;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
@@ -28,52 +30,43 @@ import jakarta.xml.bind.Marshaller;
  */
 public class OrderExportService {
 	
-	@Autowired
-	private OrderService orderService;
 	private final String downloadDir = System.getProperty("user.home") + "/Downloads/cloud_serenity_orders/";
 
 	/**
-     * 匯出訂單，可指定狀態，格式 CSV、JSON 或 XML
+     * 匯出訂單 (CSV / JSON / XML)，直接接收查詢後的結果
      *
      * @param format   匯出格式：csv / json / xml
      * @param fileName 檔案名稱
      * @param status   訂單狀態，可為 null 或空字串表示全部
 	 * @throws JAXBException 
      */
-	public String exportOrders(String format, String fileName, String status) throws IOException, JAXBException {
-		// 1. 取得資料
-		List<OrderBackendDTO> orders;
-		if (status == null || status.isEmpty()) {
-			orders = orderService.findAllOrders(); // 匯出全部
-		} else {
-			orders = orderService.getOrdersByStatus(status); // 依狀態匯出
-		}
-		if (orders.isEmpty()) {
-			System.out.println("沒有符合條件的訂單，匯出取消");
-		    return null;
-		}
-		// 2. 準備路徑
-		File dir = new File(downloadDir);
-		if (!dir.exists())
-			dir.mkdirs();
-		String filePath = downloadDir + fileName;
-		// 3. 根據格式匯出
-		switch (format.toLowerCase()) {
-		case "csv":
-			exportToCSV(orders, filePath);
-			break;
-		case "json":
-			exportToJSON(orders, filePath);
-			break;
-		case "xml": // 新增 XML 支援
-            exportToXML(orders, filePath);
-            break;
-		default:
-			throw new IllegalArgumentException("不支援的格式: " + format);
-		}
-		System.out.println("匯出完成 → " + filePath);
-		return filePath; // 回傳完整路徑
-	}
+	public String exportOrders(String format, String fileName, List<OrderBackendDTO> orders)
+            throws IOException, JAXBException {
+        if (orders == null || orders.isEmpty()) {
+            return null;
+        }
+        // 建立資料夾
+        File dir = new File(downloadDir);
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+        String filePath = downloadDir + fileName;
+        switch (format.toLowerCase()) {
+            case "csv":
+                exportToCSV(orders, filePath);
+                break;
+            case "json":
+                exportToJSON(orders, filePath);
+                break;
+            case "xml":
+                exportToXML(orders, filePath);
+                break;
+            default:
+                throw new IllegalArgumentException("不支援的格式: " + format);
+        }
+        System.out.println("匯出完成 → " + filePath);
+        return filePath;
+    }
 
 	// CSV
 	private void exportToCSV(List<OrderBackendDTO> orders, String filePath) throws IOException {
