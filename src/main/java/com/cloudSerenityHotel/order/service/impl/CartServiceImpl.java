@@ -1,6 +1,7 @@
 package com.cloudSerenityHotel.order.service.impl;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -114,8 +115,13 @@ public class CartServiceImpl implements CartService {
 		newItem.setDiscount(discount);
 		newItem.setSubtotal(subtotal);
 		newItem.setIsValid(0);
-		// 3. 儲存到資料庫並回傳剛新增的購物車明細
-		return cartItemsDao.save(newItem);
+		
+		// ✅ 更新購物車的時間戳
+	    cart.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
+	    cartDao.save(cart);
+		
+	    // 3. 儲存到資料庫並回傳剛新增的購物車明細
+	    return cartItemsDao.save(newItem);
 	}
 	
 	/*
@@ -207,6 +213,10 @@ public class CartServiceImpl implements CartService {
             									.orElseThrow(() -> new RuntimeException("有效的商品不存在於購物車中"));
 	    cartItem.setIsValid(3); // 3. 假刪除：將商品標記為無效（is_valid = 3）
 	    cartItemsDao.save(cartItem); // 4. 更新資料庫
+	    
+	    // ✅ 更新購物車的時間戳
+	    cart.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
+	    cartDao.save(cart);
 	}
 
 	// --- 清空購物車_假刪除IsValid(3)---
@@ -218,6 +228,10 @@ public class CartServiceImpl implements CartService {
         cartItems.forEach(item -> {
             item.setIsValid(3); // 假刪除：將商品標記為無效（is_valid = 3）
             cartItemsDao.save(item);
+            
+            // ✅ 更新購物車的時間戳
+    	    cart.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
+    	    cartDao.save(cart);
         });
     }
 

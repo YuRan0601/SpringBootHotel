@@ -1,6 +1,5 @@
 package com.cloudSerenityHotel.order.controller;
 
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -31,20 +30,17 @@ import com.cloudSerenityHotel.order.dto.OrderBackendDTO;
 import com.cloudSerenityHotel.order.dto.OrderFrontendDTO;
 import com.cloudSerenityHotel.order.dto.PaymentDTO;
 import com.cloudSerenityHotel.order.model.Order;
-import com.cloudSerenityHotel.order.service.EmailService;
 import com.cloudSerenityHotel.order.service.OrderChartService;
 import com.cloudSerenityHotel.order.service.OrderExportService;
 import com.cloudSerenityHotel.order.service.OrderService;
 import com.cloudSerenityHotel.order.service.PaymentService;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
+// 進入點URL -> http://localhost:8080/CloudSerenityHotel/order
 //@CrossOrigin(origins = { "http://localhost:5173" }, // Vue 的本地開發環境域名
 //		methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE } // 明確允許的請求方法
 //)
 @RestController // 變為JSON格式
 @RequestMapping("/order") // 設定這個 Controller 處理 /order 開頭的請求
-// 進入點URL -> http://localhost:8080/CloudSerenityHotel/order
 public class OrderController extends BaseController {
 	private static final long serialVersionUID = 1L;
 
@@ -52,12 +48,12 @@ public class OrderController extends BaseController {
 	private OrderService orderService;
 	@Autowired
     private PaymentService paymentService;
-    @Autowired
-    private EmailService emailService;
 	@Autowired
     private OrderExportService orderExportService;
 	@Autowired
     private OrderChartService orderChartService;
+	/*@Autowired
+	private EmailService emailService;*/
 
 	// ===========================
     // 後台訂單管理
@@ -385,7 +381,7 @@ public class OrderController extends BaseController {
     		@RequestBody CartTurntoOrderDTO dto) {
         try {
         	Order dbOrder = orderService.createOrderEntity(dto); // 拿到 Order 實體
-            emailService.sendOrderCreatedEmail(dbOrder);         // 用實體寄信
+            // emailService.sendOrderCreatedEmail(dbOrder);         // 用實體寄信(OrderServiceImpl已做)
             OrderFrontendDTO responseDto = orderService.convertToFrontendDTO(dbOrder); // 再轉 DTO
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(new ApiResponseDTO<>(true, "訂單新增成功", responseDto));
@@ -396,7 +392,7 @@ public class OrderController extends BaseController {
     }
     
     /**
-     * 2️⃣ 信用卡付款（生成訂單 + 付款表單）->  ngrok http http://localhost:8080
+     * 2️⃣ 信用卡付款（生成訂單 + 付款表單）
      * POST /orders/payment
      */
     @PostMapping("/payment")
