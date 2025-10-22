@@ -142,7 +142,8 @@ public class CartServiceImpl implements CartService {
 	    // 3. 查詢購物車內的有效 CartItem()
 	    Optional<CartItems> existingItemOpt = cartItemsDao
 	            .findByCartCartIdAndProductsProductIdAndIsValid(cart.getCartId(), productId, 0);
-	    CartItems savedItem;
+	    // 存到同一個變數，重點是最「新」資料
+	    CartItems savedItem; 
 	    if (existingItemOpt.isPresent()) {
 	        // 4a. 已存在 → 更新數量與小計
 	        CartItems existingItem = existingItemOpt.get();

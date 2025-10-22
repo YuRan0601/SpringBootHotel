@@ -57,7 +57,7 @@ public class PaymentService {
         // 取得訂單 ID
         String orderIdStr  = responseParams.get("MerchantTradeNo").split("t")[0];
         String rtnCode = responseParams.get("RtnCode");
-     // 如果金流回傳成功，交給 OrderService 處理
+        // 如果金流回傳成功，交給 OrderService 處理
         if ("1".equals(rtnCode)) {
             Integer orderId = Integer.parseInt(orderIdStr);
             orderService.paymentSuccess(orderId);

@@ -34,6 +34,67 @@ public class OrderExportService {
 	private final String downloadDir = System.getProperty("user.home") + "/Downloads/cloud_serenity_orders/";
 
 	/**
+     * #前端下載 (不落地)
+     */
+	public byte[] exportOrdersToBytes(String format, List<OrderBackendDTO> orders) throws IOException, JAXBException {
+		if (orders == null || orders.isEmpty()) {
+			return new byte[0];
+		}
+		switch (format.toLowerCase()) {
+		case "csv":
+			return exportCsvToBytes(orders);
+		case "json":
+			return exportJsonToBytes(orders);
+		case "xml":
+			return exportXmlToBytes(orders);
+		default:
+			throw new IllegalArgumentException("不支援的格式: " + format);
+		}
+	}
+
+	// --- 以下是拆開的私有方法 ---
+	private byte[] exportCsvToBytes(List<OrderBackendDTO> orders) throws IOException {
+		try (StringWriter sw = new StringWriter(); CSVWriter csvWriter = new CSVWriter(sw)) {
+			sw.write('\uFEFF'); // UTF-8 BOM，防 Excel 中文亂碼
+			csvWriter.writeNext(new String[] { "OrderID", "UserID", "ReceiveName", "Email", "PhoneNumber", "Address",
+					"OrderStatus", "PaymentMethod", "TotalAmount", "FinalAmount", "OrderDate", "UpdatedAt",
+					"ProductName", "Quantity", "UnitPrice", "Discount", "Subtotal" });
+			for (OrderBackendDTO order : orders) {
+				for (OrderItemBackendDTO item : order.getOrderItemsDtos()) {
+					csvWriter.writeNext(new String[] { String.valueOf(order.getOrderId()),
+							String.valueOf(order.getUserId()), order.getReceiveName(), order.getEmail(),
+							order.getPhoneNumber(), order.getAddress(), order.getOrderStatus(),
+							order.getPaymentMethod(), order.getTotalAmount(), order.getFinalAmount(),
+							order.getOrderDate(), order.getUpdatedAt(), item.getProductName(),
+							String.valueOf(item.getQuantity()), String.valueOf(item.getUnitPrice()),
+							String.valueOf(item.getDiscount()), String.valueOf(item.getSubtotal()) });
+				}
+			}
+			return sw.toString().getBytes(StandardCharsets.UTF_8);
+		}
+	}
+
+	private byte[] exportJsonToBytes(List<OrderBackendDTO> orders) {
+		Gson gson = new GsonBuilder().setPrettyPrinting().create();
+		String jsonStr = gson.toJson(orders);
+		return jsonStr.getBytes(StandardCharsets.UTF_8);
+	}
+
+	private byte[] exportXmlToBytes(List<OrderBackendDTO> orders) throws JAXBException {
+		JAXBContext context = JAXBContext.newInstance(OrderBackendDTOWrapper.class);
+		Marshaller marshaller = context.createMarshaller();
+		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+
+		OrderBackendDTOWrapper wrapper = new OrderBackendDTOWrapper();
+		wrapper.setOrders(orders);
+
+		StringWriter xmlWriter = new StringWriter();
+		marshaller.marshal(wrapper, xmlWriter);
+		return xmlWriter.toString().getBytes(StandardCharsets.UTF_8);
+	}
+	
+	/**
+     * #後端備份 (落地)
      * 匯出訂單 (CSV / JSON / XML)，直接接收查詢後的結果
      *
      * @param format   匯出格式：csv / json / xml
@@ -69,49 +130,6 @@ public class OrderExportService {
         return filePath;
     }
 	
-	// 只是 不寫檔案而已??
-	public byte[] exportOrdersToBytes(String format, List<OrderBackendDTO> orders) throws IOException, JAXBException {
-		if (orders == null || orders.isEmpty()) {
-			return new byte[0];
-		}
-		switch (format.toLowerCase()) {
-		case "csv":
-			try (StringWriter sw = new StringWriter(); CSVWriter csvWriter = new CSVWriter(sw)) {
-				sw.write('\uFEFF'); // UTF-8 BOM，防 Excel 中文亂碼
-				csvWriter.writeNext(new String[] { "OrderID", "UserID", "ReceiveName", "Email", "PhoneNumber",
-						"Address", "OrderStatus", "PaymentMethod", "TotalAmount", "FinalAmount", "OrderDate",
-						"UpdatedAt", "ProductName", "Quantity", "UnitPrice", "Discount", "Subtotal" });
-				for (OrderBackendDTO order : orders) {
-					for (OrderItemBackendDTO item : order.getOrderItemsDtos()) {
-						csvWriter.writeNext(new String[] { String.valueOf(order.getOrderId()),
-								String.valueOf(order.getUserId()), order.getReceiveName(), order.getEmail(),
-								order.getPhoneNumber(), order.getAddress(), order.getOrderStatus(),
-								order.getPaymentMethod(), order.getTotalAmount(), order.getFinalAmount(),
-								order.getOrderDate(), order.getUpdatedAt(), item.getProductName(),
-								String.valueOf(item.getQuantity()), String.valueOf(item.getUnitPrice()),
-								String.valueOf(item.getDiscount()), String.valueOf(item.getSubtotal()) });
-					}
-				}
-				return sw.toString().getBytes(StandardCharsets.UTF_8);
-			}
-		case "json":
-			Gson gson = new GsonBuilder().setPrettyPrinting().create();
-			String jsonStr = gson.toJson(orders);
-			return jsonStr.getBytes(StandardCharsets.UTF_8);
-		case "xml":
-			JAXBContext context = JAXBContext.newInstance(OrderBackendDTOWrapper.class);
-			Marshaller marshaller = context.createMarshaller();
-			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-			OrderBackendDTOWrapper wrapper = new OrderBackendDTOWrapper();
-			wrapper.setOrders(orders);
-			StringWriter xmlWriter = new StringWriter();
-			marshaller.marshal(wrapper, xmlWriter);
-			return xmlWriter.toString().getBytes(StandardCharsets.UTF_8);
-		default:
-			throw new IllegalArgumentException("不支援的格式: " + format);
-		}
-	}
-
 	// CSV
 	private void exportToCSV(List<OrderBackendDTO> orders, String filePath) throws IOException {
 		try (BufferedWriter writer = new BufferedWriter(
@@ -156,4 +174,48 @@ public class OrderExportService {
 		// 4. 寫入檔案
 		marshaller.marshal(wrapper, new File(filePath));
 	}
+	
+	// #前端下載 (不落地)_擠在一起版
+	// 只是 不寫檔案而已??
+//		public byte[] exportOrdersToBytes(String format, List<OrderBackendDTO> orders) throws IOException, JAXBException {
+//			if (orders == null || orders.isEmpty()) {
+//				return new byte[0];
+//			}
+//			switch (format.toLowerCase()) {
+//			case "csv":
+//				try (StringWriter sw = new StringWriter(); CSVWriter csvWriter = new CSVWriter(sw)) {
+//					sw.write('\uFEFF'); // UTF-8 BOM，防 Excel 中文亂碼
+//					csvWriter.writeNext(new String[] { "OrderID", "UserID", "ReceiveName", "Email", "PhoneNumber",
+//							"Address", "OrderStatus", "PaymentMethod", "TotalAmount", "FinalAmount", "OrderDate",
+//							"UpdatedAt", "ProductName", "Quantity", "UnitPrice", "Discount", "Subtotal" });
+//					for (OrderBackendDTO order : orders) {
+//						for (OrderItemBackendDTO item : order.getOrderItemsDtos()) {
+//							csvWriter.writeNext(new String[] { String.valueOf(order.getOrderId()),
+//									String.valueOf(order.getUserId()), order.getReceiveName(), order.getEmail(),
+//									order.getPhoneNumber(), order.getAddress(), order.getOrderStatus(),
+//									order.getPaymentMethod(), order.getTotalAmount(), order.getFinalAmount(),
+//									order.getOrderDate(), order.getUpdatedAt(), item.getProductName(),
+//									String.valueOf(item.getQuantity()), String.valueOf(item.getUnitPrice()),
+//									String.valueOf(item.getDiscount()), String.valueOf(item.getSubtotal()) });
+//						}
+//					}
+//					return sw.toString().getBytes(StandardCharsets.UTF_8);
+//				}
+//			case "json":
+//				Gson gson = new GsonBuilder().setPrettyPrinting().create();
+//				String jsonStr = gson.toJson(orders);
+//				return jsonStr.getBytes(StandardCharsets.UTF_8);
+//			case "xml":
+//				JAXBContext context = JAXBContext.newInstance(OrderBackendDTOWrapper.class);
+//				Marshaller marshaller = context.createMarshaller();
+//				marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+//				OrderBackendDTOWrapper wrapper = new OrderBackendDTOWrapper();
+//				wrapper.setOrders(orders);
+//				StringWriter xmlWriter = new StringWriter();
+//				marshaller.marshal(wrapper, xmlWriter);
+//				return xmlWriter.toString().getBytes(StandardCharsets.UTF_8);
+//			default:
+//				throw new IllegalArgumentException("不支援的格式: " + format);
+//			}
+//		}
 }

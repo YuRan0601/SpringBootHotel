@@ -367,7 +367,7 @@ public class OrderServiceImpl implements OrderService {
 			Order dbOrder = orderDao.findById(orderId)
 		            					.orElseThrow(() -> new RuntimeException("訂單不存在，ID: " + orderId));
 		    // 防止重複更新 & 寄信
-		    if ("Paid".equals(dbOrder.getOrderStatus())) {
+		    if ("已付款".equals(dbOrder.getOrderStatus())) {
 		        System.out.println("訂單已標記為已付款，略過更新與寄信");
 		        return;}
 		    // 更新訂單狀態
